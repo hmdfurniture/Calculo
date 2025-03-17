@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cubic Capacity Calculator</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,6 +18,10 @@
         .map-container {
             flex: 1;
             padding-left: 20px;
+        }
+        .map {
+            height: 500px;
+            width: 100%;
         }
         .form-group {
             margin-bottom: 10px;
@@ -39,13 +45,13 @@
         }
         input[type="text"], select, input.cubic-capacity, button.remove-button {
             width: 70px;
-            height: 26px; /* Match the height of the remove button */
+            height: 36px; /* Match the height of the remove button */
             padding: 6px 8px;
             box-sizing: border-box;
         }
         input[type="number"] {
             width: 70px;
-            height: 26px; /* Match the height of the remove button */
+            height: 36px; /* Match the height of the remove button */
             padding: 6px 8px;
             box-sizing: border-box;
         }
@@ -76,7 +82,7 @@
             border: none;
             cursor: pointer;
             padding: 6px 10px;
-            height: 26px; /* Ensure consistent height */
+            height: 36px; /* Ensure consistent height */
         }
         .remove-button:hover {
             background-color: #FF4500;
@@ -129,7 +135,7 @@
     </div>
     <div class="map-container">
         <h2>Map</h2>
-        <div id="map">Map will be displayed here.</div>
+        <div id="map" class="map"></div>
     </div>
 
     <script>
@@ -212,6 +218,32 @@
 
         // Add event listeners to the initial line
         addInputEventListeners(document.querySelector('.dimension-line'));
+
+        // Initialize Leaflet map
+        const map = L.map('map').setView([39.5, -8], 6); // Centered on Portugal
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Load GeoJSON data for Portugal (example)
+        fetch('portugal.geojson')
+            .then(response => response.json())
+            .then(data => {
+                const geojsonLayer = L.geoJSON(data, {
+                    onEachFeature: (feature, layer) => {
+                        layer.on({
+                            click: () => highlightZone(feature.properties.code)
+                        });
+                    }
+                }).addTo(map);
+            });
+
+        function highlightZone(zoneCode) {
+            // Highlight the zone based on the zoneCode
+            console.log('Highlight zone:', zoneCode);
+        }
     </script>
 </body>
 </html>
