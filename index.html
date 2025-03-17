@@ -8,6 +8,14 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            display: flex;
+        }
+        .form-container {
+            flex: 1;
+        }
+        .map-container {
+            flex: 1;
+            padding-left: 20px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -73,47 +81,53 @@
     </style>
 </head>
 <body>
-    <h1>Cubic Capacity Calculator</h1>
-    <div class="header-row">
-        <div>Width (cm):</div>
-        <div>Length (cm):</div>
-        <div>Height (cm):</div>
-        <div>Quantity:</div>
-        <div>Type:</div>
-        <div>Cubic Capacity (m³):</div>
-        <div>Action:</div>
-    </div>
-    <div id="dimension-container">
-        <div class="form-group dimension-line">
-            <div>
-                <input type="text" class="width" required>
-            </div>
-            <div>
-                <input type="text" class="length" required>
-            </div>
-            <div>
-                <input type="text" class="height" required>
-            </div>
-            <div>
-                <input type="text" class="quantity" required>
-            </div>
-            <div>
-                <select class="type" required>
-                    <option value="box">Box</option>
-                    <option value="pallet">Pallet</option>
-                </select>
-            </div>
-            <div>
-                <input type="text" class="cubic-capacity" readonly>
-            </div>
-            <div>
-                <button class="remove-button" onclick="removeLine(this)">Remove</button>
+    <div class="form-container">
+        <h1>Cubic Capacity Calculator</h1>
+        <div class="header-row">
+            <div>Width (cm):</div>
+            <div>Length (cm):</div>
+            <div>Height (cm):</div>
+            <div>Quantity:</div>
+            <div>Type:</div>
+            <div>Cubic Capacity (m³):</div>
+            <div>Action:</div>
+        </div>
+        <div id="dimension-container">
+            <div class="form-group dimension-line">
+                <div>
+                    <input type="text" class="width" required>
+                </div>
+                <div>
+                    <input type="text" class="length" required>
+                </div>
+                <div>
+                    <input type="text" class="height" required>
+                </div>
+                <div>
+                    <input type="text" class="quantity" required>
+                </div>
+                <div>
+                    <select class="type" required>
+                        <option value="box">Box</option>
+                        <option value="pallet">Pallet</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="text" class="cubic-capacity" readonly>
+                </div>
+                <div>
+                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                </div>
             </div>
         </div>
+        <button id="add-line">+ Add More Lines</button>
+        <button onclick="finalCalculate()">Calculate</button>
+        <div class="result" id="result"></div>
     </div>
-    <button id="add-line">+ Add More Lines</button>
-    <button onclick="finalCalculate()">Calculate</button>
-    <div class="result" id="result"></div>
+    <div class="map-container">
+        <h2>Map</h2>
+        <div id="map">Map will be displayed here.</div>
+    </div>
 
     <script>
         document.getElementById('add-line').addEventListener('click', () => {
