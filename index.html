@@ -17,6 +17,7 @@
             margin-bottom: 5px;
         }
         input[type="number"], select {
+            width: 70px;
             padding: 8px;
             box-sizing: border-box;
         }
@@ -37,9 +38,27 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .dimension-line:nth-child(even) {
+            background-color: #f2f2f2;
         }
         .dimension-line > div {
-            flex: 1 1 100px;
+            flex: 1 1 auto;
+        }
+        .remove-button {
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .remove-button:hover {
+            background-color: #FF4500;
         }
     </style>
 </head>
@@ -49,19 +68,19 @@
         <div class="form-group dimension-line">
             <div>
                 <label>Width (cm):</label>
-                <input type="number" class="width" required>
+                <input type="number" class="width" maxlength="3" required>
             </div>
             <div>
                 <label>Length (cm):</label>
-                <input type="number" class="length" required>
+                <input type="number" class="length" maxlength="3" required>
             </div>
             <div>
                 <label>Height (cm):</label>
-                <input type="number" class="height" required>
+                <input type="number" class="height" maxlength="3" required>
             </div>
             <div>
                 <label>Quantity:</label>
-                <input type="number" class="quantity" required>
+                <input type="number" class="quantity" maxlength="3" required>
             </div>
             <div>
                 <label>Type:</label>
@@ -74,10 +93,13 @@
                 <label>Cubic Capacity (m³):</label>
                 <input type="text" class="cubic-capacity" readonly>
             </div>
+            <div>
+                <button class="remove-button" onclick="removeLine(this)">Remove</button>
+            </div>
         </div>
     </div>
     <button id="add-line">+ Add More Lines</button>
-    <button onclick="calculate()">Calculate</button>
+    <button onclick="finalCalculate()">Calculate</button>
     <div class="result" id="result"></div>
 
     <script>
@@ -88,19 +110,19 @@
             newLine.innerHTML = `
                 <div>
                     <label>Width (cm):</label>
-                    <input type="number" class="width" required>
+                    <input type="number" class="width" maxlength="3" required>
                 </div>
                 <div>
                     <label>Length (cm):</label>
-                    <input type="number" class="length" required>
+                    <input type="number" class="length" maxlength="3" required>
                 </div>
                 <div>
                     <label>Height (cm):</label>
-                    <input type="number" class="height" required>
+                    <input type="number" class="height" maxlength="3" required>
                 </div>
                 <div>
                     <label>Quantity:</label>
-                    <input type="number" class="quantity" required>
+                    <input type="number" class="quantity" maxlength="3" required>
                 </div>
                 <div>
                     <label>Type:</label>
@@ -113,34 +135,55 @@
                     <label>Cubic Capacity (m³):</label>
                     <input type="text" class="cubic-capacity" readonly>
                 </div>
+                <div>
+                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                </div>
             `;
             container.appendChild(newLine);
+            addInputEventListeners(newLine);
         });
 
-        function calculate() {
+        function removeLine(button) {
+            const line = button.parentNode.parentNode;
+            line.remove();
+        }
+
+        function addInputEventListeners(line) {
+            const inputs = line.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => calculateLine(line));
+            });
+        }
+
+        function calculateLine(line) {
+            const width = parseFloat(line.querySelector('.width').value);
+            const length = parseFloat(line.querySelector('.length').value);
+            const height = parseFloat(line.querySelector('.height').value);
+            const quantity = parseFloat(line.querySelector('.quantity').value);
+            
+            if (!isNaN(width) && !isNaN(length) && !isNaN(height) && !isNaN(quantity)) {
+                const cubicCapacityCm = width * length * height * quantity;
+                const cubicCapacityM = cubicCapacityCm / 1000000; // Convert to cubic meters
+                line.querySelector('.cubic-capacity').value = cubicCapacityM.toFixed(3);
+            }
+        }
+
+        function finalCalculate() {
             const lines = document.querySelectorAll('.dimension-line');
             let totalCubicCapacity = 0;
             
             lines.forEach(line => {
-                const width = parseFloat(line.querySelector('.width').value);
-                const length = parseFloat(line.querySelector('.length').value);
-                const height = parseFloat(line.querySelector('.height').value);
-                const quantity = parseFloat(line.querySelector('.quantity').value);
-                
-                if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity)) {
-                    alert('Please enter valid numbers for width, length, height, and quantity.');
-                    return;
+                const cubicCapacity = parseFloat(line.querySelector('.cubic-capacity').value);
+                if (!isNaN(cubicCapacity)) {
+                    totalCubicCapacity += cubicCapacity;
                 }
-                
-                const cubicCapacityCm = width * length * height * quantity;
-                const cubicCapacityM = cubicCapacityCm / 1000000; // Convert to cubic meters
-                totalCubicCapacity += cubicCapacityM;
-                
-                line.querySelector('.cubic-capacity').value = cubicCapacityM.toFixed(3);
             });
 
             document.getElementById('result').innerHTML = `Total Cubic Capacity: ${totalCubicCapacity.toFixed(3)} m³`;
         }
+
+        // Add event listeners to the initial line
+        addInputEventListeners(document.querySelector('.dimension-line'));
     </script>
 </body>
 </html>
