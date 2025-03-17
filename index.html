@@ -35,16 +35,17 @@
             background-color: #f2f2f2;
         }
         .dimension-line > div, .header-row > div {
-            flex: 1 1 70px;
+            flex: 1 1 auto;
         }
-        input[type="text"], select, button.remove-button {
-            height: 26px; /* Match the height of the remove button */
+        input[type="text"], select, input.cubic-capacity, button.remove-button {
+            width: 70px;
+            height: 36px; /* Match the height of the remove button */
             padding: 6px 8px;
             box-sizing: border-box;
         }
         input[type="number"] {
             width: 70px;
-            height: 26px; /* Match the height of the remove button */
+            height: 36px; /* Match the height of the remove button */
             padding: 6px 8px;
             box-sizing: border-box;
         }
@@ -75,7 +76,7 @@
             border: none;
             cursor: pointer;
             padding: 6px 10px;
-            height: 26px; /* Ensure consistent height */
+            height: 36px; /* Ensure consistent height */
         }
         .remove-button:hover {
             background-color: #FF4500;
