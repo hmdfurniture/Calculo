@@ -12,14 +12,35 @@
         .form-group {
             margin-bottom: 15px;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
+        .header-row, .dimension-line {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .dimension-line {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .dimension-line:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .dimension-line > div, .header-row > div {
+            flex: 1 1 70px;
         }
         input[type="number"], select {
             width: 70px;
             padding: 8px;
             box-sizing: border-box;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
         button {
             padding: 10px 15px;
@@ -33,22 +54,6 @@
         }
         .result {
             margin-top: 20px;
-        }
-        .dimension-line {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            background-color: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-        }
-        .dimension-line:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .dimension-line > div {
-            flex: 1 1 auto;
         }
         .remove-button {
             background-color: #FF6347;
@@ -64,33 +69,36 @@
 </head>
 <body>
     <h1>Cubic Capacity Calculator</h1>
+    <div class="header-row">
+        <div>Width (cm):</div>
+        <div>Length (cm):</div>
+        <div>Height (cm):</div>
+        <div>Quantity:</div>
+        <div>Type:</div>
+        <div>Cubic Capacity (m³):</div>
+        <div>Action:</div>
+    </div>
     <div id="dimension-container">
         <div class="form-group dimension-line">
             <div>
-                <label>Width (cm):</label>
                 <input type="number" class="width" maxlength="3" required>
             </div>
             <div>
-                <label>Length (cm):</label>
                 <input type="number" class="length" maxlength="3" required>
             </div>
             <div>
-                <label>Height (cm):</label>
                 <input type="number" class="height" maxlength="3" required>
             </div>
             <div>
-                <label>Quantity:</label>
                 <input type="number" class="quantity" maxlength="3" required>
             </div>
             <div>
-                <label>Type:</label>
                 <select class="type" required>
                     <option value="box">Box</option>
                     <option value="pallet">Pallet</option>
                 </select>
             </div>
             <div>
-                <label>Cubic Capacity (m³):</label>
                 <input type="text" class="cubic-capacity" readonly>
             </div>
             <div>
@@ -109,30 +117,24 @@
             newLine.classList.add('form-group', 'dimension-line');
             newLine.innerHTML = `
                 <div>
-                    <label>Width (cm):</label>
                     <input type="number" class="width" maxlength="3" required>
                 </div>
                 <div>
-                    <label>Length (cm):</label>
                     <input type="number" class="length" maxlength="3" required>
                 </div>
                 <div>
-                    <label>Height (cm):</label>
                     <input type="number" class="height" maxlength="3" required>
                 </div>
                 <div>
-                    <label>Quantity:</label>
                     <input type="number" class="quantity" maxlength="3" required>
                 </div>
                 <div>
-                    <label>Type:</label>
                     <select class="type" required>
                         <option value="box">Box</option>
                         <option value="pallet">Pallet</option>
                     </select>
                 </div>
                 <div>
-                    <label>Cubic Capacity (m³):</label>
                     <input type="text" class="cubic-capacity" readonly>
                 </div>
                 <div>
