@@ -11,6 +11,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
+            position: relative;
         }
         .form-container {
             flex: 1;
@@ -88,13 +89,17 @@
             background-color: #FF4500;
         }
         .logout-button {
-            padding: 10px 15px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 20px;
+            padding: 2px;
             background-color: #FF6347;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
         }
         .logout-button:hover {
             background-color: #FF4500;
@@ -136,7 +141,7 @@
         <div class="form-group">
             <label for="country">Select Country:</label>
             <div class="dropdown">
-                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()">
+                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown()">
                 <div class="dropdown-content" id="country-list">
                     <!-- Country options will be dynamically populated here -->
                 </div>
@@ -350,6 +355,20 @@
             document.getElementById('country').value = countryName;
             document.getElementById('country-list').style.display = 'none';
         }
+
+        function showDropdown() {
+            const countryList = document.getElementById('country-list');
+            countryList.style.display = "block";
+        }
+
+        // Hide dropdown when clicking outside
+        window.addEventListener('click', function(e) {
+            const countryInput = document.getElementById('country');
+            const countryList = document.getElementById('country-list');
+            if (!countryInput.contains(e.target) && !countryList.contains(e.target)) {
+                countryList.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
