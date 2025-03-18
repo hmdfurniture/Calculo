@@ -11,17 +11,13 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .form-container {
             flex: 1;
-            width: 80%;
         }
         .map-container {
             flex: 1;
             padding-left: 20px;
-            width: 80%;
         }
         .map {
             height: 500px;
@@ -112,6 +108,8 @@
             position: absolute;
             background-color: #f9f9f9;
             min-width: 160px;
+            max-height: 200px;
+            overflow-y: auto;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
         }
@@ -123,9 +121,6 @@
         }
         .dropdown-content a:hover {
             background-color: #f1f1f1;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
         }
         .dropdown input {
             width: 100%;
@@ -338,14 +333,17 @@
             const filter = input.value.toUpperCase();
             const countryList = document.getElementById('country-list');
             const a = countryList.getElementsByTagName('a');
+            let count = 0;
             for (let i = 0; i < a.length; i++) {
                 const txtValue = a[i].textContent || a[i].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                if (txtValue.toUpperCase().indexOf(filter) === 0) {
                     a[i].style.display = "";
+                    count++;
                 } else {
                     a[i].style.display = "none";
                 }
             }
+            countryList.style.display = count > 0 ? "block" : "none";
         }
 
         function selectCountry(countryName) {
