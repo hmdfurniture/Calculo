@@ -11,13 +11,17 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .form-container {
             flex: 1;
+            width: 80%;
         }
         .map-container {
             flex: 1;
             padding-left: 20px;
+            width: 80%;
         }
         .map {
             height: 500px;
@@ -99,12 +103,50 @@
         .logout-button:hover {
             background-color: #FF4500;
         }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .dropdown input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px;
+        }
     </style>
 </head>
 <body>
+    <button class="logout-button" onclick="logout()">Logout</button>
     <div class="form-container">
         <h1>Welcome to the Main Page</h1>
-        <button class="logout-button" onclick="logout()">Logout</button>
+        <div class="form-group">
+            <label for="country">Select Country:</label>
+            <div class="dropdown">
+                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()">
+                <div class="dropdown-content" id="country-list">
+                    <!-- Country options will be dynamically populated here -->
+                </div>
+            </div>
+        </div>
         <div class="header-row">
             <div>Width (cm):</div>
             <div>Length (cm):</div>
@@ -273,6 +315,42 @@
                 // Redirect to the login page
                 window.location.href = 'index.html';
             }
+            // Populate country list from JSON file
+            fetch('countries.json')
+                .then(response => response.json())
+                .then(data => populateCountryList(data.countries));
+        }
+
+        function populateCountryList(countries) {
+            const countryList = document.getElementById('country-list');
+            countryList.innerHTML = ''; // Clear previous list
+            countries.forEach(country => {
+                const a = document.createElement('a');
+                a.href = "#";
+                a.textContent = country.name;
+                a.onclick = () => selectCountry(country.name);
+                countryList.appendChild(a);
+            });
+        }
+
+        function filterCountries() {
+            const input = document.getElementById('country');
+            const filter = input.value.toUpperCase();
+            const countryList = document.getElementById('country-list');
+            const a = countryList.getElementsByTagName('a');
+            for (let i = 0; i < a.length; i++) {
+                const txtValue = a[i].textContent || a[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    a[i].style.display = "";
+                } else {
+                    a[i].style.display = "none";
+                }
+            }
+        }
+
+        function selectCountry(countryName) {
+            document.getElementById('country').value = countryName;
+            document.getElementById('country-list').style.display = 'none';
         }
     </script>
 </body>
