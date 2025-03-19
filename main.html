@@ -301,7 +301,7 @@
                 map.removeLayer(geojsonLayer);
             }
 
-            fetch('portugal.geojson')
+            fetch(currentGeoJsonFile)
                 .then(response => response.json())
                 .then(data => {
                     geojsonLayer = L.geoJSON(data, {
@@ -320,6 +320,8 @@
                     map.fitBounds(geojsonLayer.getBounds());
                 });
         }
+
+        let currentGeoJsonFile = '';
 
         function logout() {
             // Remove the session token from local storage
@@ -350,9 +352,8 @@
                 a.href = "#";
                 a.textContent = country.name;
                 a.onclick = () => {
-                    selectCountry(country.name);
+                    selectCountry(country.name, country.code);
                     loadZonesForCountry(country.name);
-                    loadGeoJsonForCountry(country.code);
                 };
                 countryList.appendChild(a);
             });
@@ -394,11 +395,12 @@
             zoneList.style.display = count > 0 ? "block" : "none";
         }
 
-        function selectCountry(countryName) {
+        function selectCountry(countryName, countryCode) {
             document.getElementById('country').value = countryName;
             document.getElementById('country-list').style.display = 'none';
             document.getElementById('zone').disabled = false;
             clearZones();
+            currentGeoJsonFile = `${countryName.toLowerCase()}.geojson`;
         }
 
         function showDropdown(dropdownId) {
@@ -439,24 +441,6 @@
             document.getElementById('zone').value = '';
             document.getElementById('zone-name').textContent = '';
             document.getElementById('zone-list').innerHTML = '';
-        }
-
-        function loadGeoJsonForCountry(countryCode) {
-            fetch(`${countryCode.toLowerCase()}.geojson`)
-                .then(response => response.json())
-                .then(data => {
-                    if (geojsonLayer) {
-                        map.removeLayer(geojsonLayer);
-                    }
-                    geojsonLayer = L.geoJSON(data, {
-                        onEachFeature: (feature, layer) => {
-                            layer.on({
-                                click: () => highlightZone(feature.properties.code)
-                            });
-                        }
-                    }).addTo(map);
-                    map.fitBounds(geojsonLayer.getBounds());
-                });
         }
 
         // Hide dropdown when clicking outside
