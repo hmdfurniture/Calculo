@@ -26,6 +26,9 @@
         }
         .form-group {
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .header-row, .dimension-line {
             display: flex;
@@ -34,9 +37,9 @@
         }
         .dimension-line {
             background-color: #f9f9f9;
-            padding: 5px;
+            padding: 2px;
             border: 1px solid #ddd;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .dimension-line:nth-child(even) {
             background-color: #f2f2f2;
@@ -46,14 +49,14 @@
         }
         input[type="text"], select, input.cubic-capacity, button.remove-button {
             width: 70px;
-            height: 36px; /* Match the height of the remove button */
-            padding: 6px 8px;
+            height: 25px; /* Adjusted height */
+            padding: 4px 6px;
             box-sizing: border-box;
         }
         input[type="number"] {
             width: 70px;
-            height: 36px; /* Match the height of the remove button */
-            padding: 6px 8px;
+            height: 25px; /* Adjusted height */
+            padding: 4px 6px;
             box-sizing: border-box;
         }
         input[type="number"] {
@@ -65,7 +68,7 @@
             margin: 0;
         }
         button {
-            padding: 10px 15px;
+            padding: 5px 10px;
             background-color: #007BFF;
             color: white;
             border: none;
@@ -82,8 +85,8 @@
             color: white;
             border: none;
             cursor: pointer;
-            padding: 6px 10px;
-            height: 36px; /* Ensure consistent height */
+            padding: 4px 6px;
+            height: 25px; /* Adjusted height */
         }
         .remove-button:hover {
             background-color: #FF4500;
@@ -93,7 +96,7 @@
             top: 20px;
             right: 20px;
             width: 60px;
-            height: 20px;
+            height: 25px; /* Adjusted height */
             padding: 2px;
             background-color: #FF6347;
             color: white;
@@ -130,7 +133,8 @@
         .dropdown input {
             width: 100%;
             box-sizing: border-box;
-            padding: 6px;
+            padding: 4px;
+            height: 25px; /* Adjusted height */
         }
     </style>
 </head>
@@ -146,15 +150,14 @@
                     <!-- Country options will be dynamically populated here -->
                 </div>
             </div>
-        </div>
-        <div class="form-group">
             <label for="zone">Select Zone:</label>
             <div class="dropdown">
-                <input type="text" id="zone" placeholder="Type to search..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
                 <div class="dropdown-content" id="zone-list">
                     <!-- Zone options will be dynamically populated here -->
                 </div>
             </div>
+            <span id="zone-name"></span>
         </div>
         <div class="header-row">
             <div>Width (cm):</div>
@@ -397,19 +400,21 @@
             zones.forEach(zone => {
                 const a = document.createElement('a');
                 a.href = "#";
-                a.textContent = zone.name;
-                a.onclick = () => selectZone(zone.name);
+                a.textContent = zone.code + ' - ' + zone.name;
+                a.onclick = () => selectZone(zone.code, zone.name);
                 zoneList.appendChild(a);
             });
         }
 
-        function selectZone(zoneName) {
-            document.getElementById('zone').value = zoneName;
+        function selectZone(zoneCode, zoneName) {
+            document.getElementById('zone').value = zoneCode;
+            document.getElementById('zone-name').textContent = zoneName;
             document.getElementById('zone-list').style.display = 'none';
         }
 
         function clearZones() {
             document.getElementById('zone').value = '';
+            document.getElementById('zone-name').textContent = '';
             document.getElementById('zone-list').innerHTML = '';
         }
 
