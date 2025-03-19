@@ -291,19 +291,6 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Load GeoJSON data for Portugal (example)
-        fetch('portugal.geojson')
-            .then(response => response.json())
-            .then(data => {
-                const geojsonLayer = L.geoJSON(data, {
-                    onEachFeature: (feature, layer) => {
-                        layer.on({
-                            click: () => highlightZone(feature.properties.code)
-                        });
-                    }
-                }).addTo(map);
-            });
-
         function highlightZone(zoneCode) {
             // Highlight the zone based on the zoneCode
             console.log('Highlight zone:', zoneCode);
@@ -340,6 +327,7 @@
                 a.onclick = () => {
                     selectCountry(country.name);
                     loadZonesForCountry(country.name);
+                    loadGeoJsonForCountry(country.code);
                 };
                 countryList.appendChild(a);
             });
@@ -423,6 +411,21 @@
         function clearZones() {
             document.getElementById('zone').value = '';
             document.getElementById('zone-list').innerHTML = '';
+        }
+
+        function loadGeoJsonForCountry(countryCode) {
+            fetch(`${countryCode.toLowerCase()}.geojson`)
+                .then(response => response.json())
+                .then(data => {
+                    const geojsonLayer = L.geoJSON(data, {
+                        onEachFeature: (feature, layer) => {
+                            layer.on({
+                                click: () => highlightZone(feature.properties.code)
+                            });
+                        }
+                    }).addTo(map);
+                    map.fitBounds(geojsonLayer.getBounds());
+                });
         }
 
         // Hide dropdown when clicking outside
