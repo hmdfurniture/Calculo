@@ -294,9 +294,28 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        let geojsonLayer;
+
         function highlightZone(zoneCode) {
-            // Highlight the zone based on the zoneCode
-            console.log('Highlight zone:', zoneCode);
+            if (geojsonLayer) {
+                map.removeLayer(geojsonLayer);
+            }
+
+            fetch('portugal.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    geojsonLayer = L.geoJSON(data, {
+                        filter: function(feature) {
+                            return feature.properties.code === zoneCode;
+                        },
+                        onEachFeature: function(feature, layer) {
+                            layer.on('click', function() {
+                                highlightZone(feature.properties.code);
+                            });
+                        }
+                    }).addTo(map);
+                    map.fitBounds(geojsonLayer.getBounds());
+                });
         }
 
         function logout() {
@@ -410,6 +429,7 @@
             document.getElementById('zone').value = zoneCode;
             document.getElementById('zone-name').textContent = zoneName;
             document.getElementById('zone-list').style.display = 'none';
+            highlightZone(zoneCode);
         }
 
         function clearZones() {
@@ -422,7 +442,10 @@
             fetch(`${countryCode.toLowerCase()}.geojson`)
                 .then(response => response.json())
                 .then(data => {
-                    const geojsonLayer = L.geoJSON(data, {
+                    if (geojsonLayer) {
+                        map.removeLayer(geojsonLayer);
+                    }
+                    geojsonLayer = L.geoJSON(data, {
                         onEachFeature: (feature, layer) => {
                             layer.on({
                                 click: () => highlightZone(feature.properties.code)
