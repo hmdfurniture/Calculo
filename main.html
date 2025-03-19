@@ -289,8 +289,8 @@
         // Initialize Leaflet map
         const map = L.map('map').setView([39.5, -8], 6); // Centered on Portugal
 
-        // Add OpenStreetMap tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Add a simple basemap without details
+        L.tileLayer('https://{s}.tile.stamen.com/toner-lite/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
@@ -307,6 +307,9 @@
                     geojsonLayer = L.geoJSON(data, {
                         filter: function(feature) {
                             return feature.properties.code === zoneCode;
+                        },
+                        style: function(feature) {
+                            return {color: 'red'};
                         },
                         onEachFeature: function(feature, layer) {
                             layer.on('click', function() {
