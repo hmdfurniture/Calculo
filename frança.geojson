@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": { "name": "Paris", "code": "75" },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [2.2241, 48.8156],
+                        [2.4699, 48.8156],
+                        [2.4699, 48.9022],
+                        [2.2241, 48.9022],
+                        [2.2241, 48.8156]
+                    ]
+                ]
+            }
+        }
+    ]
+}
