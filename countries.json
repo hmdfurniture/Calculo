@@ -1,14 +1,16 @@
 {
     "countries": [
-        {"name": "France", "code": "FR"},
-        {"name": "Germany", "code": "DE"},
-        {"name": "Spain", "code": "ES"},
-        {"name": "Italy", "code": "IT"},
+        {"name": "Alemanha", "code": "DE"},
+        {"name": "Austria", "code": "AT"},
+        {"name": "Bélgica", "code": "BE"},
+        {"name": "Chequia", "code": "CZ"}
+        {"name": "Espanha", "code": "EST"},
+        {"name": "França", "code": "FR"},
+        {"name": "Italia", "code": "IT"},
+        {"name": "Paises Baixos", "code": "NL"},
         {"name": "Portugal", "code": "PT"},
-        {"name": "Netherlands", "code": "NL"},
-        {"name": "Belgium", "code": "BE"},
-        {"name": "Sweden", "code": "SE"},
-        {"name": "Norway", "code": "NO"},
-        {"name": "Denmark", "code": "DK"}
+        {"name": "Reino Unido", "code": "UK"},
+        {"name": "Suecia", "code": "SE"},
+        {"name": "Suiça", "code": "CH"},
     ]
 }
