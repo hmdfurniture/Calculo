@@ -1,7 +1,0 @@
-{
-    "destinations": [
-        {"country": "France", "code": "FR75", "rate": 2.5},
-        {"country": "Germany", "code": "DE", "rate": 2.0},
-        {"country": "USA", "code": "US", "rate": 3.0}
-    ]
-}
