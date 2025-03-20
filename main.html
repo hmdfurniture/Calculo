@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,14 +13,6 @@
         }
         .form-container {
             flex: 1;
-        }
-        .map-container {
-            flex: 1;
-            padding-left: 20px;
-        }
-        .map {
-            height: 500px;
-            width: 100%;
         }
         .form-group {
             margin-bottom: 10px;
@@ -200,10 +190,6 @@
         <button onclick="finalCalculate()">Calculate</button>
         <div class="result" id="result"></div>
     </div>
-    <div class="map-container">
-        <h2>Map</h2>
-        <div id="map" class="map"></div>
-    </div>
 
     <script>
         document.getElementById('add-line').addEventListener('click', () => {
@@ -280,48 +266,45 @@
                 }
             });
 
-            document.getElementById('result').innerHTML = `Total Cubic Capacity: ${totalCubicCapacity.toFixed(3)} m³`;
+            const country = document.getElementById('country').value;
+            const zoneCode = document.getElementById('zone').value;
+
+            fetch('supplier_config.json')
+                .then(response => response.json())
+                .then(data => {
+                    const results = [];
+                    data.suppliers.forEach(supplier => {
+                        const destination = supplier.destinations.find(dest => dest.country === country && dest.code === zoneCode);
+                        if (destination) {
+                            const conversionFactor = supplier.conversion.m3;
+                            const volumetricWeight = totalCubicCapacity * conversionFactor;
+                            const value = totalCubicCapacity * destination.rate;
+                            results.push({
+                                supplier: supplier.name,
+                                cubicCapacity: totalCubicCapacity.toFixed(2),
+                                volumetricWeight: volumetricWeight.toFixed(2),
+                                value: value.toFixed(2),
+                            });
+                        }
+                    });
+
+                    let resultHTML = '';
+                    results.forEach(result => {
+                        resultHTML += `
+                            <p>Supplier: ${result.supplier}</p>
+                            <p>Cubic Capacity: ${result.cubicCapacity} m³</p>
+                            <p>Volumetric Weight: ${result.volumetricWeight} kg</p>
+                            <p>Value: ${result.value}</p>
+                            <hr>
+                        `;
+                    });
+
+                    document.getElementById('result').innerHTML = resultHTML;
+                });
         }
 
         // Add event listeners to the initial line
         addInputEventListeners(document.querySelector('.dimension-line'));
-
-        // Initialize Leaflet map
-        const map = L.map('map').setView([39.5, -8], 6); // Centered on Portugal
-
-        // Add a simple basemap without details
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        let geojsonLayer;
-
-        function highlightZone(zoneCode) {
-            if (geojsonLayer) {
-                map.removeLayer(geojsonLayer);
-            }
-
-            fetch(currentGeoJsonFile)
-                .then(response => response.json())
-                .then(data => {
-                    geojsonLayer = L.geoJSON(data, {
-                        filter: function(feature) {
-                            return feature.properties.code === zoneCode;
-                        },
-                        style: function(feature) {
-                            return {color: 'red'};
-                        },
-                        onEachFeature: function(feature, layer) {
-                            layer.on('click', function() {
-                                highlightZone(feature.properties.code);
-                            });
-                        }
-                    }).addTo(map);
-                    map.fitBounds(geojsonLayer.getBounds());
-                });
-        }
-
-        let currentGeoJsonFile = '';
 
         function logout() {
             // Remove the session token from local storage
@@ -339,9 +322,17 @@
                 window.location.href = 'index.html';
             }
             // Populate country list from JSON file
-            fetch('countries.json')
+            fetch('supplier_config.json')
                 .then(response => response.json())
-                .then(data => populateCountryList(data.countries));
+                .then(data => {
+                    const countries = new Set();
+                    data.suppliers.forEach(supplier => {
+                        supplier.destinations.forEach(destination => {
+                            countries.add(destination.country);
+                        });
+                    });
+                    populateCountryList(Array.from(countries));
+                });
         }
 
         function populateCountryList(countries) {
@@ -350,10 +341,10 @@
             countries.forEach(country => {
                 const a = document.createElement('a');
                 a.href = "#";
-                a.textContent = country.name;
+                a.textContent = country;
                 a.onclick = () => {
-                    selectCountry(country.name, country.code);
-                    loadZonesForCountry(country.name);
+                    selectCountry(country);
+                    loadZonesForCountry(country);
                 };
                 countryList.appendChild(a);
             });
@@ -395,12 +386,11 @@
             zoneList.style.display = count > 0 ? "block" : "none";
         }
 
-        function selectCountry(countryName, countryCode) {
-            document.getElementById('country').value = countryName;
+        function selectCountry(country) {
+            document.getElementById('country').value = country;
             document.getElementById('country-list').style.display = 'none';
             document.getElementById('zone').disabled = false;
             clearZones();
-            currentGeoJsonFile = `${countryName.toLowerCase()}.geojson`;
         }
 
         function showDropdown(dropdownId) {
@@ -409,12 +399,18 @@
         }
 
         function loadZonesForCountry(country) {
-            fetch('zones.json')
+            fetch('supplier_config.json')
                 .then(response => response.json())
                 .then(data => {
-                    if (data[country]) {
-                        populateZoneList(data[country]);
-                    }
+                    const zones = [];
+                    data.suppliers.forEach(supplier => {
+                        supplier.destinations.forEach(destination => {
+                            if (destination.country === country) {
+                                zones.push(destination);
+                            }
+                        });
+                    });
+                    populateZoneList(zones);
                 });
         }
 
@@ -434,7 +430,6 @@
             document.getElementById('zone').value = zoneCode;
             document.getElementById('zone-name').textContent = zoneName;
             document.getElementById('zone-list').style.display = 'none';
-            highlightZone(zoneCode);
         }
 
         function clearZones() {
