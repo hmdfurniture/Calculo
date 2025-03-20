@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('supplier_data.json')
-        .then(response => response.json())
-        .then(data => {
-            const suppliers = data;
+    const supplierFiles = ['xbslog_international.json', 'xbslog_national.json'];
+    const suppliers = [];
+
+    Promise.all(supplierFiles.map(file => fetch(file).then(response => response.json())))
+        .then(dataArray => {
+            dataArray.forEach(data => suppliers.push(...data.destinations));
             const countries = new Set();
             suppliers.forEach(supplier => {
                 countries.add(supplier.country);
@@ -75,10 +77,19 @@ function showDropdown(dropdownId) {
 }
 
 function loadZonesForCountry(country) {
-    fetch('supplier_data.json')
-        .then(response => response.json())
-        .then(data => {
-            const zones = data.filter(supplier => supplier.country === country);
+    const supplierFiles = ['xbslog_international.json', 'xbslog_national.json'];
+    const suppliers = [];
+
+    Promise.all(supplierFiles.map(file => fetch(file).then(response => response.json())))
+        .then(dataArray => {
+            const zones = [];
+            dataArray.forEach(data => {
+                data.destinations.forEach(destination => {
+                    if (destination.country === country) {
+                        zones.push(destination);
+                    }
+                });
+            });
             populateZoneList(zones);
         });
 }
