@@ -21,7 +21,7 @@
         .map {
             height: 500px;
             width: 100%;
-            background-color: #f0f0f0; /* Placeholder background color for the map area */
+            background-color: white; /* Changed background color to white */
         }
         .form-group {
             margin-bottom: 10px;
@@ -140,7 +140,6 @@
 <body>
     <button class="logout-button" onclick="logout()">Logout</button>
     <div class="form-container">
-        <h1>Welcome to the Main Page</h1>
         <div class="form-group">
             <label for="country">Select Country:</label>
             <div class="dropdown">
@@ -194,13 +193,12 @@
                 </div>
             </div>
         </div>
-        <button id="add-line">+ Add More Lines</button>
+        <button id="add-line" onclick="addLine()">+ Add More Lines</button>
         <button onclick="finalCalculate()">Calculate</button>
         <div class="result" id="result"></div>
         <div id="rate-container"></div>
     </div>
     <div class="map-container">
-        <h2>Map</h2>
         <div id="map" class="map"></div>
     </div>
 
