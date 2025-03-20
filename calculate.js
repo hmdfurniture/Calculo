@@ -101,35 +101,76 @@ function populateZoneList(zones) {
         const a = document.createElement('a');
         a.href = "#";
         a.textContent = `${zone.code}`;
-        a.onclick = () => selectZone(zone.code, zone.rates);
+        a.onclick = () => selectZone(zone.code);
         zoneList.appendChild(a);
     });
 }
 
-function selectZone(zoneCode, rates) {
+function selectZone(zoneCode) {
     document.getElementById('zone').value = zoneCode;
     document.getElementById('zone-list').style.display = 'none';
-    displayRates(rates);
 }
 
-function displayRates(rates) {
-    const rateContainer = document.getElementById('rate-container');
-    rateContainer.innerHTML = `
-        <p>Minimum: ${rates.minimum} €</p>
-        <p><500 Kgs: ${rates['<500kgs']} €</p>
-        <p><1000 Kgs: ${rates['<1000kgs']} €</p>
-        <p><2000 Kgs: ${rates['<2000kgs']} €</p>
-        <p><3000 Kgs: ${rates['<3000kgs']} €</p>
-        <p><4000 Kgs: ${rates['<4000kgs']} €</p>
-        <p><5000 Kgs: ${rates['<5000kgs']} €</p>
-        <p>>5000 Kgs: ${rates['>5000kgs']} €</p>
+function addLine() {
+    const dimensionContainer = document.getElementById('dimension-container');
+    const newLine = document.createElement('div');
+    newLine.className = 'form-group dimension-line';
+    newLine.innerHTML = `
+        <div>
+            <input type="text" class="width" required>
+        </div>
+        <div>
+            <input type="text" class="length" required>
+        </div>
+        <div>
+            <input type="text" class="height" required>
+        </div>
+        <div>
+            <input type="text" class="quantity" required>
+        </div>
+        <div>
+            <select class="type" required>
+                <option value="box">Box</option>
+                <option value="pallet">Pallet</option>
+            </select>
+        </div>
+        <div>
+            <input type="text" class="cubic-capacity" readonly>
+        </div>
+        <div>
+            <button class="remove-button" onclick="removeLine(this)">Remove</button>
+        </div>
     `;
+    dimensionContainer.appendChild(newLine);
+}
+
+function removeLine(button) {
+    const line = button.parentNode.parentNode;
+    line.parentNode.removeChild(line);
+}
+
+function finalCalculate() {
+    const dimensionContainer = document.getElementById('dimension-container');
+    const dimensionLines = dimensionContainer.getElementsByClassName('dimension-line');
+    let totalCubicCapacity = 0;
+
+    for (let i = 0; i < dimensionLines.length; i++) {
+        const width = parseFloat(dimensionLines[i].getElementsByClassName('width')[0].value) / 100;
+        const length = parseFloat(dimensionLines[i].getElementsByClassName('length')[0].value) / 100;
+        const height = parseFloat(dimensionLines[i].getElementsByClassName('height')[0].value) / 100;
+        const quantity = parseInt(dimensionLines[i].getElementsByClassName('quantity')[0].value);
+        const cubicCapacity = width * length * height * quantity;
+        dimensionLines[i].getElementsByClassName('cubic-capacity')[0].value = cubicCapacity.toFixed(2);
+        totalCubicCapacity += cubicCapacity;
+    }
+
+    document.getElementById('result').innerText = `Total Cubic Capacity: ${totalCubicCapacity.toFixed(2)} m³`;
 }
 
 function clearZones() {
     document.getElementById('zone').value = '';
     document.getElementById('zone-list').innerHTML = '';
-    document.getElementById('rate-container').innerHTML = '';
+    document.getElementById('result').innerHTML = '';
 }
 
 function logout() {
