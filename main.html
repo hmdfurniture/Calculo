@@ -66,6 +66,9 @@
             -webkit-appearance: none;
             margin: 0;
         }
+        input[type="number"]:invalid {
+            border-color: red;
+        }
         button {
             padding: 5px 10px;
             background-color: #007BFF;
@@ -135,6 +138,11 @@
             padding: 4px;
             height: 25px; /* Adjusted height */
         }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -168,16 +176,16 @@
         <div id="dimension-container">
             <div class="form-group dimension-line">
                 <div>
-                    <input type="text" class="width" required>
+                    <input type="number" class="width" min="0" max="999" oninput="calculateCubicCapacity(this)" required>
                 </div>
                 <div>
-                    <input type="text" class="length" required>
+                    <input type="number" class="length" min="0" max="999" oninput="calculateCubicCapacity(this)" required>
                 </div>
                 <div>
-                    <input type="text" class="height" required>
+                    <input type="number" class="height" min="0" max="999" oninput="calculateCubicCapacity(this)" required>
                 </div>
                 <div>
-                    <input type="text" class="quantity" required>
+                    <input type="number" class="quantity" min="0" max="999" oninput="calculateCubicCapacity(this)" required>
                 </div>
                 <div>
                     <select class="type" required>
@@ -196,7 +204,7 @@
         <button id="add-line" onclick="addLine()">+ Add More Lines</button>
         <button onclick="finalCalculate()">Calculate</button>
         <div class="result" id="result"></div>
-        <div id="rate-container"></div>
+        <div class="error-message" id="error-message"></div>
     </div>
     <div class="map-container">
         <div id="map" class="map"></div>
