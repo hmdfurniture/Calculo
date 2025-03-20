@@ -14,6 +14,15 @@
         .form-container {
             flex: 1;
         }
+        .map-container {
+            flex: 1;
+            padding-left: 20px;
+        }
+        .map {
+            height: 500px;
+            width: 100%;
+            background-color: #f0f0f0; /* Placeholder background color for the map area */
+        }
         .form-group {
             margin-bottom: 10px;
             display: flex;
@@ -189,6 +198,10 @@
         <button id="add-line">+ Add More Lines</button>
         <button onclick="finalCalculate()">Calculate</button>
         <div class="result" id="result"></div>
+    </div>
+    <div class="map-container">
+        <h2>Map</h2>
+        <div id="map" class="map"></div>
     </div>
 
     <script>
