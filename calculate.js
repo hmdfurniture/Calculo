@@ -110,7 +110,6 @@ function selectZone(zoneCode) {
     document.getElementById('zone').value = zoneCode;
     document.getElementById('zone-list').style.display = 'none';
 }
-
 function addLine() {
     const dimensionContainer = document.getElementById('dimension-container');
     const newLine = document.createElement('div');
@@ -155,17 +154,16 @@ function calculateCubicCapacity(input) {
     const lengthInput = line.getElementsByClassName('length')[0];
     const heightInput = line.getElementsByClassName('height')[0];
     const quantityInput = line.getElementsByClassName('quantity')[0];
-    const width = parseFloat(widthInput.value) / 100;
-    const length = parseFloat(lengthInput.value) / 100;
-    const height = parseFloat(heightInput.value) / 100;
+    const width = parseFloat(widthInput.value);
+    const length = parseFloat(lengthInput.value);
+    const height = parseFloat(heightInput.value);
     const quantity = parseInt(quantityInput.value);
     
-    if (!isNaN(width) && !isNaN(length) && !isNaN(height) && !isNaN(quantity)) {
-        const cubicCapacity = width * length * height * quantity;
+    if (!isNaN(width) && !isNaN(length) && !isNaN(height) && !isNaN(quantity) && width > 0 && length > 0 && height > 0 && quantity > 0) {
+        const cubicCapacity = (width * length * height * quantity) / 1000000;
         line.getElementsByClassName('cubic-capacity')[0].value = cubicCapacity.toFixed(2);
     }
 }
-
 function finalCalculate() {
     const dimensionContainer = document.getElementById('dimension-container');
     const dimensionLines = dimensionContainer.getElementsByClassName('dimension-line');
@@ -179,20 +177,20 @@ function finalCalculate() {
         const heightInput = dimensionLines[i].getElementsByClassName('height')[0];
         const quantityInput = dimensionLines[i].getElementsByClassName('quantity')[0];
         
-        const width = parseFloat(widthInput.value) / 100;
-        const length = parseFloat(lengthInput.value) / 100;
-        const height = parseFloat(heightInput.value) / 100;
+        const width = parseFloat(widthInput.value);
+        const length = parseFloat(lengthInput.value);
+        const height = parseFloat(heightInput.value);
         const quantity = parseInt(quantityInput.value);
 
-        if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity) || widthInput.value === '' || lengthInput.value === '' || heightInput.value === '' || quantityInput.value === '') {
-            widthInput.classList.add('error');
-            lengthInput.classList.add('error');
-            heightInput.classList.add('error');
-            quantityInput.classList.add('error');
+        if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity) || width <= 0 || length <= 0 || height <= 0 || quantity <= 0) {
+            if (width <= 0 || isNaN(width)) widthInput.classList.add('error');
+            if (length <= 0 || isNaN(length)) lengthInput.classList.add('error');
+            if (height <= 0 || isNaN(height)) heightInput.classList.add('error');
+            if (quantity <= 0 || isNaN(quantity)) quantityInput.classList.add('error');
             errorMessage = '* Please fill in the mandatory fields.';
             hasError = true;
         } else {
-            const cubicCapacity = width * length * height * quantity;
+            const cubicCapacity = (width * length * height * quantity) / 1000000;
             dimensionLines[i].getElementsByClassName('cubic-capacity')[0].value = cubicCapacity.toFixed(2);
             totalCubicCapacity += cubicCapacity;
             widthInput.classList.remove('error');
