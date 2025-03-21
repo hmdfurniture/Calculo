@@ -110,6 +110,7 @@ function selectZone(zoneCode) {
     document.getElementById('zone').value = zoneCode;
     document.getElementById('zone-list').style.display = 'none';
 }
+
 function addLine() {
     const dimensionContainer = document.getElementById('dimension-container');
     const newLine = document.createElement('div');
@@ -158,7 +159,7 @@ function calculateCubicCapacity(input) {
     const length = parseFloat(lengthInput.value);
     const height = parseFloat(heightInput.value);
     const quantity = parseInt(quantityInput.value);
-    
+
     if (!isNaN(width) && !isNaN(length) && !isNaN(height) && !isNaN(quantity) && width > 0 && length > 0 && height > 0 && quantity > 0) {
         const cubicCapacity = (width * length * height * quantity) / 1000000;
         line.getElementsByClassName('cubic-capacity')[0].value = cubicCapacity.toFixed(2);
@@ -176,7 +177,7 @@ function finalCalculate() {
         const lengthInput = dimensionLines[i].getElementsByClassName('length')[0];
         const heightInput = dimensionLines[i].getElementsByClassName('height')[0];
         const quantityInput = dimensionLines[i].getElementsByClassName('quantity')[0];
-        
+
         const width = parseFloat(widthInput.value);
         const length = parseFloat(lengthInput.value);
         const height = parseFloat(heightInput.value);
@@ -205,6 +206,10 @@ function finalCalculate() {
     } else {
         document.getElementById('error-message').innerText = '';
         document.getElementById('result').innerText = `Total Cubic Capacity: ${totalCubicCapacity.toFixed(2)} m³`;
+
+        const country = document.getElementById('country').value;
+        const zone = document.getElementById('zone').value;
+        calculateShippingCost(totalCubicCapacity, country, zone);
     }
 }
 
@@ -244,3 +249,70 @@ window.addEventListener('click', function(e) {
         zoneList.style.display = 'none';
     }
 });
+
+// Calculation functions:
+
+// General calculation functions
+function calculateCubicVolume(width, length, height, quantity) {
+    return (width * length * height * quantity) / 1_000_000; // in m³
+}
+
+function calculateWeightEquivalent(cubicVolume, conversionFactor) {
+    return cubicVolume * conversionFactor; // in kg
+}
+
+// Supplier-specific functions for XBS International
+function roundWeightToNearestHundred(weight) {
+    return Math.ceil(weight / 100) * 100; // round up to nearest hundred
+}
+
+function getRateBracket(weight, rates) {
+    if (weight <= 500) return rates["<500kgs"];
+    if (weight <= 1000) return rates["<1000kgs"];
+    if (weight <= 2000) return rates["<2000kgs"];
+    if (weight <= 3000) return rates["<3000kgs"];
+    if (weight <= 4000) return rates["<4000kgs"];
+    if (weight <= 5000) return rates["<5000kgs"];
+    return rates[">5000kgs"];
+}
+
+function calculateShippingCostXBSInternational(cubicVolume, me, rates) {
+    let weight = Math.max(cubicVolume * 300, me * 1750); // Convert to weight
+    weight = roundWeightToNearestHundred(weight); // Round to nearest hundred
+    return getRateBracket(weight, rates); // Get the rate bracket and return cost
+}
+
+// Main function to calculate shipping
+function calculateShippingCost(totalCubicCapacity, country, zone) {
+    const supplierFiles = ['xbslog_international.json', 'xbslog_national.json'];
+    const suppliers = [];
+
+    Promise.all(supplierFiles.map(file => fetch(file).then(response => response.json())))
+        .then(dataArray => {
+            dataArray.forEach(data => suppliers.push(...data.destinations));
+            const results = [];
+            suppliers.forEach(supplier => {
+                if (supplier.country === country && supplier.code === zone) {
+                    if (data.name === "Xbslog International") {
+                        results.push({
+                            name: data.name,
+                            cost: calculateShippingCostXBSInternational(totalCubicCapacity, 0, supplier.rates) // Adjust as needed for ME
+                        });
+                    } else if (data.name === "Xbslog National") {
+                        // Implement XBS National logic here
+                    }
+                }
+            });
+            displayResults(results);
+        });
+}
+
+function displayResults(results) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
+    results.forEach(result => {
+        const p = document.createElement('p');
+        p.textContent = `${result.name}: €${result.cost.toFixed(2)}`;
+        resultDiv.appendChild(p);
+    });
+}
