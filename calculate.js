@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const supplierFiles = ['xbslog_international.json', 'xbslog_national.json'];
-    const suppliers = [];
-
-    Promise.all(supplierFiles.map(file => fetch(file).then(response => response.json())))
+    fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables')
+        .then(response => response.json())
+        .then(files => {
+            const jsonFiles = files.filter(file => file.name.endsWith('.json'));
+            return Promise.all(jsonFiles.map(file => fetch(file.download_url).then(response => response.json())));
+        })
         .then(dataArray => {
+            const suppliers = [];
             dataArray.forEach(data => suppliers.push(...data.destinations));
             const countries = new Set();
             suppliers.forEach(supplier => {
@@ -77,10 +80,12 @@ function showDropdown(dropdownId) {
 }
 
 function loadZonesForCountry(country) {
-    const supplierFiles = ['xbslog_international.json', 'xbslog_national.json'];
-    const suppliers = [];
-
-    Promise.all(supplierFiles.map(file => fetch(file).then(response => response.json())))
+    fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables')
+        .then(response => response.json())
+        .then(files => {
+            const jsonFiles = files.filter(file => file.name.endsWith('.json'));
+            return Promise.all(jsonFiles.map(file => fetch(file.download_url).then(response => response.json())));
+        })
         .then(dataArray => {
             const zones = [];
             dataArray.forEach(data => {
@@ -256,4 +261,13 @@ window.addEventListener('click', function(e) {
     const countryInput = document.getElementById('country');
     const countryList = document.getElementById('country-list');
     const zoneInput = document.getElementById('zone');
-    const zoneList = document.getElementById('
+    const zoneList = document.getElementById('zone-list');
+
+    if (!countryInput.contains(e.target) && !countryList.contains(e.target)) {
+        countryList.style.display = 'none';
+    }
+
+    if (!zoneInput.contains(e.target) && !zoneList.contains(e.target)) {
+        zoneList.style.display = 'none';
+    }
+});
