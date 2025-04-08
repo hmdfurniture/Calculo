@@ -176,16 +176,16 @@
         <div id="dimension-container">
             <div class="form-group dimension-line">
                 <div>
-                    <input type="number" class="width" min="0" max="999" oninput="removeHighlight(this)">
+                    <input type="number" class="width" min="0" max="999" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="length" min="0" max="999" oninput="removeHighlight(this)">
+                    <input type="number" class="length" min="0" max="999" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="height" min="0" max="999" oninput="removeHighlight(this)">
+                    <input type="number" class="height" min="0" max="999" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="quantity" min="0" max="999" oninput="removeHighlight(this)">
+                    <input type="number" class="quantity" min="0" max="999" oninput="validateInput(this)">
                 </div>
                 <div>
                     <select class="type" oninput="removeHighlight(this)">
@@ -211,6 +211,16 @@
     </div>
 
     <script>
+        function validateInput(element) {
+            let value = element.value;
+            value = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            if (value.length > 3) {
+                value = value.slice(0, 3); // Limit to 3 digits
+            }
+            element.value = value;
+            removeHighlight(element);
+        }
+
         function removeHighlight(element) {
             if (element.value) {
                 element.classList.remove('highlight');
