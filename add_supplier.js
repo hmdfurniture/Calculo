@@ -4,7 +4,7 @@ document.getElementById('operation').addEventListener('change', function() {
     document.getElementById('create-supplier-section').style.display = operation === 'create-supplier' ? 'block' : 'none';
 });
 
-const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN_HERE';
+const GITHUB_TOKEN = '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';
 
 function addZone() {
     const supplierFile = document.getElementById('existing-supplier').value;
