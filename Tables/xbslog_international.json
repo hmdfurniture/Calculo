@@ -1,0 +1,55 @@
+{
+    "name": "Xbslog International",
+    "type": "International",
+    "destinations": [
+        {
+            "country": "Alemanha",
+            "code": "10",
+            "name": "Berlin",
+            "rates": {
+                "minimum": 104.00,
+                "<500kgs": 36.60,
+                "<1000kgs": 35.00,
+                "<2000kgs": 27.05,
+                "<3000kgs": 23.90,
+                "<4000kgs": 22.30,
+                "<5000kgs": 20.70,
+                ">5000kgs": 18.50
+            }
+        },
+        {
+            "country": "Alemanha",
+            "code": "12",
+            "name": "Berlin",
+            "rates": {
+                "minimum": 104.00,
+                "<500kgs": 36.60,
+                "<1000kgs": 35.00,
+                "<2000kgs": 27.05,
+                "<3000kgs": 23.90,
+                "<4000kgs": 22.30,
+                "<5000kgs": 20.70,
+                ">5000kgs": 18.50
+            }
+        },
+        {
+            "country": "Alemanha",
+            "code": "22",
+            "name": "Schleswig-Holstein",
+            "rates": {
+                "minimum": 104.00,
+                "<500kgs": 36.60,
+                "<1000kgs": 35.00,
+                "<2000kgs": 27.05,
+                "<3000kgs": 23.90,
+                "<4000kgs": 22.30,
+                "<5000kgs": 20.70,
+                ">5000kgs": 18.50
+            }
+        }
+    ],
+    "conversion": {
+        "m3": 300,
+        "me": 1750
+    }
+}
