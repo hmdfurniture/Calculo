@@ -177,6 +177,7 @@ function calculateCubicCapacity(line) {
         line.getElementsByClassName('cubic-capacity')[0].value = volumetricWeight.toFixed(2);
     }
 }
+
 function finalCalculate() {
     const dimensionContainer = document.getElementById('dimension-container');
     const dimensionLines = dimensionContainer.getElementsByClassName('dimension-line');
