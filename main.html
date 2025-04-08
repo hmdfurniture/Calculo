@@ -210,59 +210,6 @@
         <div id="map" class="map"></div>
     </div>
 
-    <script>
-        function validateInput(element) {
-            let value = element.value;
-            value = value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-            if (value.length > 3) {
-                value = value.slice(0, 3); // Limit to 3 digits
-            }
-            element.value = value;
-            removeHighlight(element);
-        }
-
-        function removeHighlight(element) {
-            if (element.value) {
-                element.classList.remove('highlight');
-            }
-        }
-
-        function highlightEmptyFields() {
-            const fields = document.querySelectorAll('input[type="number"], select');
-            let isValid = true;
-            fields.forEach(field => {
-                if (!field.value) {
-                    field.classList.add('highlight');
-                    isValid = false;
-                }
-            });
-            return isValid;
-        }
-
-        function finalCalculate() {
-            const isValid = highlightEmptyFields();
-            if (isValid) {
-                document.getElementById('error-message').textContent = '';
-                // Perform calculation
-            } else {
-                document.getElementById('error-message').textContent = 'Please fill in all required fields.';
-            }
-        }
-
-        function addLine() {
-            const container = document.getElementById('dimension-container');
-            const newLine = container.children[0].cloneNode(true);
-            newLine.querySelectorAll('input').forEach(input => input.value = '');
-            newLine.querySelectorAll('select').forEach(select => select.value = 'box');
-            container.appendChild(newLine);
-        }
-
-        function removeLine(button) {
-            const line = button.closest('.dimension-line');
-            if (line.parentElement.children.length > 1) {
-                line.remove();
-            }
-        }
-    </script>
+    <script src="calculate.js"></script>
 </body>
 </html>
