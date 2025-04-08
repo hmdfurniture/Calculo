@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Supplier Zone</title>
     <style>
-        /* Add your CSS styling here */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -51,6 +50,8 @@
             <label for="operation">Choose Operation</label>
             <select id="operation" required>
                 <option value="add-zone">Add Zone to Existing Supplier</option>
+                <option value="edit-zone">Edit Existing Zone</option>
+                <option value="remove-zone">Remove Existing Zone</option>
                 <option value="create-supplier">Create New Supplier</option>
             </select>
         </div>
@@ -100,6 +101,75 @@
         </form>
     </div>
 
+    <div id="edit-zone-section" style="display: none;">
+        <h2>Edit Zone</h2>
+        <form id="edit-zone-form">
+            <div class="form-group">
+                <label for="existing-supplier-edit">Select Existing Supplier</label>
+                <select id="existing-supplier-edit" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="existing-zone">Select Zone</label>
+                <select id="existing-zone" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="country-edit">Country</label>
+                <input type="text" id="country-edit" required>
+            </div>
+            <div class="form-group">
+                <label for="code-edit">Zone Code</label>
+                <input type="text" id="code-edit" required>
+            </div>
+            <div class="form-group">
+                <label for="name-edit">Zone Name</label>
+                <input type="text" id="name-edit" required>
+            </div>
+            <div class="form-group">
+                <h3>Rates</h3>
+                <label for="minimum-edit">Minimum Rate</label>
+                <input type="number" id="minimum-edit" required>
+                <label for="less_500kgs-edit">Rate < 500kgs</label>
+                <input type="number" id="less_500kgs-edit" required>
+                <label for="less_1000kgs-edit">Rate < 1000kgs</label>
+                <input type="number" id="less_1000kgs-edit" required>
+                <label for="less_2000kgs-edit">Rate < 2000kgs</label>
+                <input type="number" id="less_2000kgs-edit" required>
+                <label for="less_3000kgs-edit">Rate < 3000kgs</label>
+                <input type="number" id="less_3000kgs-edit" required>
+                <label for="less_4000kgs-edit">Rate < 4000kgs</label>
+                <input type="number" id="less_4000kgs-edit" required>
+                <label for="less_5000kgs-edit">Rate < 5000kgs</label>
+                <input type="number" id="less_5000kgs-edit" required>
+                <label for="more_5000kgs-edit">Rate > 5000kgs</label>
+                <input type="number" id="more_5000kgs-edit" required>
+            </div>
+            <button type="button" onclick="editZone()">Edit Zone</button>
+        </form>
+    </div>
+
+    <div id="remove-zone-section" style="display: none;">
+        <h2>Remove Zone</h2>
+        <form id="remove-zone-form">
+            <div class="form-group">
+                <label for="existing-supplier-remove">Select Existing Supplier</label>
+                <select id="existing-supplier-remove" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="existing-zone-remove">Select Zone</label>
+                <select id="existing-zone-remove" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <button type="button" onclick="removeZone()">Remove Zone</button>
+        </form>
+    </div>
+
     <div id="create-supplier-section" style="display: none;">
         <h2>Create New Supplier</h2>
         <form id="create-supplier-form">
@@ -130,26 +200,209 @@
         document.getElementById('operation').addEventListener('change', function() {
             const operation = this.value;
             document.getElementById('add-zone-section').style.display = operation === 'add-zone' ? 'block' : 'none';
+            document.getElementById('edit-zone-section').style.display = operation === 'edit-zone' ? 'block' : 'none';
+            document.getElementById('remove-zone-section').style.display = operation === 'remove-zone' ? 'block' : 'none';
             document.getElementById('create-supplier-section').style.display = operation === 'create-supplier' ? 'block' : 'none';
         });
 
-        function addZone() {
-            // Implement function to add zone to existing supplier
-        }
+        const GITHUB_TOKEN = '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';
 
-        function createSupplier() {
-            // Implement function to create new supplier
-        }
-
-        // Fetch existing suppliers and populate the select dropdown
         function fetchExistingSuppliers() {
-            // Implement function to fetch existing suppliers from the repository
+            fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables')
+                .then(response => response.json())
+                .then(files => {
+                    const selectAdd = document.getElementById('existing-supplier');
+                    const selectEdit = document.getElementById('existing-supplier-edit');
+                    const selectRemove = document.getElementById('existing-supplier-remove');
+                    files.forEach(file => {
+                        if (file.name.endsWith('.json')) {
+                            const option = document.createElement('option');
+                            option.value = file.name;
+                            option.textContent = file.name.replace('.json', '').replace(/_/g, ' ');
+                            selectAdd.appendChild(option);
+                            selectEdit.appendChild(option.cloneNode(true));
+                            selectRemove.appendChild(option.cloneNode(true));
+                        }
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('error-message').textContent = error.message;
+                });
         }
 
-        // Call fetchExistingSuppliers when the page loads
+        function fetchZones(supplierFile, selectElement) {
+            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content);
+                    const supplier = JSON.parse(content);
+                    selectElement.innerHTML = '';
+                    supplier.destinations.forEach((destination, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${destination.country} - ${destination.code} - ${destination.name}`;
+                        selectElement.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('error-message').textContent = error.message;
+                });
+        }
+
+        document.getElementById('existing-supplier-edit').addEventListener('change', function() {
+            const supplierFile = this.value;
+            const selectZone = document.getElementById('existing-zone');
+            fetchZones(supplierFile, selectZone);
+        });
+
+        document.getElementById('existing-supplier-remove').addEventListener('change', function() {
+            const supplierFile = this.value;
+            const selectZone = document.getElementById('existing-zone-remove');
+            fetchZones(supplierFile, selectZone);
+        });
+
+        function addZone() {
+            const supplierFile = document.getElementById('existing-supplier').value;
+            const country = document.getElementById('country').value;
+            const code = document.getElementById('code').value;
+            const name = document.getElementById('name').value;
+            const rates = {
+                minimum: parseFloat(document.getElementById('minimum').value),
+                "<500kgs": parseFloat(document.getElementById('less_500kgs').value),
+                "<1000kgs": parseFloat(document.getElementById('less_1000kgs').value),
+                "<2000kgs": parseFloat(document.getElementById('less_2000kgs').value),
+                "<3000kgs": parseFloat(document.getElementById('less_3000kgs').value),
+                "<4000kgs": parseFloat(document.getElementById('less_4000kgs').value),
+                "<5000kgs": parseFloat(document.getElementById('less_5000kgs').value),
+                ">5000kgs": parseFloat(document.getElementById('more_5000kgs').value)
+            };
+
+            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content);
+                    const supplier = JSON.parse(content);
+                    supplier.destinations.push({ country, code, name, rates });
+
+                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
+
+                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Add new zone',
+                            content: updatedContent,
+                            sha: data.sha
+                        })
+                    });
+                })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('success-message').textContent = 'Zone added successfully!';
+                    } else {
+                        throw new Error('Failed to add zone');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('error-message').textContent = error.message;
+                });
+        }
+
+        function editZone() {
+            const supplierFile = document.getElementById('existing-supplier-edit').value;
+            const zoneIndex = document.getElementById('existing-zone').value;
+            const country = document.getElementById('country-edit').value;
+            const code = document.getElementById('code-edit').value;
+            const name = document.getElementById('name-edit').value;
+            const rates = {
+                minimum: parseFloat(document.getElementById('minimum-edit').value),
+                "<500kgs": parseFloat(document.getElementById('less_500kgs-edit').value),
+                "<1000kgs": parseFloat(document.getElementById('less_1000kgs-edit').value),
+                "<2000kgs": parseFloat(document.getElementById('less_2000kgs-edit').value),
+                "<3000kgs": parseFloat(document.getElementById('less_3000kgs-edit').value),
+                "<4000kgs": parseFloat(document.getElementById('less_4000kgs-edit').value),
+                "<5000kgs": parseFloat(document.getElementById('less_5000kgs-edit').value),
+                ">5000kgs": parseFloat(document.getElementById('more_5000kgs-edit').value)
+            };
+
+            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content);
+                    const supplier = JSON.parse(content);
+                    supplier.destinations[zoneIndex] = { country, code, name, rates };
+
+                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
+
+                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Edit existing zone',
+                            content: updatedContent,
+                            sha: data.sha
+                        })
+                    });
+                })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('success-message').textContent = 'Zone edited successfully!';
+                    } else {
+                        throw new Error('Failed to edit zone');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('error-message').textContent = error.message;
+                });
+        }
+
+        function removeZone() {
+            const supplierFile = document.getElementById('existing-supplier-remove').value;
+            const zoneIndex = document.getElementById('existing-zone-remove').value;
+
+            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content);
+                    const supplier = JSON.parse(content);
+                    supplier.destinations.splice(zoneIndex, 1);
+
+                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
+
+                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Remove existing zone',
+                            content: updatedContent,
+                            sha: data.sha
+                        })
+                    });
+                })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('success-message').textContent = 'Zone removed successfully!';
+                    } else {
+                        throw new Error('Failed to remove zone');
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('error-message').textContent = error.message;
+                });
+        }
+
         window.onload = function() {
             fetchExistingSuppliers();
-        }
+        };
     </script>
 </body>
 </html>
