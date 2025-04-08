@@ -66,9 +66,6 @@
             -webkit-appearance: none;
             margin: 0;
         }
-        input[type="number"]:invalid {
-            border-color: red;
-        }
         button {
             padding: 5px 10px;
             background-color: #007BFF;
@@ -143,6 +140,9 @@
             font-size: 14px;
             margin-top: 10px;
         }
+        .highlight {
+            border-color: red;
+        }
     </style>
 </head>
 <body>
@@ -176,19 +176,19 @@
         <div id="dimension-container">
             <div class="form-group dimension-line">
                 <div>
-                    <input type="number" class="width" min="0" max="999" required>
+                    <input type="number" class="width" min="0" max="999" oninput="removeHighlight(this)">
                 </div>
                 <div>
-                    <input type="number" class="length" min="0" max="999" required>
+                    <input type="number" class="length" min="0" max="999" oninput="removeHighlight(this)">
                 </div>
                 <div>
-                    <input type="number" class="height" min="0" max="999" required>
+                    <input type="number" class="height" min="0" max="999" oninput="removeHighlight(this)">
                 </div>
                 <div>
-                    <input type="number" class="quantity" min="0" max="999" required>
+                    <input type="number" class="quantity" min="0" max="999" oninput="removeHighlight(this)">
                 </div>
                 <div>
-                    <select class="type" required>
+                    <select class="type" oninput="removeHighlight(this)">
                         <option value="box">Box</option>
                         <option value="pallet">Pallet</option>
                     </select>
@@ -210,6 +210,49 @@
         <div id="map" class="map"></div>
     </div>
 
-    <script src="calculate.js"></script>
+    <script>
+        function removeHighlight(element) {
+            if (element.value) {
+                element.classList.remove('highlight');
+            }
+        }
+
+        function highlightEmptyFields() {
+            const fields = document.querySelectorAll('input[type="number"], select');
+            let isValid = true;
+            fields.forEach(field => {
+                if (!field.value) {
+                    field.classList.add('highlight');
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+
+        function finalCalculate() {
+            const isValid = highlightEmptyFields();
+            if (isValid) {
+                document.getElementById('error-message').textContent = '';
+                // Perform calculation
+            } else {
+                document.getElementById('error-message').textContent = 'Please fill in all required fields.';
+            }
+        }
+
+        function addLine() {
+            const container = document.getElementById('dimension-container');
+            const newLine = container.children[0].cloneNode(true);
+            newLine.querySelectorAll('input').forEach(input => input.value = '');
+            newLine.querySelectorAll('select').forEach(select => select.value = 'box');
+            container.appendChild(newLine);
+        }
+
+        function removeLine(button) {
+            const line = button.closest('.dimension-line');
+            if (line.parentElement.children.length > 1) {
+                line.remove();
+            }
+        }
+    </script>
 </body>
 </html>
