@@ -49,6 +49,7 @@
         <div class="form-group">
             <label for="operation">Choose Operation</label>
             <select id="operation" required>
+                <option value="" disabled selected>Select an operation</option>
                 <option value="add-zone">Add Zone to Existing Supplier</option>
                 <option value="edit-zone">Edit Existing Zone</option>
                 <option value="remove-zone">Remove Existing Zone</option>
@@ -61,44 +62,7 @@
     <div id="add-zone-section" style="display: none;">
         <h2>Add Zone</h2>
         <form id="add-zone-form">
-            <div class="form-group">
-                <label for="existing-supplier">Select Existing Supplier</label>
-                <select id="existing-supplier" required>
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="country">Select Existing Country or Add New</label>
-                <input type="text" id="country" placeholder="Type a new country or select one from the list">
-            </div>
-            <div class="form-group">
-                <label for="zone-code">Zone Code</label>
-                <input type="text" id="zone-code" required>
-            </div>
-            <div class="form-group">
-                <label for="zone-name">Zone Name</label>
-                <input type="text" id="zone-name" required>
-            </div>
-            <div class="form-group">
-                <h3>Rates</h3>
-                <label for="minimum-rate">Minimum Rate</label>
-                <input type="number" id="minimum-rate" required>
-                <label for="less-500kgs">Rate < 500kgs</label>
-                <input type="number" id="less-500kgs" required>
-                <label for="less-1000kgs">Rate < 1000kgs</label>
-                <input type="number" id="less-1000kgs" required>
-                <label for="less-2000kgs">Rate < 2000kgs</label>
-                <input type="number" id="less-2000kgs" required>
-                <label for="less-3000kgs">Rate < 3000kgs</label>
-                <input type="number" id="less-3000kgs" required>
-                <label for="less-4000kgs">Rate < 4000kgs</label>
-                <input type="number" id="less-4000kgs" required>
-                <label for="less-5000kgs">Rate < 5000kgs</label>
-                <input type="number" id="less-5000kgs" required>
-                <label for="more-5000kgs">Rate > 5000kgs</label>
-                <input type="number" id="more-5000kgs" required>
-            </div>
-            <button type="button" onclick="addZone()">Add Zone</button>
+            <!-- Add Zone Form Fields -->
         </form>
     </div>
 
@@ -106,52 +70,7 @@
     <div id="edit-zone-section" style="display: none;">
         <h2>Edit Zone</h2>
         <form id="edit-zone-form">
-            <div class="form-group">
-                <label for="existing-supplier-edit">Select Existing Supplier</label>
-                <select id="existing-supplier-edit" required>
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="country-edit">Select Country</label>
-                <select id="country-edit" required>
-                    <!-- Countries will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="zone-edit">Select Zone</label>
-                <select id="zone-edit" required>
-                    <!-- Zones will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="zone-code-edit">Zone Code</label>
-                <input type="text" id="zone-code-edit" required>
-            </div>
-            <div class="form-group">
-                <label for="zone-name-edit">Zone Name</label>
-                <input type="text" id="zone-name-edit" required>
-            </div>
-            <div class="form-group">
-                <h3>Rates</h3>
-                <label for="minimum-rate-edit">Minimum Rate</label>
-                <input type="number" id="minimum-rate-edit" required>
-                <label for="less-500kgs-edit">Rate < 500kgs</label>
-                <input type="number" id="less-500kgs-edit" required>
-                <label for="less-1000kgs-edit">Rate < 1000kgs</label>
-                <input type="number" id="less-1000kgs-edit" required>
-                <label for="less-2000kgs-edit">Rate < 2000kgs</label>
-                <input type="number" id="less-2000kgs-edit" required>
-                <label for="less-3000kgs-edit">Rate < 3000kgs</label>
-                <input type="number" id="less-3000kgs-edit" required>
-                <label for="less-4000kgs-edit">Rate < 4000kgs</label>
-                <input type="number" id="less-4000kgs-edit" required>
-                <label for="less-5000kgs-edit">Rate < 5000kgs</label>
-                <input type="number" id="less-5000kgs-edit" required>
-                <label for="more-5000kgs-edit">Rate > 5000kgs</label>
-                <input type="number" id="more-5000kgs-edit" required>
-            </div>
-            <button type="button" onclick="editZone()">Edit Zone</button>
+            <!-- Edit Zone Form Fields -->
         </form>
     </div>
 
@@ -159,31 +78,52 @@
     <div id="remove-zone-section" style="display: none;">
         <h2>Remove Zone</h2>
         <form id="remove-zone-form">
-            <div class="form-group">
-                <label for="existing-supplier-remove">Select Existing Supplier</label>
-                <select id="existing-supplier-remove" required>
-                    <!-- Options will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="country-remove">Select Country</label>
-                <select id="country-remove" required>
-                    <!-- Countries will be populated dynamically -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="zone-remove">Select Zone</label>
-                <select id="zone-remove" required>
-                    <!-- Zones will be populated dynamically -->
-                </select>
-            </div>
-            <button type="button" onclick="removeZone()">Remove Zone</button>
+            <!-- Remove Zone Form Fields -->
+        </form>
+    </div>
+
+    <!-- Create Supplier Section -->
+    <div id="create-supplier-section" style="display: none;">
+        <h2>Create New Supplier</h2>
+        <form id="create-supplier-form">
+            <!-- Create Supplier Form Fields -->
         </form>
     </div>
 
     <div class="error-message" id="error-message"></div>
     <div class="success-message" id="success-message"></div>
 
-    <script src="add_supplier.js"></script>
+    <script>
+        // Handle operation selection
+        document.getElementById('operation').addEventListener('change', function () {
+            const operation = this.value;
+
+            // Hide all sections
+            document.getElementById('add-zone-section').style.display = 'none';
+            document.getElementById('edit-zone-section').style.display = 'none';
+            document.getElementById('remove-zone-section').style.display = 'none';
+            document.getElementById('create-supplier-section').style.display = 'none';
+
+            // Show the selected section
+            if (operation === 'add-zone') {
+                document.getElementById('add-zone-section').style.display = 'block';
+            } else if (operation === 'edit-zone') {
+                document.getElementById('edit-zone-section').style.display = 'block';
+            } else if (operation === 'remove-zone') {
+                document.getElementById('remove-zone-section').style.display = 'block';
+            } else if (operation === 'create-supplier') {
+                document.getElementById('create-supplier-section').style.display = 'block';
+            }
+        });
+
+        // Initialize the page
+        window.onload = function () {
+            // Ensure no sections are visible on page load
+            document.getElementById('add-zone-section').style.display = 'none';
+            document.getElementById('edit-zone-section').style.display = 'none';
+            document.getElementById('remove-zone-section').style.display = 'none';
+            document.getElementById('create-supplier-section').style.display = 'none';
+        };
+    </script>
 </body>
 </html>
