@@ -101,6 +101,73 @@
         </form>
     </div>
 
+    <!-- Edit Zone Section -->
+    <div id="edit-zone-section" style="display: none;">
+        <h2>Edit Zone</h2>
+        <form id="edit-zone-form">
+            <div class="form-group">
+                <label for="existing-supplier-edit">Select Existing Supplier</label>
+                <select id="existing-supplier-edit" required></select>
+            </div>
+            <div class="form-group">
+                <label for="country-edit">Select Country</label>
+                <select id="country-edit" required></select>
+            </div>
+            <div class="form-group">
+                <label for="zone-edit">Select Zone</label>
+                <select id="zone-edit" required></select>
+            </div>
+            <div class="form-group">
+                <label for="code-edit">Zone Code</label>
+                <input type="text" id="code-edit" required>
+            </div>
+            <div class="form-group">
+                <label for="name-edit">Zone Name</label>
+                <input type="text" id="name-edit" required>
+            </div>
+            <div class="form-group">
+                <h3>Rates</h3>
+                <label for="minimum-edit">Minimum Rate</label>
+                <input type="number" id="minimum-edit" required>
+                <label for="less_500kgs-edit">Rate < 500kgs</label>
+                <input type="number" id="less_500kgs-edit" required>
+                <label for="less_1000kgs-edit">Rate < 1000kgs</label>
+                <input type="number" id="less_1000kgs-edit" required>
+                <label for="less_2000kgs-edit">Rate < 2000kgs</label>
+                <input type="number" id="less_2000kgs-edit" required>
+                <label for="less_3000kgs-edit">Rate < 3000kgs</label>
+                <input type="number" id="less_3000kgs-edit" required>
+                <label for="less_4000kgs-edit">Rate < 4000kgs</label>
+                <input type="number" id="less_4000kgs-edit" required>
+                <label for="less_5000kgs-edit">Rate < 5000kgs</label>
+                <input type="number" id="less_5000kgs-edit" required>
+                <label for="more_5000kgs-edit">Rate > 5000kgs</label>
+                <input type="number" id="more_5000kgs-edit" required>
+            </div>
+            <button type="button" onclick="editZone()">Edit Zone</button>
+        </form>
+    </div>
+
+    <!-- Remove Zone Section -->
+    <div id="remove-zone-section" style="display: none;">
+        <h2>Remove Zone</h2>
+        <form id="remove-zone-form">
+            <div class="form-group">
+                <label for="existing-supplier-remove">Select Existing Supplier</label>
+                <select id="existing-supplier-remove" required></select>
+            </div>
+            <div class="form-group">
+                <label for="country-remove">Select Country</label>
+                <select id="country-remove" required></select>
+            </div>
+            <div class="form-group">
+                <label for="zone-remove">Select Zone</label>
+                <select id="zone-remove" required></select>
+            </div>
+            <button type="button" onclick="removeZone()">Remove Zone</button>
+        </form>
+    </div>
+
     <div class="error-message" id="error-message"></div>
     <div class="success-message" id="success-message"></div>
 
