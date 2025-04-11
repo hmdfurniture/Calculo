@@ -1,50 +1,49 @@
 const GITHUB_TOKEN = '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';
 
-function fetchSupplierFile(supplierFile) {
-    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
+function fetchSupplierFiles() {
+    return fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables', {
+        headers: { Authorization: `token ${GITHUB_TOKEN}` },
+    })
         .then(response => response.json())
-        .then(data => {
-            const content = JSON.parse(atob(data.content));
-            content.sha = data.sha; // Include SHA
-            return content;
-        });
+        .then(files => files.filter(file => file.name.endsWith('.json')));
 }
 
-function updateSupplierFile(supplierFile, supplierData, message) {
-    const updatedContent = btoa(JSON.stringify(supplierData, null, 2));
+function populateDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.innerHTML = '<option value="" disabled selected>Select a supplier</option>';
 
-    fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            message: message,
-            content: updatedContent,
-            sha: supplierData.sha
+    fetchSupplierFiles()
+        .then(files => {
+            files.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.name;
+                option.textContent = file.name.replace('.json', '').replace(/_/g, ' ');
+                dropdown.appendChild(option);
+            });
         })
-    })
-    .then(response => {
-        if (response.ok) {
-            document.getElementById('success-message').textContent = `${message} successfully!`;
-        } else {
-            throw new Error('Failed to update supplier file');
-        }
-    })
-    .catch(error => {
-        document.getElementById('error-message').textContent = error.message;
-    });
+        .catch(error => {
+            document.getElementById('error-message').textContent = `Error fetching suppliers: ${error.message}`;
+        });
 }
 
 function initialize() {
     document.getElementById('operation').addEventListener('change', function () {
         const operation = this.value;
 
-        document.getElementById('add-zone-section').style.display = 'none';
+        const sections = ['add-zone-section', 'edit-zone-section', 'remove-zone-section', 'create-supplier-section'];
+        sections.forEach(section => {
+            document.getElementById(section).style.display = 'none';
+        });
 
         if (operation === 'add-zone') {
             document.getElementById('add-zone-section').style.display = 'block';
+            populateDropdown('existing-supplier');
+        } else if (operation === 'edit-zone') {
+            document.getElementById('edit-zone-section').style.display = 'block';
+            populateDropdown('existing-supplier-edit');
+        } else if (operation === 'remove-zone') {
+            document.getElementById('remove-zone-section').style.display = 'block';
+            populateDropdown('existing-supplier-remove');
         }
     });
 }
