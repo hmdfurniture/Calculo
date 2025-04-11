@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Supplier Zone</title>
+    <title>Manage Supplier Zones</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,7 +44,7 @@
     </style>
 </head>
 <body>
-    <h1>Add Supplier Zone</h1>
+    <h1>Manage Supplier Zones</h1>
     <form id="operation-form">
         <div class="form-group">
             <label for="operation">Choose Operation</label>
@@ -57,6 +57,7 @@
         </div>
     </form>
 
+    <!-- Add Zone Section -->
     <div id="add-zone-section" style="display: none;">
         <h2>Add Zone</h2>
         <form id="add-zone-form">
@@ -67,40 +68,41 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="country">Country</label>
-                <input type="text" id="country" required>
+                <label for="country">Select Existing Country or Add New</label>
+                <input type="text" id="country" placeholder="Type a new country or select one from the list">
             </div>
             <div class="form-group">
-                <label for="code">Zone Code</label>
-                <input type="text" id="code" required>
+                <label for="zone-code">Zone Code</label>
+                <input type="text" id="zone-code" required>
             </div>
             <div class="form-group">
-                <label for="name">Zone Name</label>
-                <input type="text" id="name" required>
+                <label for="zone-name">Zone Name</label>
+                <input type="text" id="zone-name" required>
             </div>
             <div class="form-group">
                 <h3>Rates</h3>
-                <label for="minimum">Minimum Rate</label>
-                <input type="number" id="minimum" required>
-                <label for="less_500kgs">Rate < 500kgs</label>
-                <input type="number" id="less_500kgs" required>
-                <label for="less_1000kgs">Rate < 1000kgs</label>
-                <input type="number" id="less_1000kgs" required>
-                <label for="less_2000kgs">Rate < 2000kgs</label>
-                <input type="number" id="less_2000kgs" required>
-                <label for="less_3000kgs">Rate < 3000kgs</label>
-                <input type="number" id="less_3000kgs" required>
-                <label for="less_4000kgs">Rate < 4000kgs</label>
-                <input type="number" id="less_4000kgs" required>
-                <label for="less_5000kgs">Rate < 5000kgs</label>
-                <input type="number" id="less_5000kgs" required>
-                <label for="more_5000kgs">Rate > 5000kgs</label>
-                <input type="number" id="more_5000kgs" required>
+                <label for="minimum-rate">Minimum Rate</label>
+                <input type="number" id="minimum-rate" required>
+                <label for="less-500kgs">Rate < 500kgs</label>
+                <input type="number" id="less-500kgs" required>
+                <label for="less-1000kgs">Rate < 1000kgs</label>
+                <input type="number" id="less-1000kgs" required>
+                <label for="less-2000kgs">Rate < 2000kgs</label>
+                <input type="number" id="less-2000kgs" required>
+                <label for="less-3000kgs">Rate < 3000kgs</label>
+                <input type="number" id="less-3000kgs" required>
+                <label for="less-4000kgs">Rate < 4000kgs</label>
+                <input type="number" id="less-4000kgs" required>
+                <label for="less-5000kgs">Rate < 5000kgs</label>
+                <input type="number" id="less-5000kgs" required>
+                <label for="more-5000kgs">Rate > 5000kgs</label>
+                <input type="number" id="more-5000kgs" required>
             </div>
             <button type="button" onclick="addZone()">Add Zone</button>
         </form>
     </div>
 
+    <!-- Edit Zone Section -->
     <div id="edit-zone-section" style="display: none;">
         <h2>Edit Zone</h2>
         <form id="edit-zone-form">
@@ -111,46 +113,49 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="existing-zone">Select Zone</label>
-                <select id="existing-zone" required>
-                    <!-- Options will be populated dynamically -->
+                <label for="country-edit">Select Country</label>
+                <select id="country-edit" required>
+                    <!-- Countries will be populated dynamically -->
                 </select>
             </div>
             <div class="form-group">
-                <label for="country-edit">Country</label>
-                <input type="text" id="country-edit" required>
+                <label for="zone-edit">Select Zone</label>
+                <select id="zone-edit" required>
+                    <!-- Zones will be populated dynamically -->
+                </select>
             </div>
             <div class="form-group">
-                <label for="code-edit">Zone Code</label>
-                <input type="text" id="code-edit" required>
+                <label for="zone-code-edit">Zone Code</label>
+                <input type="text" id="zone-code-edit" required>
             </div>
             <div class="form-group">
-                <label for="name-edit">Zone Name</label>
-                <input type="text" id="name-edit" required>
+                <label for="zone-name-edit">Zone Name</label>
+                <input type="text" id="zone-name-edit" required>
             </div>
             <div class="form-group">
                 <h3>Rates</h3>
-                <label for="minimum-edit">Minimum Rate</label>
-                <input type="number" id="minimum-edit" required>
-                <label for="less_500kgs-edit">Rate < 500kgs</label>
-                <input type="number" id="less_500kgs-edit" required>
-                <label for="less_1000kgs-edit">Rate < 1000kgs</label>
-                <input type="number" id="less_1000kgs-edit" required>
-                <label for="less_2000kgs-edit">Rate < 2000kgs</label>
-                <input type="number" id="less_2000kgs-edit" required>
-                <label for="less_3000kgs-edit">Rate < 3000kgs</label>
-                <input type="number" id="less_3000kgs-edit" required>
-                <label for="less_4000kgs-edit">Rate < 4000kgs</label>
-                <input type="number" id="less_4000kgs-edit" required>
-                <label for="less_5000kgs-edit">Rate < 5000kgs</label>
-                <input type="number" id="less_5000kgs-edit" required>
-                <label for="more_5000kgs-edit">Rate > 5000kgs</label>
-                <input type="number" id="more_5000kgs-edit" required>
+                <label for="minimum-rate-edit">Minimum Rate</label>
+                <input type="number" id="minimum-rate-edit" required>
+                <label for="less-500kgs-edit">Rate < 500kgs</label>
+                <input type="number" id="less-500kgs-edit" required>
+                <label for="less-1000kgs-edit">Rate < 1000kgs</label>
+                <input type="number" id="less-1000kgs-edit" required>
+                <label for="less-2000kgs-edit">Rate < 2000kgs</label>
+                <input type="number" id="less-2000kgs-edit" required>
+                <label for="less-3000kgs-edit">Rate < 3000kgs</label>
+                <input type="number" id="less-3000kgs-edit" required>
+                <label for="less-4000kgs-edit">Rate < 4000kgs</label>
+                <input type="number" id="less-4000kgs-edit" required>
+                <label for="less-5000kgs-edit">Rate < 5000kgs</label>
+                <input type="number" id="less-5000kgs-edit" required>
+                <label for="more-5000kgs-edit">Rate > 5000kgs</label>
+                <input type="number" id="more-5000kgs-edit" required>
             </div>
             <button type="button" onclick="editZone()">Edit Zone</button>
         </form>
     </div>
 
+    <!-- Remove Zone Section -->
     <div id="remove-zone-section" style="display: none;">
         <h2>Remove Zone</h2>
         <form id="remove-zone-form">
@@ -161,248 +166,24 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="existing-zone-remove">Select Zone</label>
-                <select id="existing-zone-remove" required>
-                    <!-- Options will be populated dynamically -->
+                <label for="country-remove">Select Country</label>
+                <select id="country-remove" required>
+                    <!-- Countries will be populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="zone-remove">Select Zone</label>
+                <select id="zone-remove" required>
+                    <!-- Zones will be populated dynamically -->
                 </select>
             </div>
             <button type="button" onclick="removeZone()">Remove Zone</button>
         </form>
     </div>
 
-    <div id="create-supplier-section" style="display: none;">
-        <h2>Create New Supplier</h2>
-        <form id="create-supplier-form">
-            <div class="form-group">
-                <label for="supplier-name">Supplier Name</label>
-                <input type="text" id="supplier-name" required>
-            </div>
-            <div class="form-group">
-                <label for="supplier-type">Supplier Type</label>
-                <input type="text" id="supplier-type" required>
-            </div>
-            <div class="form-group">
-                <label for="conversion-m3">Conversion m3</label>
-                <input type="number" id="conversion-m3" required>
-            </div>
-            <div class="form-group">
-                <label for="conversion-me">Conversion me</label>
-                <input type="number" id="conversion-me" required>
-            </div>
-            <button type="button" onclick="createSupplier()">Create Supplier</button>
-        </form>
-    </div>
-
     <div class="error-message" id="error-message"></div>
     <div class="success-message" id="success-message"></div>
 
-    <script>
-        document.getElementById('operation').addEventListener('change', function() {
-            const operation = this.value;
-            document.getElementById('add-zone-section').style.display = operation === 'add-zone' ? 'block' : 'none';
-            document.getElementById('edit-zone-section').style.display = operation === 'edit-zone' ? 'block' : 'none';
-            document.getElementById('remove-zone-section').style.display = operation === 'remove-zone' ? 'block' : 'none';
-            document.getElementById('create-supplier-section').style.display = operation === 'create-supplier' ? 'block' : 'none';
-        });
-
-        const GITHUB_TOKEN = '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';
-
-        function fetchExistingSuppliers() {
-            fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables')
-                .then(response => response.json())
-                .then(files => {
-                    const selectAdd = document.getElementById('existing-supplier');
-                    const selectEdit = document.getElementById('existing-supplier-edit');
-                    const selectRemove = document.getElementById('existing-supplier-remove');
-                    files.forEach(file => {
-                        if (file.name.endsWith('.json')) {
-                            const option = document.createElement('option');
-                            option.value = file.name;
-                            option.textContent = file.name.replace('.json', '').replace(/_/g, ' ');
-                            selectAdd.appendChild(option);
-                            selectEdit.appendChild(option.cloneNode(true));
-                            selectRemove.appendChild(option.cloneNode(true));
-                        }
-                    });
-                })
-                .catch(error => {
-                    document.getElementById('error-message').textContent = error.message;
-                });
-        }
-
-        function fetchZones(supplierFile, selectElement) {
-            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
-                .then(response => response.json())
-                .then(data => {
-                    const content = atob(data.content);
-                    const supplier = JSON.parse(content);
-                    selectElement.innerHTML = '';
-                    supplier.destinations.forEach((destination, index) => {
-                        const option = document.createElement('option');
-                        option.value = index;
-                        option.textContent = `${destination.country} - ${destination.code} - ${destination.name}`;
-                        selectElement.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    document.getElementById('error-message').textContent = error.message;
-                });
-        }
-
-        document.getElementById('existing-supplier-edit').addEventListener('change', function() {
-            const supplierFile = this.value;
-            const selectZone = document.getElementById('existing-zone');
-            fetchZones(supplierFile, selectZone);
-        });
-
-        document.getElementById('existing-supplier-remove').addEventListener('change', function() {
-            const supplierFile = this.value;
-            const selectZone = document.getElementById('existing-zone-remove');
-            fetchZones(supplierFile, selectZone);
-        });
-
-        function addZone() {
-            const supplierFile = document.getElementById('existing-supplier').value;
-            const country = document.getElementById('country').value;
-            const code = document.getElementById('code').value;
-            const name = document.getElementById('name').value;
-            const rates = {
-                minimum: parseFloat(document.getElementById('minimum').value),
-                "<500kgs": parseFloat(document.getElementById('less_500kgs').value),
-                "<1000kgs": parseFloat(document.getElementById('less_1000kgs').value),
-                "<2000kgs": parseFloat(document.getElementById('less_2000kgs').value),
-                "<3000kgs": parseFloat(document.getElementById('less_3000kgs').value),
-                "<4000kgs": parseFloat(document.getElementById('less_4000kgs').value),
-                "<5000kgs": parseFloat(document.getElementById('less_5000kgs').value),
-                ">5000kgs": parseFloat(document.getElementById('more_5000kgs').value)
-            };
-
-            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
-                .then(response => response.json())
-                .then(data => {
-                    const content = atob(data.content);
-                    const supplier = JSON.parse(content);
-                    supplier.destinations.push({ country, code, name, rates });
-
-                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
-
-                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Add new zone',
-                            content: updatedContent,
-                            sha: data.sha
-                        })
-                    });
-                })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById('success-message').textContent = 'Zone added successfully!';
-                    } else {
-                        throw new Error('Failed to add zone');
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('error-message').textContent = error.message;
-                });
-        }
-
-        function editZone() {
-            const supplierFile = document.getElementById('existing-supplier-edit').value;
-            const zoneIndex = document.getElementById('existing-zone').value;
-            const country = document.getElementById('country-edit').value;
-            const code = document.getElementById('code-edit').value;
-            const name = document.getElementById('name-edit').value;
-            const rates = {
-                minimum: parseFloat(document.getElementById('minimum-edit').value),
-                "<500kgs": parseFloat(document.getElementById('less_500kgs-edit').value),
-                "<1000kgs": parseFloat(document.getElementById('less_1000kgs-edit').value),
-                "<2000kgs": parseFloat(document.getElementById('less_2000kgs-edit').value),
-                "<3000kgs": parseFloat(document.getElementById('less_3000kgs-edit').value),
-                "<4000kgs": parseFloat(document.getElementById('less_4000kgs-edit').value),
-                "<5000kgs": parseFloat(document.getElementById('less_5000kgs-edit').value),
-                ">5000kgs": parseFloat(document.getElementById('more_5000kgs-edit').value)
-            };
-
-            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
-                .then(response => response.json())
-                .then(data => {
-                    const content = atob(data.content);
-                    const supplier = JSON.parse(content);
-                    supplier.destinations[zoneIndex] = { country, code, name, rates };
-
-                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
-
-                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Edit existing zone',
-                            content: updatedContent,
-                            sha: data.sha
-                        })
-                    });
-                })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById('success-message').textContent = 'Zone edited successfully!';
-                    } else {
-                        throw new Error('Failed to edit zone');
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('error-message').textContent = error.message;
-                });
-        }
-
-        function removeZone() {
-            const supplierFile = document.getElementById('existing-supplier-remove').value;
-            const zoneIndex = document.getElementById('existing-zone-remove').value;
-
-            fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`)
-                .then(response => response.json())
-                .then(data => {
-                    const content = atob(data.content);
-                    const supplier = JSON.parse(content);
-                    supplier.destinations.splice(zoneIndex, 1);
-
-                    const updatedContent = btoa(JSON.stringify(supplier, null, 2));
-
-                    return fetch(`https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables/${supplierFile}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${GITHUB_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Remove existing zone',
-                            content: updatedContent,
-                            sha: data.sha
-                        })
-                    });
-                })
-                .then(response => {
-                    if (response.ok) {
-                        document.getElementById('success-message').textContent = 'Zone removed successfully!';
-                    } else {
-                        throw new Error('Failed to remove zone');
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('error-message').textContent = error.message;
-                });
-        }
-
-        window.onload = function() {
-            fetchExistingSuppliers();
-        };
-    </script>
+    <script src="add_supplier.js"></script>
 </body>
 </html>
