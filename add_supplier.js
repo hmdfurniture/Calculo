@@ -4,8 +4,17 @@ function fetchSupplierFiles() {
     return fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables', {
         headers: { Authorization: `token ${GITHUB_TOKEN}` },
     })
-        .then(response => response.json())
-        .then(files => files.filter(file => file.name.endsWith('.json')));
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch supplier files. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(files => files.filter(file => file.name.endsWith('.json')))
+        .catch(error => {
+            console.error('Error fetching supplier files:', error.message);
+            throw error; // Re-throw error for further handling
+        });
 }
 
 function populateDropdown(dropdownId) {
@@ -14,6 +23,9 @@ function populateDropdown(dropdownId) {
 
     fetchSupplierFiles()
         .then(files => {
+            if (files.length === 0) {
+                throw new Error('No supplier files found.');
+            }
             files.forEach(file => {
                 const option = document.createElement('option');
                 option.value = file.name;
@@ -27,14 +39,16 @@ function populateDropdown(dropdownId) {
 }
 
 function initialize() {
-    document.getElementById('operation').addEventListener('change', function () {
+    const operationDropdown = document.getElementById('operation');
+    operationDropdown.addEventListener('change', function () {
         const operation = this.value;
 
-        const sections = ['add-zone-section', 'edit-zone-section', 'remove-zone-section', 'create-supplier-section'];
-        sections.forEach(section => {
+        // Hide all sections
+        ['add-zone-section', 'edit-zone-section', 'remove-zone-section', 'create-supplier-section'].forEach(section => {
             document.getElementById(section).style.display = 'none';
         });
 
+        // Show relevant section and populate dropdown
         if (operation === 'add-zone') {
             document.getElementById('add-zone-section').style.display = 'block';
             populateDropdown('existing-supplier');
@@ -45,6 +59,11 @@ function initialize() {
             document.getElementById('remove-zone-section').style.display = 'block';
             populateDropdown('existing-supplier-remove');
         }
+    });
+
+    // Hide all sections on page load
+    ['add-zone-section', 'edit-zone-section', 'remove-zone-section', 'create-supplier-section'].forEach(section => {
+        document.getElementById(section).style.display = 'none';
     });
 }
 
