@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function populateCountryList(countries) {
     const countryList = document.getElementById('country-list');
     countryList.innerHTML = ''; // Clear previous list
+
+    // Sort countries alphabetically
+    countries.sort();
+
     countries.forEach(country => {
         const a = document.createElement('a');
         a.href = "#";
@@ -102,6 +106,10 @@ function loadZonesForCountry(country) {
 function populateZoneList(zones) {
     const zoneList = document.getElementById('zone-list');
     zoneList.innerHTML = ''; // Clear previous list
+
+    // Sort zones alphabetically by their code or name
+    zones.sort((a, b) => a.code.localeCompare(b.code)); // Or replace 'code' with the appropriate property
+
     zones.forEach(zone => {
         const a = document.createElement('a');
         a.href = "#";
