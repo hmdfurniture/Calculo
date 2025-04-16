@@ -130,16 +130,16 @@ function addLine() {
     newLine.className = 'form-group dimension-line';
     newLine.innerHTML = `
         <div>
-            <input type="number" class="width" min="0" max="999" required>
+            <input type="number" class="width" oninput="this.value = Math.min(Math.max(this.value, 0), 999)" required>
         </div>
         <div>
-            <input type="number" class="length" min="0" max="999" required>
+            <input type="number" class="length" oninput="this.value = Math.min(Math.max(this.value, 0), 999)" required>
         </div>
         <div>
-            <input type="number" class="height" min="0" max="999" required>
+            <input type="number" class="height" oninput="this.value = Math.min(Math.max(this.value, 0), 999)" required>
         </div>
         <div>
-            <input type="number" class="quantity" min="0" max="999" required>
+            <input type="number" class="quantity" oninput="this.value = Math.min(Math.max(this.value, 0), 999)" required>
         </div>
         <div>
             <select class="type" required>
