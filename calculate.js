@@ -1,42 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('https://api.github.com/repos/hmdfurniture/Calculo/contents/Tables')
-        .then(response => response.json())
-        .then(files => {
-            const jsonFiles = files.filter(file => file.name.endsWith('.json'));
-            console.log(jsonFiles); // Depuração para ver os ficheiros encontrados
-
-            if (jsonFiles.length > 0) {
-                return Promise.all(jsonFiles.map(file =>
-                    fetch(file.download_url).then(response => response.json())
-                ));
-            } else {
-                console.error("Nenhum ficheiro JSON encontrado.");
-                return [];
+    fetch('https://raw.githubusercontent.com/hmdfurniture/Calculo/main/Tables/xbslog_international.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch JSON file: ${response.statusText}`);
             }
+            return response.json();
         })
-        .then(dataArray => {
-            console.log(dataArray); // Confirma se os dados foram carregados
-            const suppliers = [];
-            dataArray.forEach(data => suppliers.push(...data.destinations));
+        .then(data => {
+            console.log(data); // Debugging: Confirm data loaded
+            const suppliers = data.destinations || [];
             const countries = new Set();
-            suppliers.forEach(supplier => {
-                countries.add(supplier.country);
-            });
+            suppliers.forEach(supplier => countries.add(supplier.country));
             populateCountryList(Array.from(countries));
         })
-        .catch(error => console.error("Erro ao buscar JSON:", error));
+        .catch(error => {
+            console.error("Error fetching JSON:", error);
+            document.getElementById('error-message').innerText = "Failed to load country data. Please try again later.";
+        });
 });
 
 function populateCountryList(countries) {
     const countryList = document.getElementById('country-list');
-    countryList.innerHTML = ''; // Limpa a lista anterior
-
     if (!countryList) {
-        console.error("Elemento country-list não encontrado!");
+        console.error("Element #country-list not found!");
         return;
     }
 
-    // Ordena os países alfabeticamente
+    countryList.innerHTML = ''; // Clear the previous list
+
+    // Sort countries alphabetically
     countries.sort();
 
     countries.forEach(country => {
@@ -44,14 +36,13 @@ function populateCountryList(countries) {
         a.href = "#";
         a.textContent = country;
         a.onclick = () => {
-            selectCountry(country);
+            document.getElementById('country').value = country;
             loadZonesForCountry(country);
         };
         countryList.appendChild(a);
     });
 }
 
-// Função corrigida para limitar os inputs numéricos a 3 dígitos
 function validateInput(input) {
     if (input.value > 999) {
         input.value = 999;
@@ -60,18 +51,13 @@ function validateInput(input) {
     }
 }
 
-// Função para exibir dropdown corretamente
-function showDropdown(id) {
-    const dropdown = document.getElementById(id);
-    if (dropdown) {
-        dropdown.style.display = "block";
-    } else {
-        console.error(`Elemento ${id} não encontrado.`);
-    }
-}
-
 function finalCalculate() {
     const dimensionContainer = document.getElementById('dimension-container');
+    if (!dimensionContainer) {
+        console.error("Element #dimension-container not found!");
+        return;
+    }
+
     const dimensionLines = dimensionContainer.getElementsByClassName('dimension-line');
     let totalVolumetricWeight = 0;
     let errorMessage = '';
@@ -84,21 +70,21 @@ function finalCalculate() {
         const quantityInput = dimensionLines[i].getElementsByClassName('quantity')[0];
         const typeInput = dimensionLines[i].getElementsByClassName('type')[0];
 
-        const width = parseFloat(widthInput.value);
-        const length = parseFloat(lengthInput.value);
-        const height = parseFloat(heightInput.value);
-        const quantity = parseInt(quantityInput.value);
-        const type = typeInput.value;
+        const width = parseFloat(widthInput?.value || 0);
+        const length = parseFloat(lengthInput?.value || 0);
+        const height = parseFloat(heightInput?.value || 0);
+        const quantity = parseInt(quantityInput?.value || 0);
+        const type = typeInput?.value || '';
 
         if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity) ||
             width <= 0 || length <= 0 || height <= 0 || quantity <= 0) {
 
-            if (width <= 0 || isNaN(width)) widthInput.classList.add('error');
-            if (length <= 0 || isNaN(length)) lengthInput.classList.add('error');
-            if (height <= 0 || isNaN(height)) heightInput.classList.add('error');
-            if (quantity <= 0 || isNaN(quantity)) quantityInput.classList.add('error');
+            if (width <= 0 || isNaN(width)) widthInput?.classList.add('error');
+            if (length <= 0 || isNaN(length)) lengthInput?.classList.add('error');
+            if (height <= 0 || isNaN(height)) heightInput?.classList.add('error');
+            if (quantity <= 0 || isNaN(quantity)) quantityInput?.classList.add('error');
             
-            errorMessage = '* Por favor, preencha os campos obrigatórios.';
+            errorMessage = '* Please fill in all required fields.';
             hasError = true;
         } else {
             const cubicCapacity = (width * length * height * quantity) / 1000000;
@@ -110,17 +96,15 @@ function finalCalculate() {
                 volumetricWeight = cubicCapacity * 1750; // 1 ldm = 1750 kg
             }
 
-            // Arredonda para o próximo múltiplo de 100
             volumetricWeight = Math.ceil(volumetricWeight / 100) * 100;
 
             dimensionLines[i].getElementsByClassName('cubic-capacity')[0].value = volumetricWeight.toFixed(2);
             totalVolumetricWeight += volumetricWeight;
 
-            // Remove a classe de erro se os campos estiverem preenchidos corretamente
-            widthInput.classList.remove('error');
-            lengthInput.classList.remove('error');
-            heightInput.classList.remove('error');
-            quantityInput.classList.remove('error');
+            widthInput?.classList.remove('error');
+            lengthInput?.classList.remove('error');
+            heightInput?.classList.remove('error');
+            quantityInput?.classList.remove('error');
         }
     }
 
@@ -129,9 +113,5 @@ function finalCalculate() {
     } else {
         document.getElementById('error-message').innerText = '';
         document.getElementById('result').innerText = `Total Volumetric Weight: ${totalVolumetricWeight.toFixed(2)} kg`;
-
-        const country = document.getElementById('country').value;
-        const zone = document.getElementById('zone').value;
-        calculateShippingCost(totalVolumetricWeight, country, zone);
     }
 }
