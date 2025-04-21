@@ -3,9 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(files => {
             const jsonFiles = files.filter(file => file.name.endsWith('.json'));
-            return Promise.all(jsonFiles.map(file => fetch(file.download_url).then(response => response.json())));
+            console.log(jsonFiles); // Depuração para ver os ficheiros encontrados
+
+            if (jsonFiles.length > 0) {
+                return Promise.all(jsonFiles.map(file =>
+                    fetch(file.download_url).then(response => response.json())
+                ));
+            } else {
+                console.error("Nenhum ficheiro JSON encontrado.");
+                return [];
+            }
         })
         .then(dataArray => {
+            console.log(dataArray); // Confirma se os dados foram carregados
             const suppliers = [];
             dataArray.forEach(data => suppliers.push(...data.destinations));
             const countries = new Set();
@@ -13,14 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 countries.add(supplier.country);
             });
             populateCountryList(Array.from(countries));
-        });
+        })
+        .catch(error => console.error("Erro ao buscar JSON:", error));
 });
 
 function populateCountryList(countries) {
     const countryList = document.getElementById('country-list');
-    countryList.innerHTML = ''; // Clear previous list
+    countryList.innerHTML = ''; // Limpa a lista anterior
 
-    // Sort countries alphabetically
+    if (!countryList) {
+        console.error("Elemento country-list não encontrado!");
+        return;
+    }
+
+    // Ordena os países alfabeticamente
     countries.sort();
 
     countries.forEach(country => {
@@ -35,32 +51,22 @@ function populateCountryList(countries) {
     });
 }
 
-function calculateCubicCapacity(line) {
-    const widthInput = line.getElementsByClassName('width')[0];
-    const lengthInput = line.getElementsByClassName('length')[0];
-    const heightInput = line.getElementsByClassName('height')[0];
-    const quantityInput = line.getElementsByClassName('quantity')[0];
-    const typeInput = line.getElementsByClassName('type')[0];
-    const width = parseFloat(widthInput.value);
-    const length = parseFloat(lengthInput.value);
-    const height = parseFloat(heightInput.value);
-    const quantity = parseInt(quantityInput.value);
-    const type = typeInput.value;
+// Função corrigida para limitar os inputs numéricos a 3 dígitos
+function validateInput(input) {
+    if (input.value > 999) {
+        input.value = 999;
+    } else if (input.value < 0) {
+        input.value = 0;
+    }
+}
 
-    if (!isNaN(width) && !isNaN(length) && !isNaN(height) && !isNaN(quantity) && width > 0 && length > 0 && height > 0 && quantity > 0) {
-        const cubicCapacity = (width * length * height * quantity) / 1000000;
-        let volumetricWeight = 0;
-
-        if (type === 'box' || (type === 'pallet' && height <= 125)) {
-            volumetricWeight = cubicCapacity * 300; // 1 m³ = 300 kg
-        } else if (type === 'pallet' && height > 125) {
-            volumetricWeight = cubicCapacity * 1750; // 1 ldm = 1750 kg
-        }
-
-        // Round up to the nearest hundred
-        volumetricWeight = Math.ceil(volumetricWeight / 100) * 100;
-
-        line.getElementsByClassName('cubic-capacity')[0].value = volumetricWeight.toFixed(2);
+// Função para exibir dropdown corretamente
+function showDropdown(id) {
+    const dropdown = document.getElementById(id);
+    if (dropdown) {
+        dropdown.style.display = "block";
+    } else {
+        console.error(`Elemento ${id} não encontrado.`);
     }
 }
 
@@ -84,12 +90,15 @@ function finalCalculate() {
         const quantity = parseInt(quantityInput.value);
         const type = typeInput.value;
 
-        if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity) || width <= 0 || length <= 0 || height <= 0 || quantity <= 0) {
+        if (isNaN(width) || isNaN(length) || isNaN(height) || isNaN(quantity) ||
+            width <= 0 || length <= 0 || height <= 0 || quantity <= 0) {
+
             if (width <= 0 || isNaN(width)) widthInput.classList.add('error');
             if (length <= 0 || isNaN(length)) lengthInput.classList.add('error');
             if (height <= 0 || isNaN(height)) heightInput.classList.add('error');
             if (quantity <= 0 || isNaN(quantity)) quantityInput.classList.add('error');
-            errorMessage = '* Please fill in the mandatory fields.';
+            
+            errorMessage = '* Por favor, preencha os campos obrigatórios.';
             hasError = true;
         } else {
             const cubicCapacity = (width * length * height * quantity) / 1000000;
@@ -101,11 +110,13 @@ function finalCalculate() {
                 volumetricWeight = cubicCapacity * 1750; // 1 ldm = 1750 kg
             }
 
-            // Round up to the nearest hundred
+            // Arredonda para o próximo múltiplo de 100
             volumetricWeight = Math.ceil(volumetricWeight / 100) * 100;
 
             dimensionLines[i].getElementsByClassName('cubic-capacity')[0].value = volumetricWeight.toFixed(2);
             totalVolumetricWeight += volumetricWeight;
+
+            // Remove a classe de erro se os campos estiverem preenchidos corretamente
             widthInput.classList.remove('error');
             lengthInput.classList.remove('error');
             heightInput.classList.remove('error');
