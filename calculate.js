@@ -130,43 +130,49 @@ function selectCountry(country) {
   countryInput.dispatchEvent(new Event("input"));
 }
 
-// Function to calculate cubic capacity and volumetric weight
-function calculateCubicCapacity(line) {
-  const widthInput = line.getElementsByClassName("width")[0];
-  const lengthInput = line.getElementsByClassName("length")[0];
-  const heightInput = line.getElementsByClassName("height")[0];
-  const quantityInput = line.getElementsByClassName("quantity")[0];
-  const typeInput = line.getElementsByClassName("type")[0];
-  const width = parseFloat(widthInput.value);
-  const length = parseFloat(lengthInput.value);
-  const height = parseFloat(heightInput.value);
-  const quantity = parseInt(quantityInput.value);
-  const type = typeInput.value;
+// Function to add a new dimension line
+function addLine() {
+  const dimensionContainer = document.getElementById("dimension-container");
+  const lineTemplate = `
+    <div class="form-group dimension-line">
+      <div>
+        <input type="number" class="width" min="0" max="999" oninput="validateInput(this)">
+      </div>
+      <div>
+        <input type="number" class="length" min="0" max="999" oninput="validateInput(this)">
+      </div>
+      <div>
+        <input type="number" class="height" min="0" max="999" oninput="validateInput(this)">
+      </div>
+      <div>
+        <input type="number" class="quantity" min="0" max="999" oninput="validateInput(this)">
+      </div>
+      <div>
+        <select class="type" oninput="removeHighlight(this)">
+          <option value="box">Box</option>
+          <option value="pallet">Pallet</option>
+        </select>
+      </div>
+      <div>
+        <input type="text" class="cubic-capacity" readonly>
+      </div>
+      <div>
+        <button class="remove-button" onclick="removeLine(this)">Remove</button>
+      </div>
+    </div>`;
+  dimensionContainer.insertAdjacentHTML("beforeend", lineTemplate);
+}
 
-  if (
-    !isNaN(width) &&
-    !isNaN(length) &&
-    !isNaN(height) &&
-    !isNaN(quantity) &&
-    width > 0 &&
-    length > 0 &&
-    height > 0 &&
-    quantity > 0
-  ) {
-    const cubicCapacity = (width * length * height * quantity) / 1000000;
-    let volumetricWeight = 0;
+// Function to remove a dimension line
+function removeLine(button) {
+  const line = button.closest(".dimension-line");
+  line.remove();
+}
 
-    if (type === "box" || (type === "pallet" && height <= 125)) {
-      volumetricWeight = cubicCapacity * 300; // 1 m³ = 300 kg
-    } else if (type === "pallet" && height > 125) {
-      volumetricWeight = cubicCapacity * 1750; // 1 ldm = 1750 kg
-    }
-
-    // Round up to the nearest hundred
-    volumetricWeight = Math.ceil(volumetricWeight / 100) * 100;
-
-    line.getElementsByClassName("cubic-capacity")[0].value =
-      volumetricWeight.toFixed(2);
+// Function to validate input for numeric fields
+function validateInput(input) {
+  if (input.value > 999) {
+    input.value = 999; // Enforce the maximum value
   }
 }
 
@@ -176,7 +182,6 @@ function finalCalculate() {
   const dimensionLines =
     dimensionContainer.getElementsByClassName("dimension-line");
   let totalVolumetricWeight = 0;
-  let errorMessage = "";
   let hasError = false;
 
   for (let i = 0; i < dimensionLines.length; i++) {
@@ -203,14 +208,20 @@ function finalCalculate() {
       height <= 0 ||
       quantity <= 0
     ) {
-      if (width <= 0 || isNaN(width)) widthInput.classList.add("error");
-      if (length <= 0 || isNaN(length)) lengthInput.classList.add("error");
-      if (height <= 0 || isNaN(height)) heightInput.classList.add("error");
+      // Highlight invalid fields
+      if (width <= 0 || isNaN(width)) widthInput.classList.add("highlight");
+      if (length <= 0 || isNaN(length)) lengthInput.classList.add("highlight");
+      if (height <= 0 || isNaN(height)) heightInput.classList.add("highlight");
       if (quantity <= 0 || isNaN(quantity))
-        quantityInput.classList.add("error");
-      errorMessage = "* Please fill in the mandatory fields.";
+        quantityInput.classList.add("highlight");
       hasError = true;
     } else {
+      // Remove highlights for valid fields
+      widthInput.classList.remove("highlight");
+      lengthInput.classList.remove("highlight");
+      heightInput.classList.remove("highlight");
+      quantityInput.classList.remove("highlight");
+
       const cubicCapacity = (width * length * height * quantity) / 1000000;
       let volumetricWeight = 0;
 
@@ -226,15 +237,12 @@ function finalCalculate() {
       dimensionLines[i].getElementsByClassName("cubic-capacity")[0].value =
         volumetricWeight.toFixed(2);
       totalVolumetricWeight += volumetricWeight;
-      widthInput.classList.remove("error");
-      lengthInput.classList.remove("error");
-      heightInput.classList.remove("error");
-      quantityInput.classList.remove("error");
     }
   }
 
   if (hasError) {
-    document.getElementById("error-message").innerText = errorMessage;
+    document.getElementById("error-message").innerText =
+      "* Please fill in the mandatory fields.";
   } else {
     document.getElementById("error-message").innerText = "";
     document.getElementById(
@@ -242,9 +250,5 @@ function finalCalculate() {
     ).innerText = `Total Volumetric Weight: ${totalVolumetricWeight.toFixed(
       2
     )} kg`;
-
-    const country = document.getElementById("country").value;
-    const zone = document.getElementById("zone").value;
-    calculateShippingCost(totalVolumetricWeight, country, zone);
   }
 }
