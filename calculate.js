@@ -102,6 +102,83 @@ function removeLine(button) {
   line.remove(); // Remove the row
 }
 
+// Function to validate all lines and highlight missing fields
+function finalCalculate() {
+  const lines = document.querySelectorAll(".dimension-line");
+  let allValid = true;
+
+  // Iterate over each line
+  lines.forEach((line) => {
+    const width = line.querySelector(".width");
+    const length = line.querySelector(".length");
+    const height = line.querySelector(".height");
+    const quantity = line.querySelector(".quantity");
+    const type = line.querySelector(".type");
+
+    // Validate each field
+    if (!width.value) {
+      highlightField(width);
+      allValid = false;
+    } else {
+      removeHighlight(width);
+    }
+
+    if (!length.value) {
+      highlightField(length);
+      allValid = false;
+    } else {
+      removeHighlight(length);
+    }
+
+    if (!height.value) {
+      highlightField(height);
+      allValid = false;
+    } else {
+      removeHighlight(height);
+    }
+
+    if (!quantity.value) {
+      highlightField(quantity);
+      allValid = false;
+    } else {
+      removeHighlight(quantity);
+    }
+
+    if (!type.value) {
+      highlightField(type);
+      allValid = false;
+    } else {
+      removeHighlight(type);
+    }
+  });
+
+  // Display error message if not all fields are valid
+  const errorMessage = document.getElementById("error-message");
+  if (!allValid) {
+    errorMessage.textContent = "Please fill in all the required fields.";
+  } else {
+    errorMessage.textContent = "";
+    // Proceed with calculation logic when all fields are valid
+    calculateResults();
+  }
+}
+
+// Helper function to highlight a field with a red border
+function highlightField(field) {
+  field.classList.add("highlight");
+}
+
+// Helper function to remove red border from a field
+function removeHighlight(field) {
+  field.classList.remove("highlight");
+}
+
+// Example calculation logic (replace with your actual calculation logic)
+function calculateResults() {
+  const result = document.getElementById("result");
+  result.textContent = "Calculation was successful!";
+}
+
 // Add event listeners for inputs
 document.getElementById("country").addEventListener("focus", () => {
   showDropdown("country-list"); // Show dropdown when input is focused
