@@ -17,17 +17,15 @@ function populateCountryDropdown() {
   const countryList = document.getElementById("country-list");
   countryList.innerHTML = ""; // Clear previous options
 
-  // Extract unique countries
   const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
-  // Populate the dropdown list
   uniqueCountries.forEach((country) => {
     const a = document.createElement("a");
     a.href = "#";
     a.textContent = country;
     a.onclick = () => {
       selectCountry(country);
-      hideDropdown("country-list"); // Hide the dropdown after selection
+      hideDropdown("country-list");
     };
     countryList.appendChild(a);
   });
@@ -38,35 +36,31 @@ function selectCountry(country) {
   const countryInput = document.getElementById("country");
   countryInput.value = country;
 
-  // Enable and populate the zone dropdown
   const zoneInput = document.getElementById("zone");
   zoneInput.disabled = false;
   populateZoneDropdown(country);
 
-  // Trigger input event for additional logic
   countryInput.dispatchEvent(new Event("input"));
 }
 
 // Populate the "Select Zone" dropdown based on the selected country
 function populateZoneDropdown(country) {
   const zoneList = document.getElementById("zone-list");
-  zoneList.innerHTML = ""; // Clear previous options
+  zoneList.innerHTML = "";
 
-  // Filter zones for the selected country
   const zones = supplierData
     .filter((item) => item.country === country)
     .map((item) => item.code);
 
   const uniqueZones = [...new Set(zones)].sort();
 
-  // Populate the dropdown list
   uniqueZones.forEach((zone) => {
     const a = document.createElement("a");
     a.href = "#";
     a.textContent = zone;
     a.onclick = () => {
       selectZone(zone);
-      hideDropdown("zone-list"); // Hide the dropdown after selection
+      hideDropdown("zone-list");
     };
     zoneList.appendChild(a);
   });
@@ -77,7 +71,6 @@ function selectZone(zone) {
   const zoneInput = document.getElementById("zone");
   zoneInput.value = zone;
 
-  // Trigger input event for additional logic
   zoneInput.dispatchEvent(new Event("input"));
 }
 
@@ -102,14 +95,11 @@ function filterCountries() {
 
   for (let i = 0; i < items.length; i++) {
     const text = items[i].textContent || items[i].innerText;
-    if (text.toLowerCase().startsWith(filter)) { // Updated logic
-      items[i].style.display = ""; // Show matching items
-    } else {
-      items[i].style.display = "none"; // Hide non-matching items
-    }
+    items[i].style.display = text.toLowerCase().startsWith(filter) ? "" : "none";
   }
 }
-// Filter zones as user types (shows only those starting with input)
+
+// Function to filter zones as user types
 function filterZones() {
   const input = document.getElementById("zone");
   const filter = input.value.toLowerCase();
@@ -118,7 +108,6 @@ function filterZones() {
 
   for (let i = 0; i < items.length; i++) {
     const text = items[i].textContent || items[i].innerText;
-    // Show only items that start with the input text
     items[i].style.display = text.toLowerCase().startsWith(filter) ? "" : "none";
   }
 }
@@ -127,22 +116,21 @@ function filterZones() {
 function addLine() {
   const container = document.getElementById("dimension-container");
 
-  // Create a new row
   const newLine = document.createElement("div");
   newLine.className = "form-group dimension-line";
 
   newLine.innerHTML = `
       <div>
-          <input type="number" class="width" min="0" max="999" oninput="validateInput(this)">
+          <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
       </div>
       <div>
-          <input type="number" class="length" min="0" max="999" oninput="validateInput(this)">
+          <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
       </div>
       <div>
-          <input type="number" class="height" min="0" max="999" oninput="validateInput(this)">
+          <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
       </div>
       <div>
-          <input type="number" class="quantity" min="0" max="999" oninput="validateInput(this)">
+          <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
       </div>
       <div>
           <select class="type" oninput="removeHighlight(this)">
@@ -158,14 +146,23 @@ function addLine() {
       </div>
   `;
 
-  // Append the new line to the container
   container.appendChild(newLine);
 }
 
 // Function to remove a specific line
 function removeLine(button) {
-  const line = button.parentElement.parentElement; // Get the parent row
-  line.remove(); // Remove the row
+  const line = button.parentElement.parentElement;
+  line.remove();
+}
+
+function validateInput(input) {
+  // Remove any non-numeric characters
+  input.value = input.value.replace(/\D/g, '');
+
+  // Prevent additional characters if length exceeds 3
+  if (input.value.length > 3) {
+    input.value = input.value.slice(0, 3); // Keep only the first 3 digits
+  }
 }
 
 // Function to validate all lines and highlight missing fields
@@ -173,7 +170,6 @@ function finalCalculate() {
   const lines = document.querySelectorAll(".dimension-line");
   let allValid = true;
 
-  // Iterate over each line
   lines.forEach((line) => {
     const width = line.querySelector(".width");
     const length = line.querySelector(".length");
@@ -181,7 +177,6 @@ function finalCalculate() {
     const quantity = line.querySelector(".quantity");
     const type = line.querySelector(".type");
 
-    // Validate each field
     if (!width.value) {
       highlightField(width);
       allValid = false;
@@ -218,13 +213,11 @@ function finalCalculate() {
     }
   });
 
-  // Display error message if not all fields are valid
   const errorMessage = document.getElementById("error-message");
   if (!allValid) {
     errorMessage.textContent = "Please fill in all the required fields.";
   } else {
     errorMessage.textContent = "";
-    // Proceed with calculation logic when all fields are valid
     calculateResults();
   }
 }
@@ -239,7 +232,7 @@ function removeHighlight(field) {
   field.classList.remove("highlight");
 }
 
-// Example calculation logic (replace with your actual calculation logic)
+// Example calculation logic
 function calculateResults() {
   const result = document.getElementById("result");
   result.textContent = "Calculation was successful!";
@@ -247,19 +240,19 @@ function calculateResults() {
 
 // Add event listeners for inputs
 document.getElementById("country").addEventListener("focus", () => {
-  showDropdown("country-list"); // Show dropdown when input is focused
+  showDropdown("country-list");
 });
 
 document.getElementById("country").addEventListener("blur", () => {
-  setTimeout(() => hideDropdown("country-list"), 200); // Hide dropdown after 200ms to allow clicks
+  setTimeout(() => hideDropdown("country-list"), 200);
 });
 
 document.getElementById("zone").addEventListener("focus", () => {
-  showDropdown("zone-list"); // Show dropdown when input is focused
+  showDropdown("zone-list");
 });
 
 document.getElementById("zone").addEventListener("blur", () => {
-  setTimeout(() => hideDropdown("zone-list"), 200); // Hide dropdown after 200ms to allow clicks
+  setTimeout(() => hideDropdown("zone-list"), 200);
 });
 
 // Load supplier data on page load
