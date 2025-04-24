@@ -108,7 +108,7 @@ function filterCountries() {
       items[i].style.display = "none"; // Hide non-matching items
     }
   }
-
+}
 // Filter zones as user types (shows only those starting with input)
 function filterZones() {
   const input = document.getElementById("zone");
