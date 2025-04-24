@@ -1,10 +1,24 @@
+// Store the JSON data globally for easier access
+let supplierData = [];
+
+// Fetch and load JSON files
+function loadSupplierData() {
+  fetch('./Tables/xbslog_international.json')
+    .then((response) => response.json())
+    .then((data) => {
+      supplierData = data.destinations;
+      populateCountryDropdown();
+    })
+    .catch((error) => console.error('Error loading supplier data:', error));
+}
+
 // Function to populate the "Select Country" dropdown
-function populateCountryDropdown(countries) {
+function populateCountryDropdown() {
   const countryList = document.getElementById("country-list");
   countryList.innerHTML = ""; // Clear previous options
 
-  // Sort and ensure uniqueness of countries
-  const uniqueCountries = [...new Set(countries)].sort();
+  // Extract unique countries
+  const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
   // Populate the dropdown list
   uniqueCountries.forEach((country) => {
@@ -24,8 +38,47 @@ function selectCountry(country) {
   const countryInput = document.getElementById("country");
   countryInput.value = country;
 
-  // Trigger input event to populate zones
+  // Enable and populate the zone dropdown
+  const zoneInput = document.getElementById("zone");
+  zoneInput.disabled = false;
+  populateZoneDropdown(country);
+
+  // Trigger input event for additional logic
   countryInput.dispatchEvent(new Event("input"));
+}
+
+// Populate the "Select Zone" dropdown based on the selected country
+function populateZoneDropdown(country) {
+  const zoneList = document.getElementById("zone-list");
+  zoneList.innerHTML = ""; // Clear previous options
+
+  // Filter zones for the selected country
+  const zones = supplierData
+    .filter((item) => item.country === country)
+    .map((item) => item.code);
+
+  const uniqueZones = [...new Set(zones)].sort();
+
+  // Populate the dropdown list
+  uniqueZones.forEach((zone) => {
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = zone;
+    a.onclick = () => {
+      selectZone(zone);
+      hideDropdown("zone-list"); // Hide the dropdown after selection
+    };
+    zoneList.appendChild(a);
+  });
+}
+
+// Function to handle zone selection
+function selectZone(zone) {
+  const zoneInput = document.getElementById("zone");
+  zoneInput.value = zone;
+
+  // Trigger input event for additional logic
+  zoneInput.dispatchEvent(new Event("input"));
 }
 
 // Function to show the dropdown
@@ -49,11 +102,20 @@ function filterCountries() {
 
   for (let i = 0; i < items.length; i++) {
     const text = items[i].textContent || items[i].innerText;
-    if (text.toLowerCase().indexOf(filter) > -1) {
-      items[i].style.display = ""; // Show matching items
-    } else {
-      items[i].style.display = "none"; // Hide non-matching items
-    }
+    items[i].style.display = text.toLowerCase().includes(filter) ? "" : "none";
+  }
+}
+
+// Function to filter zones as user types
+function filterZones() {
+  const input = document.getElementById("zone");
+  const filter = input.value.toLowerCase();
+  const zoneList = document.getElementById("zone-list");
+  const items = zoneList.getElementsByTagName("a");
+
+  for (let i = 0; i < items.length; i++) {
+    const text = items[i].textContent || items[i].innerText;
+    items[i].style.display = text.toLowerCase().includes(filter) ? "" : "none";
   }
 }
 
@@ -187,3 +249,14 @@ document.getElementById("country").addEventListener("focus", () => {
 document.getElementById("country").addEventListener("blur", () => {
   setTimeout(() => hideDropdown("country-list"), 200); // Hide dropdown after 200ms to allow clicks
 });
+
+document.getElementById("zone").addEventListener("focus", () => {
+  showDropdown("zone-list"); // Show dropdown when input is focused
+});
+
+document.getElementById("zone").addEventListener("blur", () => {
+  setTimeout(() => hideDropdown("zone-list"), 200); // Hide dropdown after 200ms to allow clicks
+});
+
+// Load supplier data on page load
+window.onload = loadSupplierData;
