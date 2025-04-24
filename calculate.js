@@ -102,11 +102,14 @@ function filterCountries() {
 
   for (let i = 0; i < items.length; i++) {
     const text = items[i].textContent || items[i].innerText;
-    items[i].style.display = text.toLowerCase().includes(filter) ? "" : "none";
+    if (text.toLowerCase().startsWith(filter)) { // Updated logic
+      items[i].style.display = ""; // Show matching items
+    } else {
+      items[i].style.display = "none"; // Hide non-matching items
+    }
   }
-}
 
-// Function to filter zones as user types
+// Filter zones as user types (shows only those starting with input)
 function filterZones() {
   const input = document.getElementById("zone");
   const filter = input.value.toLowerCase();
@@ -115,7 +118,8 @@ function filterZones() {
 
   for (let i = 0; i < items.length; i++) {
     const text = items[i].textContent || items[i].innerText;
-    items[i].style.display = text.toLowerCase().includes(filter) ? "" : "none";
+    // Show only items that start with the input text
+    items[i].style.display = text.toLowerCase().startsWith(filter) ? "" : "none";
   }
 }
 
