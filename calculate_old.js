@@ -86,32 +86,6 @@ function hideDropdown(dropdownId) {
   dropdown.style.display = "none";
 }
 
-// Function to filter countries as user types
-function filterCountries() {
-  const input = document.getElementById("country");
-  const filter = input.value.toLowerCase();
-  const countryList = document.getElementById("country-list");
-  const items = countryList.getElementsByTagName("a");
-
-  for (let i = 0; i < items.length; i++) {
-    const text = items[i].textContent || items[i].innerText;
-    items[i].style.display = text.toLowerCase().startsWith(filter) ? "" : "none";
-  }
-}
-
-// Function to filter zones as user types
-function filterZones() {
-  const input = document.getElementById("zone");
-  const filter = input.value.toLowerCase();
-  const zoneList = document.getElementById("zone-list");
-  const items = zoneList.getElementsByTagName("a");
-
-  for (let i = 0; i < items.length; i++) {
-    const text = items[i].textContent || items[i].innerText;
-    items[i].style.display = text.toLowerCase().startsWith(filter) ? "" : "none";
-  }
-}
-
 // Function to add a new line dynamically
 function addLine() {
   const container = document.getElementById("dimension-container");
@@ -155,13 +129,12 @@ function removeLine(button) {
   line.remove();
 }
 
+// Function to validate input fields to restrict to 3 numeric digits
 function validateInput(input) {
-  // Remove any non-numeric characters
   input.value = input.value.replace(/\D/g, '');
 
-  // Prevent additional characters if length exceeds 3
   if (input.value.length > 3) {
-    input.value = input.value.slice(0, 3); // Keep only the first 3 digits
+    input.value = input.value.slice(0, 3);
   }
 }
 
@@ -232,10 +205,28 @@ function removeHighlight(field) {
   field.classList.remove("highlight");
 }
 
-// Example calculation logic
+// Function to calculate total cubic meters (m³)
 function calculateResults() {
+  const lines = document.querySelectorAll(".dimension-line");
+  let totalCubicMeters = 0;
+
+  lines.forEach((line) => {
+    const width = parseFloat(line.querySelector(".width").value) || 0;
+    const length = parseFloat(line.querySelector(".length").value) || 0;
+    const height = parseFloat(line.querySelector(".height").value) || 0;
+    const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+
+    const cubicMeters = (width * length * height) / 1000000; // Convert cm³ to m³
+    const totalForLine = cubicMeters * quantity;
+
+    totalCubicMeters += totalForLine;
+
+    const cubicCapacityField = line.querySelector(".cubic-capacity");
+    cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
+  });
+
   const result = document.getElementById("result");
-  result.textContent = "Calculation was successful!";
+  result.textContent = `Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³`;
 }
 
 // Add event listeners for inputs
