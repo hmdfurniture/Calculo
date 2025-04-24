@@ -155,16 +155,13 @@ function removeLine(button) {
   line.remove();
 }
 
-// Function to validate input fields to restrict to 3 numeric digits
 function validateInput(input) {
-  input.value = input.value.replace(/\D/g, ''); // Remove non-numeric characters
+  // Remove any non-numeric characters
+  input.value = input.value.replace(/\D/g, '');
 
-  if (parseInt(input.value, 10) > 999) {
-    input.value = '999'; // Restrict value to 999
-  }
-
+  // Prevent additional characters if length exceeds 3
   if (input.value.length > 3) {
-    input.value = input.value.slice(0, 3); // Restrict to 3 digits
+    input.value = input.value.slice(0, 3); // Keep only the first 3 digits
   }
 }
 
