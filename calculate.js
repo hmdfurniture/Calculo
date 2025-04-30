@@ -214,7 +214,7 @@ function calculateResults() {
     let totalLdm = 0;
     let hasBox = false;
     let hasPallet = false;
-    let invalidPallet = false; // To track if any pallet has invalid dimensions
+    let invalidPallet = false; // To track if all pallets are invalid
     const errorMessage = document.getElementById("result");
 
     lines.forEach((line) => {
@@ -241,16 +241,19 @@ function calculateResults() {
                 return; // Skip further processing for invalid pallets
             }
 
-            // Valid pallet - Calculate LDM
-            const ldm = (width / 200) * quantity; // LDM calculation (width in cm divided by 200 cm)
-            totalLdm += ldm;
+            // Adjust pallet height if necessary
+            const adjustedHeight = height > 126 ? 250 : height;
+
+            const cubicMeters = (width * length * adjustedHeight) / 1000000; // Convert cm³ to m³
+            const totalForLine = cubicMeters * quantity;
+            totalCubicMeters += totalForLine;
 
             const cubicCapacityField = line.querySelector(".cubic-capacity");
-            cubicCapacityField.value = ldm.toFixed(2); // Display LDM for the line
+            cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
         }
     });
 
-    if (invalidPallet) {
+    if (invalidPallet && !hasBox) {
         errorMessage.innerHTML =
             "The pallet does not have the standard measurements, so it is not possible to calculate the value automatically.";
         return;
@@ -313,6 +316,7 @@ function calculateResults() {
         }
     }
 }
+
 // Determine rate tier based on weight
 function getRateTier(weight, rates) {
     if (weight < 500) return "<500kgs";
