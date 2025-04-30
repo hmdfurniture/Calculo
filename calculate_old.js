@@ -205,7 +205,7 @@ function removeHighlight(field) {
   field.classList.remove("highlight");
 }
 
-// Function to calculate total cubic meters (m³)
+// Function to calculate total cubic meters (m³) and final cost
 function calculateResults() {
   const lines = document.querySelectorAll(".dimension-line");
   let totalCubicMeters = 0;
@@ -226,7 +226,47 @@ function calculateResults() {
   });
 
   const result = document.getElementById("result");
-  result.textContent = `Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³`;
+  const country = document.getElementById("country").value;
+  const zone = document.getElementById("zone").value;
+
+  if (!country || !zone || totalCubicMeters === 0) {
+    result.textContent = "Please select a country, zone, and fill in dimensions.";
+    return;
+  }
+
+  const conversionFactor = 300; // 1 m³ = 300 kg as per the JSON file
+  const totalWeight = totalCubicMeters * conversionFactor;
+
+  const roundedWeight = Math.ceil(totalWeight / 100) * 100; // Round to nearest 100
+  const scaledWeight = roundedWeight / 100; // Scaled weight in hundreds
+
+  const rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
+
+  if (rates) {
+    const rateTier = getRateTier(totalWeight, rates);
+    const cost = scaledWeight * rates[rateTier];
+
+    result.innerHTML = `
+      <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
+      <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
+      <p>Rounded Weight: ${roundedWeight} kg</p>
+      <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+      <p>Final Cost: €${cost.toFixed(2)}</p>
+    `;
+  } else {
+    result.textContent = "No rates found for the selected country and zone.";
+  }
+}
+
+// Determine rate tier based on weight
+function getRateTier(weight, rates) {
+  if (weight < 500) return "<500kgs";
+  if (weight < 1000) return "<1000kgs";
+  if (weight < 2000) return "<2000kgs";
+  if (weight < 3000) return "<3000kgs";
+  if (weight < 4000) return "<4000kgs";
+  if (weight < 5000) return "<5000kgs";
+  return ">5000kgs";
 }
 
 // Add event listeners for inputs
