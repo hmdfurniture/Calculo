@@ -1,5 +1,6 @@
 // Store the JSON data globally for easier access
 let supplierData = [];
+let conversionFactors = {}; // Store conversion factors dynamically
 
 // Fetch and load JSON files
 function loadSupplierData() {
@@ -7,6 +8,7 @@ function loadSupplierData() {
         .then((response) => response.json())
         .then((data) => {
             supplierData = data.destinations;
+            conversionFactors = data.conversion; // Load conversion factors dynamically
             populateCountryDropdown();
         })
         .catch((error) => console.error('Error loading supplier data:', error));
@@ -221,7 +223,6 @@ function calculateResults() {
 
         if (type === "box") {
             hasBox = true;
-            // Regular m³ calculation for boxes
             const cubicMeters = (width * length * height) / 1000000; // Convert cm³ to m³
             const totalForLine = cubicMeters * quantity;
             totalCubicMeters += totalForLine;
@@ -231,7 +232,6 @@ function calculateResults() {
         } else if (type === "pallet") {
             hasPallet = true;
             if (height <= 125) {
-                // Regular m³ calculation for pallets with height ≤ 125 cm
                 const cubicMeters = (width * length * height) / 1000000; // Convert cm³ to m³
                 const totalForLine = cubicMeters * quantity;
                 totalCubicMeters += totalForLine;
@@ -239,9 +239,8 @@ function calculateResults() {
                 const cubicCapacityField = line.querySelector(".cubic-capacity");
                 cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
             } else {
-                // Use "me" (LDM) value for pallets with height > 125 cm
                 const ldm = width / 200; // LDM logic assumes 200 cm width for truck/container
-                const totalForLine = ldm * quantity;
+                const totalForLine = ldm * quantity * conversionFactors.LDM; // Use dynamic LDM conversion
                 totalCubicMeters += totalForLine;
 
                 const cubicCapacityField = line.querySelector(".cubic-capacity");
@@ -250,23 +249,21 @@ function calculateResults() {
         }
     });
 
-    // Mixed pallet and box logic: if both exist, calculate everything as m³
     if (hasBox && hasPallet) {
-        totalCubicMeters = 0; // Reset total to recalculate
+        totalCubicMeters = 0; // Recalculate if mixed
         lines.forEach((line) => {
             const width = parseFloat(line.querySelector(".width").value) || 0;
             const length = parseFloat(line.querySelector(".length").value) || 0;
             const height = parseFloat(line.querySelector(".height").value) || 0;
             const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
 
-            // Treat pallets as m³ with height fixed at 250 cm
             const adjustedHeight = line.querySelector(".type").value === "pallet" ? 250 : height;
-            const cubicMeters = (width * length * adjustedHeight) / 1000000; // Convert cm³ to m³
+            const cubicMeters = (width * length * adjustedHeight) / 1000000;
             const totalForLine = cubicMeters * quantity;
             totalCubicMeters += totalForLine;
 
             const cubicCapacityField = line.querySelector(".cubic-capacity");
-            cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
+            cubicCapacityField.value = totalForLine.toFixed(3);
         });
     }
 
@@ -279,11 +276,11 @@ function calculateResults() {
         return;
     }
 
-    const conversionFactor = 300; // 1 m³ = 300 kg as per the JSON file
+    const conversionFactor = conversionFactors.m3; // Dynamically use m³ conversion
     const totalWeight = totalCubicMeters * conversionFactor;
 
-    const roundedWeight = Math.ceil(totalWeight / 100) * 100; // Round to nearest 100
-    const scaledWeight = roundedWeight / 100; // Scaled weight in hundreds
+    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
+    const scaledWeight = roundedWeight / 100;
 
     const rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
 
