@@ -214,6 +214,8 @@ function calculateResults() {
     let totalLdm = 0;
     let hasBox = false;
     let hasPallet = false;
+    let invalidPallet = false; // To track if any pallet has invalid dimensions
+    const errorMessage = document.getElementById("result");
 
     lines.forEach((line) => {
         const width = parseFloat(line.querySelector(".width").value) || 0;
@@ -232,22 +234,27 @@ function calculateResults() {
             cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
         } else if (type === "pallet") {
             hasPallet = true;
-            if (height <= 125) {
-                const cubicMeters = (width * length * height) / 1000000; // Convert cm³ to m³
-                const totalForLine = cubicMeters * quantity;
-                totalCubicMeters += totalForLine;
 
-                const cubicCapacityField = line.querySelector(".cubic-capacity");
-                cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
-            } else {
-                const ldm = (length / 100) * quantity; // Calculate LDM (length in meters)
-                totalLdm += ldm;
-
-                const cubicCapacityField = line.querySelector(".cubic-capacity");
-                cubicCapacityField.value = ldm.toFixed(2); // Display LDM for the line
+            // Check for invalid pallet length
+            if (length > 125 || length < 100) {
+                invalidPallet = true;
+                return; // Skip further processing for invalid pallets
             }
+
+            // Valid pallet - Calculate LDM
+            const ldm = (width / 200) * quantity; // LDM calculation (width in cm divided by 200 cm)
+            totalLdm += ldm;
+
+            const cubicCapacityField = line.querySelector(".cubic-capacity");
+            cubicCapacityField.value = ldm.toFixed(2); // Display LDM for the line
         }
     });
+
+    if (invalidPallet) {
+        errorMessage.innerHTML =
+            "The pallet does not have the standard measurements, so it is not possible to calculate the value automatically.";
+        return;
+    }
 
     const result = document.getElementById("result");
     const country = document.getElementById("country").value;
@@ -306,7 +313,6 @@ function calculateResults() {
         }
     }
 }
-
 // Determine rate tier based on weight
 function getRateTier(weight, rates) {
     if (weight < 500) return "<500kgs";
