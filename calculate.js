@@ -207,10 +207,11 @@ function removeHighlight(field) {
     field.classList.remove("highlight");
 }
 
-// Function to calculate total cubic meters (m³) and final cost
+// Function to calculate total cubic meters (m³) or loading meters (LDM) and final cost
 function calculateResults() {
     const lines = document.querySelectorAll(".dimension-line");
     let totalCubicMeters = 0;
+    let totalLdm = 0;
     let hasBox = false;
     let hasPallet = false;
 
@@ -239,64 +240,70 @@ function calculateResults() {
                 const cubicCapacityField = line.querySelector(".cubic-capacity");
                 cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
             } else {
-                const ldm = width / 200; // LDM logic assumes 200 cm width for truck/container
-                const totalForLine = ldm * quantity * conversionFactors.LDM; // Use dynamic LDM conversion
-                totalCubicMeters += totalForLine;
+                const ldm = (length / 100) * quantity; // Calculate LDM (length in meters)
+                totalLdm += ldm;
 
                 const cubicCapacityField = line.querySelector(".cubic-capacity");
-                cubicCapacityField.value = totalForLine.toFixed(3); // Display LDM for the line
+                cubicCapacityField.value = ldm.toFixed(2); // Display LDM for the line
             }
         }
     });
-
-    if (hasBox && hasPallet) {
-        totalCubicMeters = 0; // Recalculate if mixed
-        lines.forEach((line) => {
-            const width = parseFloat(line.querySelector(".width").value) || 0;
-            const length = parseFloat(line.querySelector(".length").value) || 0;
-            const height = parseFloat(line.querySelector(".height").value) || 0;
-            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
-
-            const adjustedHeight = line.querySelector(".type").value === "pallet" ? 250 : height;
-            const cubicMeters = (width * length * adjustedHeight) / 1000000;
-            const totalForLine = cubicMeters * quantity;
-            totalCubicMeters += totalForLine;
-
-            const cubicCapacityField = line.querySelector(".cubic-capacity");
-            cubicCapacityField.value = totalForLine.toFixed(3);
-        });
-    }
 
     const result = document.getElementById("result");
     const country = document.getElementById("country").value;
     const zone = document.getElementById("zone").value;
 
-    if (!country || !zone || totalCubicMeters === 0) {
+    if (!country || !zone || (totalCubicMeters === 0 && totalLdm === 0)) {
         result.textContent = "Please select a country, zone, and fill in dimensions.";
         return;
     }
 
-    const conversionFactor = conversionFactors.m3; // Dynamically use m³ conversion
-    const totalWeight = totalCubicMeters * conversionFactor;
+    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
 
-    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
-    const scaledWeight = roundedWeight / 100;
+    if (totalLdm > 0 && !hasBox) {
+        // LDM-specific calculations
+        totalWeight = totalLdm * conversionFactors.LDM; // Use LDM conversion factor
+        roundedWeight = Math.ceil(totalWeight / 100) * 100;
+        scaledWeight = roundedWeight / 100;
 
-    const rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
+        rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
 
-    if (rates) {
-        const rateTier = getRateTier(totalWeight, rates);
-        const cost = scaledWeight * rates[rateTier];
+        if (rates) {
+            rateTier = getRateTier(totalWeight, rates);
+            cost = scaledWeight * rates[rateTier];
 
-        result.innerHTML = `
-            <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
-            <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-            <p>Rounded Weight: ${roundedWeight} kg</p>
-            <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
-            <p>Final Cost: €${cost.toFixed(2)}</p>
-        `;
+            result.innerHTML = `
+                <p>Total Ldm: ${totalLdm.toFixed(2)} m</p>
+                <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
+                <p>Rounded Weight: ${roundedWeight} kg</p>
+                <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+                <p>Final Cost: €${cost.toFixed(2)}</p>
+            `;
+        } else {
+            result.textContent = "No rates found for the selected country and zone.";
+        }
     } else {
-        result.textContent = "No rates found for the selected country and zone.";
+        // m³-specific calculations (for boxes or mixed)
+        totalWeight = totalCubicMeters * conversionFactors.m3; // Use m³ conversion factor
+        roundedWeight = Math.ceil(totalWeight / 100) * 100;
+        scaledWeight = roundedWeight / 100;
+
+        rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
+
+        if (rates) {
+            rateTier = getRateTier(totalWeight, rates);
+            cost = scaledWeight * rates[rateTier];
+
+            result.innerHTML = `
+                <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
+                <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
+                <p>Rounded Weight: ${roundedWeight} kg</p>
+                <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+                <p>Final Cost: €${cost.toFixed(2)}</p>
+            `;
+        } else {
+            result.textContent = "No rates found for the selected country and zone.";
+        }
     }
 }
 
