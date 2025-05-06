@@ -21,7 +21,7 @@
         .map {
             height: 500px;
             width: 100%;
-            background-color: white; /* Changed background color to white */
+            background-color: white;
         }
         .form-group {
             margin-bottom: 10px;
@@ -48,13 +48,13 @@
         }
         input[type="text"], select, input.cubic-capacity, button.remove-button {
             width: 70px;
-            height: 25px; /* Adjusted height */
+            height: 25px;
             padding: 4px 6px;
             box-sizing: border-box;
         }
         input[type="number"] {
             width: 70px;
-            height: 25px; /* Adjusted height */
+            height: 25px;
             padding: 4px 6px;
             box-sizing: border-box;
         }
@@ -85,7 +85,7 @@
             border: none;
             cursor: pointer;
             padding: 4px 6px;
-            height: 25px; /* Adjusted height */
+            height: 25px;
         }
         .remove-button:hover {
             background-color: #FF4500;
@@ -95,7 +95,7 @@
             top: 20px;
             right: 20px;
             width: 60px;
-            height: 25px; /* Adjusted height */
+            height: 25px;
             padding: 2px;
             background-color: #FF6347;
             color: white;
@@ -133,7 +133,7 @@
             width: 100%;
             box-sizing: border-box;
             padding: 4px;
-            height: 25px; /* Adjusted height */
+            height: 25px;
         }
         .error-message {
             color: red;
@@ -176,16 +176,16 @@
         <div id="dimension-container">
             <div class="form-group dimension-line">
                 <div>
-                    <input type="number" class="width" min="0" max="999" oninput="validateInput(this)">
+                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="length" min="0" max="999" oninput="validateInput(this)">
+                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="height" min="0" max="999" oninput="validateInput(this)">
+                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
                 </div>
                 <div>
-                    <input type="number" class="quantity" min="0" max="999" oninput="validateInput(this)">
+                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
                 </div>
                 <div>
                     <select class="type" oninput="removeHighlight(this)">
