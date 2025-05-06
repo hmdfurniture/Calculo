@@ -9,13 +9,16 @@
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
+            position: relative;
             flex-wrap: wrap; /* Allow wrapping for smaller screens */
         }
         .form-container {
-            flex: 1 1 50%; /* Keep the form's width at 50% */
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
         }
         .map-container {
-            flex: 1 1 50%; /* Keep the map's width at 50% */
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
             padding-left: 20px;
         }
         .map {
@@ -151,7 +154,8 @@
             }
             .form-container, .map-container {
                 flex: 1 1 100%; /* Take full width */
-                padding-left: 0; /* Remove padding for map */
+                max-width: none; /* Allow full width stacking */
+                padding-left: 0; /* Remove map padding for smaller screens */
             }
             .map {
                 height: 300px; /* Reduce map height for smaller screens */
