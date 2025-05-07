@@ -214,7 +214,8 @@ function calculateResults() {
     let totalLdm = 0;
     let hasBox = false;
     let hasPallet = false;
-    let invalidPallet = false; // To track if all pallets are invalid
+    let allPalletsHaveLowHeight = true; // Tracks if all pallets have height ≤ 125 cm
+    let allPalletsHaveHighHeight = true; // Tracks if all pallets have height > 125 cm
     const errorMessage = document.getElementById("result");
 
     lines.forEach((line) => {
@@ -235,15 +236,13 @@ function calculateResults() {
         } else if (type === "pallet") {
             hasPallet = true;
 
-            // Check for invalid pallet length
-            if (length > 125 || length < 100) {
-                invalidPallet = true;
-                return; // Skip further processing for invalid pallets
+            if (height > 125) {
+                allPalletsHaveLowHeight = false;
+            } else {
+                allPalletsHaveHighHeight = false;
             }
 
-            // Adjust pallet height if necessary
-            const adjustedHeight = height > 126 ? 250 : height;
-
+            const adjustedHeight = height > 125 ? 250 : height; // Use 250 cm for height > 125 cm
             const cubicMeters = (width * length * adjustedHeight) / 1000000; // Convert cm³ to m³
             const totalForLine = cubicMeters * quantity;
             totalCubicMeters += totalForLine;
@@ -253,10 +252,10 @@ function calculateResults() {
         }
     });
 
-    if (invalidPallet && !hasBox) {
-        errorMessage.innerHTML =
-            "The pallet does not have the standard measurements, so it is not possible to calculate the value automatically.";
-        return;
+    // Handle pallets with all heights > 125 cm (use LDM instead of m³)
+    if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
+        totalLdm = totalCubicMeters * conversionFactors.LDM; // Example conversion factor
+        totalCubicMeters = 0; // Reset m³ since we're using LDM
     }
 
     const result = document.getElementById("result");
