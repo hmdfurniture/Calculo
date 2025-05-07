@@ -242,8 +242,11 @@ function calculateResults() {
                 allPalletsHaveHighHeight = false;
             }
 
+            // Adjust the length for LDM calculation to 120 cm if it is between 100 and 125 cm
+            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+
             const adjustedHeight = height > 125 ? 250 : height; // Use 250 cm for height > 125 cm
-            const cubicMeters = (width * length * adjustedHeight) / 1000000; // Convert cm³ to m³
+            const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000; // Convert cm³ to m³
             const totalForLine = cubicMeters * quantity;
             totalCubicMeters += totalForLine;
 
@@ -254,7 +257,14 @@ function calculateResults() {
 
     // Handle pallets with all heights > 125 cm (use LDM instead of m³)
     if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
-        totalLdm = totalCubicMeters * conversionFactors.LDM; // Example conversion factor
+        lines.forEach((line) => {
+            const width = parseFloat(line.querySelector(".width").value) || 0;
+            const length = parseFloat(line.querySelector(".length").value) || 0;
+            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Adjust length to 120
+            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+
+            totalLdm += (width / 240) * (adjustedLength / 100) * quantity; // LDM calculation
+        });
         totalCubicMeters = 0; // Reset m³ since we're using LDM
     }
 
