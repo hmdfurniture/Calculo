@@ -218,6 +218,8 @@ function calculateResults() {
     let allPalletsHaveHighHeight = true; // Tracks if all pallets have height > 125 cm
     const errorMessage = document.getElementById("result");
 
+    let invalidLdmMessageDisplayed = false; // Track if the invalid LDM message has been displayed
+
     lines.forEach((line) => {
         const width = parseFloat(line.querySelector(".width").value) || 0;
         const length = parseFloat(line.querySelector(".length").value) || 0;
@@ -262,6 +264,17 @@ function calculateResults() {
             const length = parseFloat(line.querySelector(".length").value) || 0;
             const adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Adjust length to 120
             const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+
+            // Check if the length is outside the standard range for LDM
+            if (length < 100 || length > 125) {
+                if (!invalidLdmMessageDisplayed) {
+                    errorMessage.innerHTML = `
+                        <p>The provided dimensions are outside the standard parameters, so it's not possible to accurately calculate the linear metres (LDM) for this load.</p>
+                    `;
+                    invalidLdmMessageDisplayed = true; // Prevent duplicate messages
+                }
+                return; // Skip this pallet's LDM calculation
+            }
 
             totalLdm += (width / 240) * (adjustedLength / 100) * quantity; // LDM calculation
         });
