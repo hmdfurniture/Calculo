@@ -243,30 +243,21 @@ function calculateResults() {
             } else {
                 allPalletsHaveHighHeight = false;
             }
-
-            // Adjust the length for LDM calculation to 120 cm if it is between 100 and 125 cm
-            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-
-            const adjustedHeight = height > 125 ? 250 : height; // Use 250 cm for height > 125 cm
-            const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000; // Convert cm³ to m³
-            const totalForLine = cubicMeters * quantity;
-            totalCubicMeters += totalForLine;
-
-            const cubicCapacityField = line.querySelector(".cubic-capacity");
-            cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
         }
     });
 
     // Handle pallets with all heights > 125 cm (use LDM instead of m³)
     if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
+        let validLdm = true; // Track whether any valid LDM calculation was possible
+
         lines.forEach((line) => {
             const width = parseFloat(line.querySelector(".width").value) || 0;
             const length = parseFloat(line.querySelector(".length").value) || 0;
-            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Adjust length to 120
             const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
 
             // Check if the length is outside the standard range for LDM
             if (length < 100 || length > 125) {
+                validLdm = false;
                 if (!invalidLdmMessageDisplayed) {
                     errorMessage.innerHTML = `
                         <p>The provided dimensions are outside the standard parameters, so it's not possible to accurately calculate the linear metres (LDM) for this load.</p>
@@ -276,8 +267,14 @@ function calculateResults() {
                 return; // Skip this pallet's LDM calculation
             }
 
-            totalLdm += (width / 240) * (adjustedLength / 100) * quantity; // LDM calculation
+            // LDM calculation logic
+            totalLdm += (width / 240) * (length / 100) * quantity;
         });
+
+        if (!validLdm) {
+            return; // Stop further processing if no valid LDM was possible
+        }
+
         totalCubicMeters = 0; // Reset m³ since we're using LDM
     }
 
