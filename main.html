@@ -5,93 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
+        /* The CSS styles for layout and responsiveness */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
             position: relative;
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
+            flex-wrap: wrap;
         }
-        .form-container {
-            flex: 1 1 50%; /* Take 50% of the available width */
-            max-width: 600px; /* Prevent stretching too wide */
+        .form-container, .map-container {
+            flex: 1 1 50%;
+            max-width: 600px;
         }
         .map-container {
-            flex: 1 1 50%; /* Take 50% of the available width */
-            max-width: 600px; /* Prevent stretching too wide */
             padding-left: 20px;
         }
         .map {
             height: 500px;
             width: 100%;
             background-color: white;
-        }
-        .form-group {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header-row, .dimension-line {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .dimension-line {
-            background-color: #f9f9f9;
-            padding: 2px;
-            border: 1px solid #ddd;
-            margin-bottom: 5px;
-        }
-        .dimension-line:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .dimension-line > div, .header-row > div {
-            flex: 1 1 auto;
-        }
-        input[type="text"], select, input.cubic-capacity, button.remove-button {
-            width: 70px;
-            height: 25px;
-            padding: 4px 6px;
-            box-sizing: border-box;
-        }
-        input[type="number"] {
-            width: 70px;
-            height: 25px;
-            padding: 4px 6px;
-            box-sizing: border-box;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        button {
-            padding: 5px 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result {
-            margin-top: 20px;
-        }
-        .remove-button {
-            background-color: #FF6347;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 4px 6px;
-            height: 25px;
-        }
-        .remove-button:hover {
-            background-color: #FF4500;
         }
         .logout-button {
             position: absolute;
@@ -109,72 +41,46 @@
         .logout-button:hover {
             background-color: #FF4500;
         }
-        .dropdown {
-            position: relative;
-            display: inline-block;
+        .header-row {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+            font-weight: bold;
         }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            max-height: 200px;
-            overflow-y: auto;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
+        .form-group input, .form-group select, .form-group button {
+            flex: 1;
         }
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        .dropdown input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 4px;
-            height: 25px;
+        .result {
+            margin-top: 20px;
         }
         .error-message {
             color: red;
-            font-size: 14px;
             margin-top: 10px;
         }
-        .highlight {
-            border-color: red;
-        }
-
         /* Responsive Styles */
         @media (max-width: 768px) {
             body {
-                flex-direction: column; /* Stack form and map vertically */
+                flex-direction: column;
             }
             .form-container, .map-container {
-                flex: 1 1 100%; /* Take full width */
-                max-width: none; /* Allow full width stacking */
-                padding-left: 0; /* Remove map padding for smaller screens */
+                flex: 1 1 100%;
+                max-width: none;
+                padding-left: 0;
             }
             .map {
-                height: 300px; /* Reduce map height for smaller screens */
+                height: 300px;
             }
         }
         @media (max-width: 480px) {
             .logout-button {
-                width: 100%; /* Full width logout button on very small screens */
-                position: static; /* Adjust position */
+                width: 100%;
+                position: static;
                 margin-bottom: 10px;
-            }
-            input[type="text"], select, input.cubic-capacity, button.remove-button {
-                width: 100%; /* Full width inputs for mobile */
-            }
-            input[type="number"] {
-                width: 100%; /* Full width number inputs for mobile */
-            }
-            button {
-                width: 100%; /* Full width buttons for mobile */
             }
         }
     </style>
@@ -210,19 +116,19 @@
         <div id="dimension-container">
             <div class="form-group dimension-line">
                 <div>
-                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this); saveFormData()">
                 </div>
                 <div>
-                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this); saveFormData()">
                 </div>
                 <div>
-                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this); saveFormData()">
                 </div>
                 <div>
-                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this); saveFormData()">
                 </div>
                 <div>
-                    <select class="type" oninput="removeHighlight(this)">
+                    <select class="type" oninput="removeHighlight(this); saveFormData()">
                         <option value="box">Box</option>
                         <option value="pallet">Pallet</option>
                     </select>
@@ -231,11 +137,11 @@
                     <input type="text" class="cubic-capacity" readonly>
                 </div>
                 <div>
-                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                    <button class="remove-button" onclick="removeLine(this); saveFormData()">Remove</button>
                 </div>
             </div>
         </div>
-        <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+        <button id="add-line" onclick="addLine(); saveFormData()">+ Add More Lines</button>
         <button onclick="finalCalculate()">Calculate</button>
         <div class="result" id="result"></div>
         <div class="error-message" id="error-message"></div>
@@ -243,7 +149,50 @@
     <div class="map-container">
         <div id="map" class="map"></div>
     </div>
- 
-    <script src="calculate.js"></script>
+    <script>
+        // Save form data to sessionStorage
+        function saveFormData() {
+            const dimensionContainer = document.getElementById('dimension-container');
+            sessionStorage.setItem('formData', dimensionContainer.innerHTML);
+        }
+
+        // Restore form data from sessionStorage
+        function restoreFormData() {
+            const savedData = sessionStorage.getItem('formData');
+            if (savedData) {
+                const dimensionContainer = document.getElementById('dimension-container');
+                dimensionContainer.innerHTML = savedData;
+
+                // Reattach event listeners for dynamically restored elements
+                const inputs = dimensionContainer.querySelectorAll('input, select, button');
+                inputs.forEach(input => {
+                    if (input.tagName === 'INPUT' || input.tagName === 'SELECT') {
+                        input.addEventListener('input', saveFormData);
+                    }
+                    if (input.classList.contains('remove-button')) {
+                        input.addEventListener('click', saveFormData);
+                    }
+                });
+            }
+        }
+
+        // Logout and clear session data
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // Check if the user is logged in
+        window.onload = function() {
+            const username = sessionStorage.getItem('username');
+            if (!username) {
+                // Redirect to the login page if no session data is found
+                window.location.href = 'index.html';
+            }
+
+            // Restore form data
+            restoreFormData();
+        }
+    </script>
 </body>
 </html>
