@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
+        /* The CSS styles for login layout */
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -20,12 +21,12 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             background-color: #fff;
-            width: 300px; /* Increased width */
-            text-align: center; /* Center-align text */
+            width: 300px;
+            text-align: center;
         }
         .login-container h1 {
             margin-bottom: 30px;
-            font-size: 24px; /* Increased font size */
+            font-size: 24px;
         }
         .login-container input {
             display: block;
@@ -44,7 +45,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px; /* Increased font size */
+            font-size: 16px;
         }
         .login-container button:hover {
             background-color: #0056b3;
@@ -58,7 +59,6 @@
         <input type="password" id="password" placeholder="Password">
         <button onclick="login()">Login</button>
     </div>
-
     <script>
         function login() {
             const username = document.getElementById('username').value;
@@ -66,11 +66,8 @@
 
             // Hardcoded credentials for testing purposes
             if (username === 'a' && password === 'b') {
-                // Generate a session token (for demonstration purposes, we'll use a simple string)
-                const sessionToken = 'your-session-token';
-                
-                // Store the session token in local storage
-                localStorage.setItem('sessionToken', sessionToken);
+                // Store session data in sessionStorage
+                sessionStorage.setItem('username', username);
 
                 // Redirect to the main page
                 window.location.href = 'main.html';
@@ -81,8 +78,8 @@
 
         // Check if the user is already logged in
         window.onload = function() {
-            const sessionToken = localStorage.getItem('sessionToken');
-            if (sessionToken) {
+            const username = sessionStorage.getItem('username');
+            if (username) {
                 // Redirect to the main page
                 window.location.href = 'main.html';
             }
