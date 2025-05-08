@@ -10,12 +10,15 @@
             margin: 20px;
             display: flex;
             position: relative;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
         }
         .form-container {
-            flex: 1;
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
         }
         .map-container {
-            flex: 1;
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
             padding-left: 20px;
         }
         .map {
@@ -142,6 +145,37 @@
         }
         .highlight {
             border-color: red;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack form and map vertically */
+            }
+            .form-container, .map-container {
+                flex: 1 1 100%; /* Take full width */
+                max-width: none; /* Allow full width stacking */
+                padding-left: 0; /* Remove map padding for smaller screens */
+            }
+            .map {
+                height: 300px; /* Reduce map height for smaller screens */
+            }
+        }
+        @media (max-width: 480px) {
+            .logout-button {
+                width: 100%; /* Full width logout button on very small screens */
+                position: static; /* Adjust position */
+                margin-bottom: 10px;
+            }
+            input[type="text"], select, input.cubic-capacity, button.remove-button {
+                width: 100%; /* Full width inputs for mobile */
+            }
+            input[type="number"] {
+                width: 100%; /* Full width number inputs for mobile */
+            }
+            button {
+                width: 100%; /* Full width buttons for mobile */
+            }
         }
     </style>
 </head>
