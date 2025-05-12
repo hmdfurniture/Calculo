@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
+<!-- Adiciona no <head> -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -263,39 +264,7 @@
     <div class="map-container">
         <div id="map" class="map"></div>
     </div>
- 
-    <script src="calculate.js"></script>
-    <script>
-function resetForm() {
-    // Limpa todas as linhas de dimensão, exceto a primeira
-    const container = document.getElementById('dimension-container');
-    container.innerHTML = '';
-
-    // Adiciona uma nova linha vazia
-    container.innerHTML = `
-        <div class="form-group dimension-line">
-                    <div>
-                <select class="type" oninput="removeHighlight(this)">
-                    <option value="box">Box</option>
-                    <option value="pallet">Pallet</option>
-                </select>
-            </div>
-            <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="text" class="cubic-capacity" readonly></div>
-            <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
-        </div>`;
-
-    // Limpa país, zona, resultados e erros
-    document.getElementById('country').value = '';
-    document.getElementById('zone').value = '';
-    document.getElementById('zone').disabled = true;
-    document.getElementById('result').innerHTML = '';
-    document.getElementById('error-message').innerHTML = '';
-}
-<script>
+ <script>
 // Inicializar o mapa no div #map
 const map = L.map('map').setView([39.5, -8.0], 6); // Centro aproximado de Portugal
 
@@ -334,6 +303,37 @@ L.geoJSON(sampleGeoJSON, {
 }).addTo(map);
 </script>
 
+    <script src="calculate.js"></script>
+    <script>
+function resetForm() {
+    // Limpa todas as linhas de dimensão, exceto a primeira
+    const container = document.getElementById('dimension-container');
+    container.innerHTML = '';
+
+    // Adiciona uma nova linha vazia
+    container.innerHTML = `
+        <div class="form-group dimension-line">
+                    <div>
+                <select class="type" oninput="removeHighlight(this)">
+                    <option value="box">Box</option>
+                    <option value="pallet">Pallet</option>
+                </select>
+            </div>
+            <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="text" class="cubic-capacity" readonly></div>
+            <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
+        </div>`;
+
+    // Limpa país, zona, resultados e erros
+    document.getElementById('country').value = '';
+    document.getElementById('zone').value = '';
+    document.getElementById('zone').disabled = true;
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('error-message').innerHTML = '';
+}
 </script>
 
 </body>
