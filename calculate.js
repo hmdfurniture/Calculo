@@ -4,11 +4,23 @@ let conversionFactors = {}; // Store conversion factors dynamically
 
 // Fetch and load JSON files
 function loadSupplierData() {
-    fetch('./Tables/xbslog_international.json')
-        .then((response) => response.json())
-        .then((data) => {
-            supplierData = data.destinations;
-            conversionFactors = data.conversion; // Load conversion factors dynamically
+    // Fetch both JSON files
+    Promise.all([
+        fetch('./Tables/xbslog_international.json').then((response) => response.json()),
+        fetch('./Tables/xbslog_nacional.json').then((response) => response.json())
+    ])
+        .then(([internationalData, nacionalData]) => {
+            // Merge the destinations and conversion factors from both files
+            supplierData = [
+                ...internationalData.destinations,
+                ...nacionalData.destinations
+            ];
+            conversionFactors = {
+                ...internationalData.conversion,
+                ...nacionalData.conversion
+            };
+
+            // Populate the dropdown with the merged data
             populateCountryDropdown();
         })
         .catch((error) => console.error('Error loading supplier data:', error));
