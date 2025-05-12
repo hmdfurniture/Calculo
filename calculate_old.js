@@ -217,7 +217,7 @@ function calculateResults() {
     let allPalletsHaveHighHeight = true;
     const errorMessage = document.getElementById("result");
 
-    // Etapa 1: verificar presença de caixas e tipos de paletes
+    // Step 1: Check for the presence of boxes and types of pallets
     lines.forEach((line) => {
         const type = line.querySelector(".type").value;
         const height = parseFloat(line.querySelector(".height").value) || 0;
@@ -234,7 +234,7 @@ function calculateResults() {
         }
     });
 
-    // ✅ NOVO: se for para calcular com base em LDM, verificar se todas as paletes >125cm têm comprimento adequado
+    // If calculating based on LDM, check if all pallets >125cm have appropriate lengths
     if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
         let allLengthsValid = true;
 
@@ -251,12 +251,12 @@ function calculateResults() {
         });
 
         if (!allLengthsValid) {
-            errorMessage.textContent = "Não é possível calcular: todas as paletes com mais de 125 cm de altura devem ter comprimento entre 100 e 125 cm para usar LDM.";
+            errorMessage.textContent = "Cannot calculate: All pallets taller than 125 cm must have a length between 100 and 125 cm to use LDM.";
             return;
         }
     }
 
-    // Etapa 2: calcular volumes (m³ ou LDM)
+    // Step 2: Calculate volumes (m³ or LDM)
     lines.forEach((line) => {
         const width = parseFloat(line.querySelector(".width").value) || 0;
         const length = parseFloat(line.querySelector(".length").value) || 0;
@@ -306,7 +306,10 @@ function calculateResults() {
 
         if (rates) {
             rateTier = getRateTier(totalWeight, rates);
-            cost = scaledWeight * rates[rateTier];
+            const calculatedCost = scaledWeight * rates[rateTier];
+
+            // Apply the minimum if the calculated cost is less
+            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
 
             result.innerHTML = `
                 <p>Total Ldm: ${totalLdm.toFixed(2)} m</p>
@@ -327,7 +330,10 @@ function calculateResults() {
 
         if (rates) {
             rateTier = getRateTier(totalWeight, rates);
-            cost = scaledWeight * rates[rateTier];
+            const calculatedCost = scaledWeight * rates[rateTier];
+
+            // Apply the minimum if the calculated cost is less
+            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
 
             result.innerHTML = `
                 <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
@@ -342,16 +348,73 @@ function calculateResults() {
     }
 }
 
-
-// Determine rate tier based on weight
+// Updated getRateTier function
 function getRateTier(weight, rates) {
-    if (weight < 500) return "<500kgs";
-    if (weight < 1000) return "<1000kgs";
-    if (weight < 2000) return "<2000kgs";
-    if (weight < 3000) return "<3000kgs";
-    if (weight < 4000) return "<4000kgs";
-    if (weight < 5000) return "<5000kgs";
-    return ">5000kgs";
+    const rateKeys = Object.keys(rates);
+
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    // Default to "minimum" if no range matches
+    return "minimum";
+}
+
+// Updated getRateTier function
+function getRateTier(weight, rates) {
+    const rateKeys = Object.keys(rates);
+
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    // Default to "minimum" if no range matches
+    return "minimum";
+}
+
+function getRateTier(weight, rates) {
+    // Convert the rate keys into an array of ranges
+    const rateKeys = Object.keys(rates);
+
+    // Loop through the keys to find the correct range
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            // Handle ranges like "1-50", "51-100"
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            // Handle ranges like ">5000"
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    // Default to "minimum" if no range matches
+    return "minimum";
 }
 
 // Add event listeners for inputs
