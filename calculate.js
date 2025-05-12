@@ -343,15 +343,29 @@ function calculateResults() {
 }
 
 
-// Determine rate tier based on weight
 function getRateTier(weight, rates) {
-    if (weight < 500) return "<500kgs";
-    if (weight < 1000) return "<1000kgs";
-    if (weight < 2000) return "<2000kgs";
-    if (weight < 3000) return "<3000kgs";
-    if (weight < 4000) return "<4000kgs";
-    if (weight < 5000) return "<5000kgs";
-    return ">5000kgs";
+    // Convert the rate keys into an array of ranges
+    const rateKeys = Object.keys(rates);
+
+    // Loop through the keys to find the correct range
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            // Handle ranges like "1-50", "51-100"
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            // Handle ranges like ">5000"
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    // Default to "minimum" if no range matches
+    return "minimum";
 }
 
 // Add event listeners for inputs
