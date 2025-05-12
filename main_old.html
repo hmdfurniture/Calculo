@@ -215,7 +215,7 @@
         </div>
         <div id="dimension-container">
             <div class="form-group dimension-line">
-                <div>
+               <div>
                     <select class="type" oninput="removeHighlight(this)">
                         <option value="box">Box</option>
                         <option value="pallet">Pallet</option>
@@ -263,16 +263,16 @@ function resetForm() {
     // Adiciona uma nova linha vazia
     container.innerHTML = `
         <div class="form-group dimension-line">
-            <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-            <div>
+                    <div>
                 <select class="type" oninput="removeHighlight(this)">
                     <option value="box">Box</option>
                     <option value="pallet">Pallet</option>
                 </select>
             </div>
+            <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+            <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
             <div><input type="text" class="cubic-capacity" readonly></div>
             <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
         </div>`;
