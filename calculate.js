@@ -234,6 +234,28 @@ function calculateResults() {
         }
     });
 
+    // ✅ NOVO: se for para calcular com base em LDM, verificar se todas as paletes >125cm têm comprimento adequado
+    if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
+        let allLengthsValid = true;
+
+        lines.forEach((line) => {
+            const type = line.querySelector(".type").value;
+            const height = parseFloat(line.querySelector(".height").value) || 0;
+            const length = parseFloat(line.querySelector(".length").value) || 0;
+
+            if (type === "pallet" && height > 125) {
+                if (length < 100 || length > 125) {
+                    allLengthsValid = false;
+                }
+            }
+        });
+
+        if (!allLengthsValid) {
+            errorMessage.textContent = "Não é possível calcular: todas as paletes com mais de 125 cm de altura devem ter comprimento entre 100 e 125 cm para usar LDM.";
+            return;
+        }
+    }
+
     // Etapa 2: calcular volumes (m³ ou LDM)
     lines.forEach((line) => {
         const width = parseFloat(line.querySelector(".width").value) || 0;
@@ -244,19 +266,16 @@ function calculateResults() {
         const cubicCapacityField = line.querySelector(".cubic-capacity");
 
         if (type === "box") {
-            // Caixas: sempre em m³ com altura real
             const cubicMeters = (width * length * height) / 1000000;
             const totalForLine = cubicMeters * quantity;
             totalCubicMeters += totalForLine;
             cubicCapacityField.value = totalForLine.toFixed(3);
         } else if (type === "pallet") {
             if (allPalletsHaveHighHeight && !hasBox) {
-                // Todas as paletes são >125cm e não há caixas → LDM
                 const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
                 totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
                 cubicCapacityField.value = "LDM";
             } else {
-                // Paletes com altura ajustada para 250cm se >125cm e há mistura
                 const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
                 const adjustedHeight = height > 125 ? 250 : height;
                 const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
@@ -279,7 +298,6 @@ function calculateResults() {
     let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
 
     if (totalLdm > 0 && !hasBox) {
-        // Cálculo com base em LDM
         totalWeight = totalLdm * conversionFactors.LDM;
         roundedWeight = Math.ceil(totalWeight / 100) * 100;
         scaledWeight = roundedWeight / 100;
@@ -301,7 +319,6 @@ function calculateResults() {
             result.textContent = "No rates found for the selected country and zone.";
         }
     } else {
-        // Cálculo com base em m³
         totalWeight = totalCubicMeters * conversionFactors.m3;
         roundedWeight = Math.ceil(totalWeight / 100) * 100;
         scaledWeight = roundedWeight / 100;
