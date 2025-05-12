@@ -95,7 +95,14 @@ function addLine() {
     const newLine = document.createElement("div");
     newLine.className = "form-group dimension-line";
 
+    // Adjusted order: Type is now at the beginning of the line
     newLine.innerHTML = `
+        <div>
+            <select class="type" oninput="removeHighlight(this)">
+                <option value="box">Box</option>
+                <option value="pallet">Pallet</option>
+            </select>
+        </div>
         <div>
             <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
         </div>
@@ -107,12 +114,6 @@ function addLine() {
         </div>
         <div>
             <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-        </div>
-        <div>
-            <select class="type" oninput="removeHighlight(this)">
-                <option value="box">Box</option>
-                <option value="pallet">Pallet</option>
-            </select>
         </div>
         <div>
             <input type="text" class="cubic-capacity" readonly>
