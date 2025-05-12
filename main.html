@@ -5,213 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
-        /* Existing styles remain untouched */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
-            position: relative;
-            flex-wrap: wrap;
+            flex-direction: row; /* Maintain horizontal layout */
+            justify-content: space-between; /* Space between form and map */
+            gap: 20px; /* Add some space between sections */
         }
         .form-container {
-            flex: 1 1 50%;
-            max-width: 600px;
+            flex: 1; /* Form takes up available space */
+            max-width: 70%; /* Limit form width */
         }
         .map-container {
-            flex: 1 1 50%;
-            max-width: 600px;
-            padding-left: 20px;
+            flex: 1; /* Map takes up remaining space */
+            max-width: 30%; /* Limit map width */
         }
         .map {
             height: 500px;
-            width: 100%;
+            width: 100%; /* Ensure the map fills its container */
             background-color: white;
+            border: 1px solid #ddd; /* Optional border for clarity */
         }
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            .form-container, .map-container {
-                flex: 1 1 100%;
-                max-width: none;
-                padding-left: 0;
-            }
-            .map {
-                height: 300px;
-            }
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input, select, button {
+            padding: 5px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .remove-button {
+            background-color: #FF6347;
+        }
+        .remove-button:hover {
+            background-color: #FF4500;
+        }
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .logout-button:hover {
+            background-color: #FF4500;
         }
     </style>
 
-    <!-- Include Leaflet.js library -->
+    <!-- Leaflet.js for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
     <button class="logout-button" onclick="logout()">Logout</button>
+    
+    <!-- Form Section -->
     <div class="form-container">
-        <!-- Existing form content remains untouched -->
         <div class="form-group">
             <label for="country">Select Country:</label>
-            <div class="dropdown">
-                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                <div class="dropdown-content" id="country-list">
-                    <!-- Country options will be dynamically populated here -->
-                </div>
-            </div>
+            <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" />
             <label for="zone">Select Zone:</label>
-            <div class="dropdown">
-                <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                <div class="dropdown-content" id="zone-list">
-                    <!-- Zone options will be dynamically populated here -->
-                </div>
-            </div>
+            <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" disabled />
         </div>
-        <div class="header-row">
-            <div>Type:</div>
-            <div>Width (cm):</div>
-            <div>Length (cm):</div>
-            <div>Height (cm):</div>
-            <div>Quantity:</div>
-            <div>Volumetric Weight (kg):</div>
-            <div>Action:</div>
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <select id="type">
+                <option value="box">Box</option>
+                <option value="pallet">Pallet</option>
+            </select>
+            <label for="width">Width (cm):</label>
+            <input type="number" id="width" min="0" />
+            <label for="length">Length (cm):</label>
+            <input type="number" id="length" min="0" />
+            <label for="height">Height (cm):</label>
+            <input type="number" id="height" min="0" />
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" min="0" />
+            <button class="remove-button" onclick="removeLine()">Remove</button>
         </div>
-        <div id="dimension-container">
-            <div class="form-group dimension-line">
-                <div>
-                    <select class="type" oninput="removeHighlight(this)">
-                        <option value="box">Box</option>
-                        <option value="pallet">Pallet</option>
-                    </select>
-                </div>
-                <div>
-                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="text" class="cubic-capacity" readonly>
-                </div>
-                <div>
-                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
-                </div>
-            </div>
-        </div>
-        <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-        <div class="button-container">
-            <button onclick="finalCalculate()">Calculate</button>
-        </div>
+        <button onclick="addLine()">+ Add More Lines</button>
+        <button onclick="calculate()">Calculate</button>
         <button onclick="resetForm()">Reset</button>
-        <div class="result" id="result"></div>
-        <div class="error-message" id="error-message"></div>
+        <div id="result"></div>
     </div>
+    
+    <!-- Map Section -->
     <div class="map-container">
         <div id="map" class="map"></div>
     </div>
 
-    <script src="calculate.js"></script>
     <script>
         // Initialize the map
-        let map = L.map('map').setView([39.5, -8], 6); // Default center on Portugal
-        let currentLayer; // Variable to store the current GeoJSON layer
+        let map = L.map('map').setView([39.5, -8], 6); // Default: Portugal
+        let currentLayer;
 
-        // Add a tile layer (background map)
+        // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-        // Load GeoJSON for the selected country
+        // Load GeoJSON data when a country is selected
         function loadCountryMap() {
             const country = document.getElementById('country').value;
 
-            if (!country) return; // If no country is selected, do nothing
+            if (!country) return;
 
-            // Remove the current layer if it exists
-            if (currentLayer) {
-                map.removeLayer(currentLayer);
-            }
+            if (currentLayer) map.removeLayer(currentLayer);
 
-            // Fetch the GeoJSON file for the selected country
             fetch(`./GeoJSON/${country}.geojson`)
-                .then((response) => response.json())
-                .then((geojson) => {
-                    // Add the GeoJSON layer
+                .then(response => response.json())
+                .then(geojson => {
                     currentLayer = L.geoJSON(geojson, {
-                        style: {
-                            color: 'black', // Outline color
-                            fillColor: 'white', // Default fill color
-                            weight: 1, // Outline thickness
-                        },
+                        style: { color: 'black', fillColor: 'white', weight: 1 },
                         onEachFeature: (feature, layer) => {
-                            // Attach the postal code to the layer
-                            layer.postalCode = feature.properties.postal_code;
-
-                            // Highlight zone on click
-                            layer.on('click', () => {
-                                highlightZoneByCode(layer.postalCode);
-                            });
+                            layer.on('click', () => highlightZoneByCode(feature.properties.postal_code));
                         },
                     }).addTo(map);
-
-                    // Fit the map to the GeoJSON boundaries
                     map.fitBounds(currentLayer.getBounds());
-
-                    // Populate the zone dropdown
-                    populateZoneDropdown(geojson);
                 })
-                .catch((error) => console.error('Error loading GeoJSON:', error));
+                .catch(err => console.error('Error loading GeoJSON:', err));
         }
 
-        // Populate the zone dropdown with postal codes from the GeoJSON
-        function populateZoneDropdown(geojson) {
-            const zoneDropdown = document.getElementById('zone');
-            zoneDropdown.innerHTML = '<option value="">-- Select Zone --</option>'; // Clear previous options
-
-            geojson.features.forEach((feature) => {
-                const postalCode = feature.properties.postal_code;
-                const option = document.createElement('option');
-                option.value = postalCode;
-                option.textContent = postalCode;
-                zoneDropdown.appendChild(option);
-            });
-
-            // Enable the zone dropdown after loading zones
-            document.getElementById('zone').disabled = false;
-        }
-
-        // Highlight a zone based on the dropdown selection
-        function highlightZone() {
-            const selectedZone = document.getElementById('zone').value;
-
-            if (!selectedZone || !currentLayer) return;
-
-            // Reset all styles
-            currentLayer.eachLayer((layer) => {
-                layer.setStyle({
-                    color: 'black',
-                    fillColor: 'white',
-                });
-
-                // Highlight the selected zone
-                if (layer.postalCode === selectedZone) {
-                    layer.setStyle({
-                        color: 'red',
-                        fillColor: 'orange',
-                    });
-                }
-            });
-        }
-
-        // Highlight a zone by postal code (used by map clicks)
         function highlightZoneByCode(postalCode) {
-            // Update the zone dropdown
             document.getElementById('zone').value = postalCode;
-            highlightZone(); // Highlight the selected zone
         }
     </script>
 </body>
