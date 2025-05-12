@@ -207,37 +207,25 @@ function removeHighlight(field) {
     field.classList.remove("highlight");
 }
 
-// Function to calculate total cubic meters (m³) or loading meters (LDM) and final cost
 function calculateResults() {
     const lines = document.querySelectorAll(".dimension-line");
     let totalCubicMeters = 0;
     let totalLdm = 0;
     let hasBox = false;
     let hasPallet = false;
-    let allPalletsHaveLowHeight = true; // Tracks if all pallets have height ≤ 125 cm
-    let allPalletsHaveHighHeight = true; // Tracks if all pallets have height > 125 cm
+    let allPalletsHaveLowHeight = true;
+    let allPalletsHaveHighHeight = true;
     const errorMessage = document.getElementById("result");
 
-    let invalidLdmMessageDisplayed = false; // Track if the invalid LDM message has been displayed
-
+    // Etapa 1: verificar presença de caixas e tipos de paletes
     lines.forEach((line) => {
-        const width = parseFloat(line.querySelector(".width").value) || 0;
-        const length = parseFloat(line.querySelector(".length").value) || 0;
-        const height = parseFloat(line.querySelector(".height").value) || 0;
-        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
         const type = line.querySelector(".type").value;
+        const height = parseFloat(line.querySelector(".height").value) || 0;
 
         if (type === "box") {
             hasBox = true;
-            const cubicMeters = (width * length * height) / 1000000; // Convert cm³ to m³
-            const totalForLine = cubicMeters * quantity;
-            totalCubicMeters += totalForLine;
-
-            const cubicCapacityField = line.querySelector(".cubic-capacity");
-            cubicCapacityField.value = totalForLine.toFixed(3); // Display m³ for the line
         } else if (type === "pallet") {
             hasPallet = true;
-
             if (height > 125) {
                 allPalletsHaveLowHeight = false;
             } else {
@@ -246,37 +234,38 @@ function calculateResults() {
         }
     });
 
-    // Handle pallets with all heights > 125 cm (use LDM instead of m³)
-    if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
-        let validLdm = true; // Track whether any valid LDM calculation was possible
+    // Etapa 2: calcular volumes (m³ ou LDM)
+    lines.forEach((line) => {
+        const width = parseFloat(line.querySelector(".width").value) || 0;
+        const length = parseFloat(line.querySelector(".length").value) || 0;
+        const height = parseFloat(line.querySelector(".height").value) || 0;
+        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+        const type = line.querySelector(".type").value;
+        const cubicCapacityField = line.querySelector(".cubic-capacity");
 
-        lines.forEach((line) => {
-            const width = parseFloat(line.querySelector(".width").value) || 0;
-            const length = parseFloat(line.querySelector(".length").value) || 0;
-            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
-
-            // Check if the length is outside the standard range for LDM
-            if (length < 100 || length > 125) {
-                validLdm = false;
-                if (!invalidLdmMessageDisplayed) {
-                    errorMessage.innerHTML = `
-                        <p>The provided dimensions are outside the standard parameters, so it's not possible to accurately calculate the linear metres (LDM) for this load.</p>
-                    `;
-                    invalidLdmMessageDisplayed = true; // Prevent duplicate messages
-                }
-                return; // Skip this pallet's LDM calculation
+        if (type === "box") {
+            // Caixas: sempre em m³ com altura real
+            const cubicMeters = (width * length * height) / 1000000;
+            const totalForLine = cubicMeters * quantity;
+            totalCubicMeters += totalForLine;
+            cubicCapacityField.value = totalForLine.toFixed(3);
+        } else if (type === "pallet") {
+            if (allPalletsHaveHighHeight && !hasBox) {
+                // Todas as paletes são >125cm e não há caixas → LDM
+                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
+                cubicCapacityField.value = "LDM";
+            } else {
+                // Paletes com altura ajustada para 250cm se >125cm e há mistura
+                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                const adjustedHeight = height > 125 ? 250 : height;
+                const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
+                const totalForLine = cubicMeters * quantity;
+                totalCubicMeters += totalForLine;
+                cubicCapacityField.value = totalForLine.toFixed(3);
             }
-
-            // LDM calculation logic
-            totalLdm += (width / 240) * (length / 100) * quantity;
-        });
-
-        if (!validLdm) {
-            return; // Stop further processing if no valid LDM was possible
         }
-
-        totalCubicMeters = 0; // Reset m³ since we're using LDM
-    }
+    });
 
     const result = document.getElementById("result");
     const country = document.getElementById("country").value;
@@ -290,8 +279,8 @@ function calculateResults() {
     let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
 
     if (totalLdm > 0 && !hasBox) {
-        // LDM-specific calculations
-        totalWeight = totalLdm * conversionFactors.LDM; // Use LDM conversion factor
+        // Cálculo com base em LDM
+        totalWeight = totalLdm * conversionFactors.LDM;
         roundedWeight = Math.ceil(totalWeight / 100) * 100;
         scaledWeight = roundedWeight / 100;
 
@@ -312,8 +301,8 @@ function calculateResults() {
             result.textContent = "No rates found for the selected country and zone.";
         }
     } else {
-        // m³-specific calculations (for boxes or mixed)
-        totalWeight = totalCubicMeters * conversionFactors.m3; // Use m³ conversion factor
+        // Cálculo com base em m³
+        totalWeight = totalCubicMeters * conversionFactors.m3;
         roundedWeight = Math.ceil(totalWeight / 100) * 100;
         scaledWeight = roundedWeight / 100;
 
@@ -335,6 +324,7 @@ function calculateResults() {
         }
     }
 }
+
 
 // Determine rate tier based on weight
 function getRateTier(weight, rates) {
