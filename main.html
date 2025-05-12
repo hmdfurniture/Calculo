@@ -177,6 +177,12 @@
                 width: 100%; /* Full width buttons for mobile */
             }
         }
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
     </style>
 </head>
 <body>
@@ -236,7 +242,9 @@
             </div>
         </div>
         <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-        <button onclick="finalCalculate()">Calculate</button>
+        <div class="button-container">
+    <button onclick="finalCalculate()">Calculate</button>
+    </div>
         <button onclick="resetForm()">Reset</button>
         <div class="result" id="result"></div>
         <div class="error-message" id="error-message"></div>
