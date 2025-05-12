@@ -306,12 +306,10 @@ function calculateResults() {
 
         if (rates) {
             rateTier = getRateTier(totalWeight, rates);
-            cost = scaledWeight * rates[rateTier];
+            const calculatedCost = scaledWeight * rates[rateTier];
 
-            // Check if the cost is less than the minimum
-            if (cost < rates.minimum) {
-                cost = rates.minimum;
-            }
+            // Apply the minimum if the calculated cost is less
+            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
 
             result.innerHTML = `
                 <p>Total Ldm: ${totalLdm.toFixed(2)} m</p>
@@ -332,12 +330,10 @@ function calculateResults() {
 
         if (rates) {
             rateTier = getRateTier(totalWeight, rates);
-            cost = scaledWeight * rates[rateTier];
+            const calculatedCost = scaledWeight * rates[rateTier];
 
-            // Check if the cost is less than the minimum
-            if (cost < rates.minimum) {
-                cost = rates.minimum;
-            }
+            // Apply the minimum if the calculated cost is less
+            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
 
             result.innerHTML = `
                 <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
@@ -350,6 +346,28 @@ function calculateResults() {
             result.textContent = "No rates found for the selected country and zone.";
         }
     }
+}
+
+// Updated getRateTier function
+function getRateTier(weight, rates) {
+    const rateKeys = Object.keys(rates);
+
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    // Default to "minimum" if no range matches
+    return "minimum";
 }
 
 // Updated getRateTier function
