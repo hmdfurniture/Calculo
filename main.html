@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
-<!-- Adiciona no <head> -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -264,45 +260,7 @@
     <div class="map-container">
         <div id="map" class="map"></div>
     </div>
- <script>
-// Inicializar o mapa no div #map
-const map = L.map('map').setView([39.5, -8.0], 6); // Centro aproximado de Portugal
-
-// Adiciona camada base (tiles)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-// GeoJSON fictício de teste — substituir pelo teu ficheiro depois
-const sampleGeoJSON = {
-    "type": "FeatureCollection",
-    "features": [{
-        "type": "Feature",
-        "properties": { "name": "Portugal fictício" },
-        "geometry": {
-            "type": "Polygon",
-            "coordinates": [[
-                [-9.5, 41.9],
-                [-6.2, 41.9],
-                [-6.2, 36.8],
-                [-9.5, 36.8],
-                [-9.5, 41.9]
-            ]]
-        }
-    }]
-};
-
-// Adiciona o GeoJSON ao mapa
-L.geoJSON(sampleGeoJSON, {
-    style: {
-        color: "#3388ff",
-        weight: 2,
-        fillColor: "#66aaff",
-        fillOpacity: 0.4
-    }
-}).addTo(map);
-</script>
-
+ 
     <script src="calculate.js"></script>
     <script>
 function resetForm() {
@@ -311,7 +269,7 @@ function resetForm() {
     container.innerHTML = '';
 
     // Adiciona uma nova linha vazia
-    container.innerHTML = 
+    container.innerHTML = `
         <div class="form-group dimension-line">
                     <div>
                 <select class="type" oninput="removeHighlight(this)">
@@ -325,7 +283,7 @@ function resetForm() {
             <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
             <div><input type="text" class="cubic-capacity" readonly></div>
             <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
-        </div>;
+        </div>`;
 
     // Limpa país, zona, resultados e erros
     document.getElementById('country').value = '';
