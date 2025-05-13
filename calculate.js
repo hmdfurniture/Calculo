@@ -1,7 +1,7 @@
 // Store the JSON data globally for easier access
 let supplierData = [];
 let internationalConversion = {};
-let nationalConversion = {}; // Separate conversion factors for international/national
+let nationalConversion = {};
 
 // Fetch and load JSON files
 function loadSupplierData() {
@@ -32,7 +32,6 @@ function populateCountryDropdown() {
     const countryList = document.getElementById("country-list");
     countryList.innerHTML = ""; // Clear previous options
 
-    // Extract unique country names from supplierData
     const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
     uniqueCountries.forEach((country) => {
@@ -64,7 +63,6 @@ function populateZoneDropdown(country) {
     const zoneList = document.getElementById("zone-list");
     zoneList.innerHTML = ""; // Clear previous options
 
-    // Filter zones based on the selected country
     const zones = supplierData
         .filter((item) => item.country === country)
         .map((item) => item.code);
@@ -89,6 +87,72 @@ function selectZone(zone) {
     zoneInput.value = zone;
 
     zoneInput.dispatchEvent(new Event("input"));
+}
+
+// Function to show the dropdown
+function showDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.style.display = "block";
+}
+
+// Function to hide the dropdown
+function hideDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    dropdown.style.display = "none";
+}
+
+// Function to add a new line dynamically
+function addLine() {
+    const container = document.getElementById("dimension-container");
+
+    const newLine = document.createElement("div");
+    newLine.className = "form-group dimension-line";
+
+    newLine.innerHTML = `
+        <div>
+            <select class="type" oninput="removeHighlight(this)">
+                <option value="box">Box</option>
+                <option value="pallet">Pallet</option>
+            </select>
+        </div>
+        <div>
+            <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+        </div>
+        <div>
+            <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+        </div>
+        <div>
+            <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+        </div>
+        <div>
+            <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+        </div>
+        <div>
+            <input type="text" class="cubic-capacity" readonly>
+        </div>
+        <div>
+            <button class="remove-button" onclick="removeLine(this)">Remove</button>
+        </div>
+    `;
+
+    container.appendChild(newLine);
+}
+
+// Function to remove a specific line
+function removeLine(button) {
+    const line = button.parentElement.parentElement;
+    line.remove();
+}
+
+// Function to validate input fields to restrict to 3 numeric digits
+function validateInput(input) {
+    // Remove any non-numeric characters
+    input.value = input.value.replace(/\D/g, '');
+
+    // Restrict the input length to 3 digits
+    if (input.value.length > 3) {
+        input.value = input.value.slice(0, 3);
+    }
 }
 
 // Function to validate all lines and highlight missing fields
@@ -156,79 +220,6 @@ function highlightField(field) {
 // Helper function to remove red border from a field
 function removeHighlight(field) {
     field.classList.remove("highlight");
-}
-
-// Function to calculate results
-function calculateResults() {
-    const lines = document.querySelectorAll(".dimension-line");
-    let totalCubicMeters = 0;
-    let totalLdm = 0;
-    const result = document.getElementById("result");
-    const country = document.getElementById("country").value;
-    const zone = document.getElementById("zone").value;
-
-    if (!country || !zone) {
-        result.textContent = "Please select a country and zone.";
-        return;
-    }
-
-    // Determine if the selected country is international or national
-    const selectedType = supplierData.find(item => item.country === country)?.type;
-    const conversion = selectedType === 'International' ? internationalConversion : nationalConversion;
-
-    // Calculate volumes (m³ or LDM)
-    lines.forEach((line) => {
-        const width = parseFloat(line.querySelector(".width").value) || 0;
-        const length = parseFloat(line.querySelector(".length").value) || 0;
-        const height = parseFloat(line.querySelector(".height").value) || 0;
-        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
-
-        const cubicMeters = (width * length * height) / 1000000;
-        totalCubicMeters += cubicMeters * quantity;
-    });
-
-    const totalWeight = totalCubicMeters * conversion.m3; // Use the appropriate conversion factor
-    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
-
-    // Fetch rates for the selected country and zone
-    const rates = supplierData.find(item => item.country === country && item.code === zone)?.rates;
-
-    if (rates) {
-        const rateTier = getRateTier(roundedWeight, rates);
-        const calculatedCost = (roundedWeight / 100) * rates[rateTier];
-        const finalCost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
-
-        result.innerHTML = `
-            <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
-            <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-            <p>Rounded Weight: ${roundedWeight} kg</p>
-            <p>Final Cost: €${finalCost.toFixed(2)}</p>
-        `;
-    } else {
-        result.textContent = "No rates found for the selected country and zone.";
-    }
-}
-
-// Determine the appropriate rate tier for the weight
-function getRateTier(weight, rates) {
-    const rateKeys = Object.keys(rates);
-
-    for (const key of rateKeys) {
-        if (key.includes('-')) {
-            const [min, max] = key.split('-').map(Number);
-            if (weight >= min && weight <= max) {
-                return key;
-            }
-        } else if (key.startsWith('>')) {
-            const min = Number(key.slice(1));
-            if (weight > min) {
-                return key;
-            }
-        }
-    }
-
-    // Default to "minimum" if no range matches
-    return "minimum";
 }
 
 // Load supplier data on page load
