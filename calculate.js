@@ -32,6 +32,7 @@ function populateCountryDropdown() {
     const countryList = document.getElementById("country-list");
     countryList.innerHTML = ""; // Clear previous options
 
+    // Extract unique country names from supplierData
     const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
     uniqueCountries.forEach((country) => {
@@ -63,6 +64,7 @@ function populateZoneDropdown(country) {
     const zoneList = document.getElementById("zone-list");
     zoneList.innerHTML = ""; // Clear previous options
 
+    // Filter zones based on the selected country
     const zones = supplierData
         .filter((item) => item.country === country)
         .map((item) => item.code);
