@@ -1,27 +1,25 @@
 // Store the JSON data globally for easier access
 let supplierData = [];
-let internationalConversion = {};
-let nationalConversion = {};
 
 // Fetch and load JSON files
 function loadSupplierData() {
-    // Fetch both JSON files
     Promise.all([
         fetch('./Tables/xbslog_international.json').then((response) => response.json()),
         fetch('./Tables/xbslog_nacional.json').then((response) => response.json())
     ])
         .then(([internationalData, nacionalData]) => {
-            // Merge the destinations
+            // Associate conversion factors with each destination
             supplierData = [
-                ...internationalData.destinations.map(item => ({ ...item, type: 'International' })),
-                ...nacionalData.destinations.map(item => ({ ...item, type: 'National' }))
+                ...internationalData.destinations.map(item => ({
+                    ...item,
+                    conversion: internationalData.conversion
+                })),
+                ...nacionalData.destinations.map(item => ({
+                    ...item,
+                    conversion: nacionalData.conversion
+                }))
             ];
 
-            // Store conversion factors separately
-            internationalConversion = internationalData.conversion;
-            nationalConversion = nacionalData.conversion;
-
-            // Populate the dropdown with the merged data
             populateCountryDropdown();
         })
         .catch((error) => console.error('Error loading supplier data:', error));
@@ -89,18 +87,6 @@ function selectZone(zone) {
     zoneInput.dispatchEvent(new Event("input"));
 }
 
-// Function to show the dropdown
-function showDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    dropdown.style.display = "block";
-}
-
-// Function to hide the dropdown
-function hideDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    dropdown.style.display = "none";
-}
-
 // Function to add a new line dynamically
 function addLine() {
     const container = document.getElementById("dimension-container");
@@ -146,10 +132,8 @@ function removeLine(button) {
 
 // Function to validate input fields to restrict to 3 numeric digits
 function validateInput(input) {
-    // Remove any non-numeric characters
     input.value = input.value.replace(/\D/g, '');
 
-    // Restrict the input length to 3 digits
     if (input.value.length > 3) {
         input.value = input.value.slice(0, 3);
     }
@@ -221,6 +205,101 @@ function highlightField(field) {
 function removeHighlight(field) {
     field.classList.remove("highlight");
 }
+
+function calculateResults() {
+    const lines = document.querySelectorAll(".dimension-line");
+    let totalCubicMeters = 0;
+    let totalLdm = 0;
+    const country = document.getElementById("country").value;
+    const zone = document.getElementById("zone").value;
+    const result = document.getElementById("result");
+
+    if (!country || !zone) {
+        result.textContent = "Please select a country and zone.";
+        return;
+    }
+
+    const destination = supplierData.find(item => item.country === country && item.code === zone);
+    if (!destination) {
+        result.textContent = "No rates found for the selected country and zone.";
+        return;
+    }
+
+    const { conversion, rates } = destination;
+
+    lines.forEach((line) => {
+        const width = parseFloat(line.querySelector(".width").value) || 0;
+        const length = parseFloat(line.querySelector(".length").value) || 0;
+        const height = parseFloat(line.querySelector(".height").value) || 0;
+        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+        const type = line.querySelector(".type").value;
+        const cubicCapacityField = line.querySelector(".cubic-capacity");
+
+        if (type === "box") {
+            const cubicMeters = (width * length * height) / 1000000;
+            const totalForLine = cubicMeters * quantity;
+            totalCubicMeters += totalForLine;
+            cubicCapacityField.value = totalForLine.toFixed(3);
+        } else if (type === "pallet") {
+            const cubicMeters = (width * length * height) / 1000000;
+            const totalForLine = cubicMeters * quantity;
+            totalCubicMeters += totalForLine;
+            cubicCapacityField.value = totalForLine.toFixed(3);
+        }
+    });
+
+    const totalWeight = totalCubicMeters * conversion.m3;
+    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
+    const scaledWeight = roundedWeight / 100;
+    const rateTier = getRateTier(totalWeight, rates);
+    const calculatedCost = scaledWeight * rates[rateTier];
+    const finalCost = Math.max(calculatedCost, rates.minimum);
+
+    result.innerHTML = `
+        <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
+        <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
+        <p>Rounded Weight: ${roundedWeight} kg</p>
+        <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+        <p>Final Cost: €${finalCost.toFixed(2)}</p>
+    `;
+}
+
+function getRateTier(weight, rates) {
+    const rateKeys = Object.keys(rates);
+
+    for (const key of rateKeys) {
+        if (key.includes('-')) {
+            const [min, max] = key.split('-').map(Number);
+            if (weight >= min && weight <= max) {
+                return key;
+            }
+        } else if (key.startsWith('>')) {
+            const min = Number(key.slice(1));
+            if (weight > min) {
+                return key;
+            }
+        }
+    }
+
+    return "minimum";
+}
+
+// Add event listeners for inputs
+document.getElementById("country").addEventListener("focus", () => {
+    showDropdown("country-list");
+});
+
+document.getElementById("country").addEventListener("blur", () => {
+    setTimeout(() => hideDropdown("country-list"), 200);
+});
+
+document.getElementById("zone").addEventListener("focus", () => {
+    showDropdown("zone-list");
+});
+
+document.getElementById("zone").addEventListener("blur", () => {
+    setTimeout(() => hideDropdown("zone-list"), 200);
+});
 
 // Load supplier data on page load
 window.onload = loadSupplierData;
