@@ -69,12 +69,13 @@ function filterCountries() {
     }
 
     // Caso 2: Se o valor do input corresponde a um país selecionado
-    if (uniqueCountries.includes(input)) {
+    const selectedCountry = uniqueCountries.find((country) => country.toLowerCase() === input);
+    if (selectedCountry) {
         const a = document.createElement("a");
         a.href = "#";
-        a.textContent = input; // Mostra apenas o país selecionado
+        a.textContent = selectedCountry; // Mostra apenas o país selecionado
         a.onclick = () => {
-            selectCountry(input);
+            selectCountry(selectedCountry);
             hideDropdown("country-list");
         };
         countryList.appendChild(a);
@@ -95,15 +96,23 @@ function filterCountries() {
             countryList.appendChild(a);
         });
 }
+
 // Function to handle country selection
 function selectCountry(country) {
     const countryInput = document.getElementById("country");
     countryInput.value = country;
 
+    // Resetar o campo da zona quando o país for alterado
     const zoneInput = document.getElementById("zone");
-    zoneInput.disabled = false;
+    zoneInput.value = ""; // Limpa o valor da zona
+    zoneInput.disabled = false; // Habilita o campo da zona
+    const zoneList = document.getElementById("zone-list");
+    zoneList.innerHTML = ""; // Limpa o dropdown de zonas
+
+    // Atualiza a lista de zonas com base no novo país
     populateZoneDropdown(country);
 
+    // Dispara um evento de input para qualquer lógica associada
     countryInput.dispatchEvent(new Event("input"));
 }
 
@@ -160,12 +169,13 @@ function filterZones() {
     }
 
     // Caso 2: Se o valor do input corresponde a uma zona selecionada
-    if (uniqueZones.includes(input)) {
+    const selectedZone = uniqueZones.find((zone) => zone.toLowerCase() === input);
+    if (selectedZone) {
         const a = document.createElement("a");
         a.href = "#";
-        a.textContent = input; // Mostra apenas a zona selecionada
+        a.textContent = selectedZone; // Mostra apenas a zona selecionada
         a.onclick = () => {
-            selectZone(input);
+            selectZone(selectedZone);
             hideDropdown("zone-list");
         };
         zoneList.appendChild(a);
