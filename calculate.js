@@ -68,23 +68,9 @@ function filterCountries() {
         return;
     }
 
-    // Caso 2: Se o valor do input corresponde a um país selecionado
-    const selectedCountry = uniqueCountries.find((country) => country.toLowerCase() === input);
-    if (selectedCountry) {
-        const a = document.createElement("a");
-        a.href = "#";
-        a.textContent = selectedCountry; // Mostra apenas o país selecionado
-        a.onclick = () => {
-            selectCountry(selectedCountry);
-            hideDropdown("country-list");
-        };
-        countryList.appendChild(a);
-        return;
-    }
-
-    // Caso 3: Caso contrário, filtra com base no texto digitado
+    // Caso 2: Filtra os países com base no texto digitado
     uniqueCountries
-        .filter((country) => country.toLowerCase().startsWith(input))
+        .filter((country) => country.toLowerCase().startsWith(input)) // Filtra países que começam com o texto digitado
         .forEach((country) => {
             const a = document.createElement("a");
             a.href = "#";
@@ -168,23 +154,9 @@ function filterZones() {
         return;
     }
 
-    // Caso 2: Se o valor do input corresponde a uma zona selecionada
-    const selectedZone = uniqueZones.find((zone) => zone.toLowerCase() === input);
-    if (selectedZone) {
-        const a = document.createElement("a");
-        a.href = "#";
-        a.textContent = selectedZone; // Mostra apenas a zona selecionada
-        a.onclick = () => {
-            selectZone(selectedZone);
-            hideDropdown("zone-list");
-        };
-        zoneList.appendChild(a);
-        return;
-    }
-
-    // Caso 3: Caso contrário, filtra com base no texto digitado
+    // Caso 2: Filtra as zonas com base no texto digitado
     uniqueZones
-        .filter((zone) => zone.startsWith(input))
+        .filter((zone) => zone.startsWith(input)) // Filtra zonas que começam com o texto digitado
         .forEach((zone) => {
             const a = document.createElement("a");
             a.href = "#";
