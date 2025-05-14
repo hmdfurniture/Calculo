@@ -1,6 +1,7 @@
 // Store the JSON data globally for easier access
 let supplierData = [];
-let conversionFactors = {}; // Store conversion factors dynamically
+let conversionFactorsInternational = {}; // Store conversion factors for international transport
+let conversionFactorsNational = {}; // Store conversion factors for national transport
 
 // Fetch and load JSON files
 function loadSupplierData() {
@@ -10,15 +11,15 @@ function loadSupplierData() {
         fetch('./Tables/xbslog_nacional.json').then((response) => response.json())
     ])
         .then(([internationalData, nacionalData]) => {
-            // Merge the destinations and conversion factors from both files
+            // Merge the destinations from both files
             supplierData = [
                 ...internationalData.destinations,
                 ...nacionalData.destinations
             ];
-            conversionFactors = {
-                ...internationalData.conversion,
-                ...nacionalData.conversion
-            };
+
+            // Store conversion factors separately
+            conversionFactorsInternational = internationalData.conversion;
+            conversionFactorsNational = nacionalData.conversion;
 
             // Populate the dropdown with the merged data
             populateCountryDropdown();
@@ -324,7 +325,7 @@ function calculateResults() {
     let hasPallet = false;
     let allPalletsHaveLowHeight = true;
     let allPalletsHaveHighHeight = true;
-    const errorMessage = document.getElementById("result");
+    const result = document.getElementById("result");
 
     // Step 1: Check for the presence of boxes and types of pallets
     lines.forEach((line) => {
@@ -343,27 +344,24 @@ function calculateResults() {
         }
     });
 
-    // If calculating based on LDM, check if all pallets >125cm have appropriate lengths
-    if (hasPallet && !hasBox && allPalletsHaveHighHeight) {
-        let allLengthsValid = true;
+    // Fetch selected country and zone
+    const country = document.getElementById("country").value;
+    const zone = document.getElementById("zone").value;
 
-        lines.forEach((line) => {
-            const type = line.querySelector(".type").value;
-            const height = parseFloat(line.querySelector(".height").value) || 0;
-            const length = parseFloat(line.querySelector(".length").value) || 0;
-
-            if (type === "pallet" && height > 125) {
-                if (length < 100 || length > 125) {
-                    allLengthsValid = false;
-                }
-            }
-        });
-
-        if (!allLengthsValid) {
-            errorMessage.textContent = "Cannot calculate: All pallets taller than 125 cm must have a length between 100 and 125 cm to use LDM.";
-            return;
-        }
+    if (!country || !zone) {
+        result.textContent = "Please select a country and zone.";
+        return;
     }
+
+    // Determine if it's international or national
+    const isTransportInternational = isInternational(country, zone);
+
+    // Choose the appropriate conversion factors
+    const conversionFactors = isTransportInternational
+        ? conversionFactorsInternational
+        : conversionFactorsNational;
+
+    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
 
     // Step 2: Calculate volumes (m³ or LDM)
     lines.forEach((line) => {
@@ -380,81 +378,50 @@ function calculateResults() {
             totalCubicMeters += totalForLine;
             cubicCapacityField.value = totalForLine.toFixed(3);
         } else if (type === "pallet") {
-            if (allPalletsHaveHighHeight && !hasBox) {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
-                cubicCapacityField.value = "LDM";
-            } else {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-                const adjustedHeight = height > 125 ? 250 : height;
-                const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
-                const totalForLine = cubicMeters * quantity;
-                totalCubicMeters += totalForLine;
-                cubicCapacityField.value = totalForLine.toFixed(3);
-            }
+            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+            const adjustedHeight = height > 125 ? 250 : height;
+            const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
+            const totalForLine = cubicMeters * quantity;
+            totalCubicMeters += totalForLine;
+            cubicCapacityField.value = totalForLine.toFixed(3);
         }
     });
 
-    const result = document.getElementById("result");
-    const country = document.getElementById("country").value;
-    const zone = document.getElementById("zone").value;
-
-    if (!country || !zone || (totalCubicMeters === 0 && totalLdm === 0)) {
-        result.textContent = "Please select a country, zone, and fill in dimensions.";
+    if (totalCubicMeters === 0 && totalLdm === 0) {
+        result.textContent = "Please fill in dimensions.";
         return;
     }
 
-    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
-
     if (totalLdm > 0 && !hasBox) {
         totalWeight = totalLdm * conversionFactors.LDM;
-        roundedWeight = Math.ceil(totalWeight / 100) * 100;
-        scaledWeight = roundedWeight / 100;
-
-        rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
-
-        if (rates) {
-            rateTier = getRateTier(totalWeight, rates);
-            const calculatedCost = scaledWeight * rates[rateTier];
-
-            // Apply the minimum if the calculated cost is less
-            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
-
-            result.innerHTML = `
-                <p>Total Ldm: ${totalLdm.toFixed(2)} m</p>
-                <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-                <p>Rounded Weight: ${roundedWeight} kg</p>
-                <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
-                <p>Final Cost: €${cost.toFixed(2)}</p>
-            `;
-        } else {
-            result.textContent = "No rates found for the selected country and zone.";
-        }
     } else {
         totalWeight = totalCubicMeters * conversionFactors.m3;
-        roundedWeight = Math.ceil(totalWeight / 100) * 100;
-        scaledWeight = roundedWeight / 100;
-
-        rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
-
-        if (rates) {
-            rateTier = getRateTier(totalWeight, rates);
-            const calculatedCost = scaledWeight * rates[rateTier];
-
-            // Apply the minimum if the calculated cost is less
-            cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
-
-            result.innerHTML = `
-                <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
-                <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-                <p>Rounded Weight: ${roundedWeight} kg</p>
-                <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
-                <p>Final Cost: €${cost.toFixed(2)}</p>
-            `;
-        } else {
-            result.textContent = "No rates found for the selected country and zone.";
-        }
     }
+
+    roundedWeight = Math.ceil(totalWeight / 100) * 100;
+    scaledWeight = roundedWeight / 100;
+
+    // Find the corresponding rates
+    rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
+
+    if (!rates) {
+        result.textContent = "No rates found for the selected country and zone.";
+        return;
+    }
+
+    rateTier = getRateTier(totalWeight, rates);
+    const calculatedCost = scaledWeight * rates[rateTier];
+
+    // Apply the minimum if the calculated cost is less
+    cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
+
+    result.innerHTML = `
+        <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
+        <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
+        <p>Rounded Weight: ${roundedWeight} kg</p>
+        <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+        <p>Final Cost: €${cost.toFixed(2)}</p>
+    `;
 }
 
 // Updated getRateTier function
