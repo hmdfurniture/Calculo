@@ -437,28 +437,57 @@ function calculateResults() {
     `;
 }
 
-function getRateTier(weight, rates) {
-    // Convert the rate keys into an array of ranges
-    const rateKeys = Object.keys(rates);
+function getRateTier(weight, rates, isInternational) {
+    // Excluir a chave "minimum" da lógica de seleção
+    const rateKeys = Object.keys(rates).filter(key => key !== "minimum");
 
-    // Loop through the keys to find the correct range
-    for (const key of rateKeys) {
-        if (key.includes('-')) {
-            // Handle ranges like "1-50", "51-100"
-            const [min, max] = key.split('-').map(Number);
-            if (weight >= min && weight <= max) {
-                return key;
+    if (isInternational) {
+        // Ordenar as chaves para garantir que sejam processadas corretamente para internacional
+        const sortedKeys = rateKeys.sort((a, b) => {
+            const aValue = a.startsWith('<') ? parseInt(a.slice(1), 10) : a.startsWith('>') ? parseInt(a.slice(1), 10) : Number.MAX_SAFE_INTEGER;
+            const bValue = b.startsWith('<') ? parseInt(b.slice(1), 10) : b.startsWith('>') ? parseInt(b.slice(1), 10) : Number.MAX_SAFE_INTEGER;
+            return aValue - bValue;
+        });
+
+        // Loop pelas chaves ordenadas para encontrar o escalão correto
+        for (const key of sortedKeys) {
+            if (key.startsWith('<')) {
+                const max = parseInt(key.slice(1), 10);
+                if (weight <= max) {
+                    return key;
+                }
+            } else if (key.startsWith('>')) {
+                const min = parseInt(key.slice(1), 10);
+                if (weight > min) {
+                    return key;
+                }
             }
-        } else if (key.startsWith('>')) {
-            // Handle ranges like ">5000"
-            const min = Number(key.slice(1));
-            if (weight > min) {
-                return key;
+        }
+    } else {
+        // Ordenar as chaves para nacional com base nos intervalos explícitos
+        const sortedKeys = rateKeys.sort((a, b) => {
+            const aMin = a.includes('-') ? parseInt(a.split('-')[0], 10) : a.startsWith('>') ? parseInt(a.slice(1), 10) : Number.MAX_SAFE_INTEGER;
+            const bMin = b.includes('-') ? parseInt(b.split('-')[0], 10) : b.startsWith('>') ? parseInt(b.slice(1), 10) : Number.MAX_SAFE_INTEGER;
+            return aMin - bMin;
+        });
+
+        // Loop pelas chaves ordenadas para encontrar o escalão correto
+        for (const key of sortedKeys) {
+            if (key.includes('-')) {
+                const [min, max] = key.split('-').map(Number);
+                if (weight >= min && weight <= max) {
+                    return key;
+                }
+            } else if (key.startsWith('>')) {
+                const min = parseInt(key.slice(1), 10);
+                if (weight > min) {
+                    return key;
+                }
             }
         }
     }
 
-    // Default to "minimum" if no range matches
+    // Retornar "minimum" como fallback
     return "minimum";
 }
 
