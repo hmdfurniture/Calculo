@@ -437,50 +437,6 @@ function calculateResults() {
     `;
 }
 
-// Updated getRateTier function
-function getRateTier(weight, rates) {
-    const rateKeys = Object.keys(rates);
-
-    for (const key of rateKeys) {
-        if (key.includes('-')) {
-            const [min, max] = key.split('-').map(Number);
-            if (weight >= min && weight <= max) {
-                return key;
-            }
-        } else if (key.startsWith('>')) {
-            const min = Number(key.slice(1));
-            if (weight > min) {
-                return key;
-            }
-        }
-    }
-
-    // Default to "minimum" if no range matches
-    return "minimum";
-}
-
-// Updated getRateTier function
-function getRateTier(weight, rates) {
-    const rateKeys = Object.keys(rates);
-
-    for (const key of rateKeys) {
-        if (key.includes('-')) {
-            const [min, max] = key.split('-').map(Number);
-            if (weight >= min && weight <= max) {
-                return key;
-            }
-        } else if (key.startsWith('>')) {
-            const min = Number(key.slice(1));
-            if (weight > min) {
-                return key;
-            }
-        }
-    }
-
-    // Default to "minimum" if no range matches
-    return "minimum";
-}
-
 function getRateTier(weight, rates) {
     // Convert the rate keys into an array of ranges
     const rateKeys = Object.keys(rates);
