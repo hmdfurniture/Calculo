@@ -100,6 +100,9 @@ function selectCountry(country) {
 
     // Dispara um evento de input para qualquer lógica associada
     countryInput.dispatchEvent(new Event("input"));
+
+    // Atualiza o dropdown para exibir apenas o valor selecionado
+    filterCountries();
 }
 
 // Populate the "Select Zone" dropdown based on the selected country
@@ -174,7 +177,11 @@ function selectZone(zone) {
     const zoneInput = document.getElementById("zone");
     zoneInput.value = zone;
 
+    // Dispara um evento 'input' manualmente para atualizar a lógica
     zoneInput.dispatchEvent(new Event("input"));
+
+    // Atualiza o dropdown para exibir apenas o valor selecionado
+    filterZones();
 }
 
 // Function to show the dropdown
