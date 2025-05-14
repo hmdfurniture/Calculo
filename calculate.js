@@ -368,7 +368,7 @@ function calculateResults() {
         ? conversionFactorsInternational
         : conversionFactorsNational;
 
-    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost;
+    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost, rateValue;
 
     // Step 2: Calculate volumes (m³ or LDM)
     lines.forEach((line) => {
@@ -416,17 +416,23 @@ function calculateResults() {
         return;
     }
 
+    // Get the correct rate tier
     rateTier = getRateTier(totalWeight, rates);
-    const calculatedCost = scaledWeight * rates[rateTier];
+    rateValue = rates[rateTier]; // Get the value used for the calculation
+
+    // Calculate the cost
+    const calculatedCost = scaledWeight * rateValue;
 
     // Apply the minimum if the calculated cost is less
     cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
 
+    // Display the results
     result.innerHTML = `
         <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
         <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
         <p>Rounded Weight: ${roundedWeight} kg</p>
         <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
+        <p>Rate Value: €${rateValue.toFixed(2)}</p>
         <p>Final Cost: €${cost.toFixed(2)}</p>
     `;
 }
