@@ -417,7 +417,7 @@ function calculateResults() {
     }
 
     // Get the correct rate tier
-    rateTier = getRateTier(totalWeight, rates);
+    rateTier = getRateTier(totalWeight, rates, isTransportInternational);
     rateValue = rates[rateTier]; // Get the value used for the calculation
 
     // Calculate the cost
