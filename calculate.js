@@ -547,6 +547,20 @@ function getRateTier(weight, rates) {
     return "minimum";
 }
 
+// Evento para monitorar mudanças no campo de país
+document.getElementById("country").addEventListener("input", () => {
+    const countryInput = document.getElementById("country");
+    const zoneInput = document.getElementById("zone");
+    const zoneList = document.getElementById("zone-list");
+
+    // Se o campo de país estiver vazio, reseta o campo de zona
+    if (countryInput.value.trim() === "") {
+        zoneInput.value = ""; // Limpa o valor da zona
+        zoneInput.disabled = true; // Desativa o campo da zona
+        zoneList.innerHTML = ""; // Limpa a lista de zonas
+    }
+});
+
 // Add event listeners for inputs
 document.getElementById("country").addEventListener("focus", () => {
     showDropdown("country-list");
