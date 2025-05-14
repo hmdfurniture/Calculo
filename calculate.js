@@ -368,7 +368,7 @@ function calculateResults() {
         ? conversionFactorsInternational
         : conversionFactorsNational;
 
-    let totalWeight, roundedWeight, scaledWeight, rates, rateTier, cost, rateValue;
+    let totalWeight, scaledWeight, rates, rateTier, cost, rateValue;
 
     // Step 2: Calculate volumes (m³ or LDM)
     lines.forEach((line) => {
@@ -405,9 +405,6 @@ function calculateResults() {
         totalWeight = totalCubicMeters * conversionFactors.m3;
     }
 
-    roundedWeight = Math.ceil(totalWeight / 100) * 100;
-    scaledWeight = roundedWeight / 100;
-
     // Find the corresponding rates
     rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
 
@@ -416,23 +413,80 @@ function calculateResults() {
         return;
     }
 
-    // Get the correct rate tier
-    rateTier = getRateTier(totalWeight, rates, isTransportInternational);
-    rateValue = rates[rateTier]; // Get the value used for the calculation
+    // Logic for national transport
+    if (!isTransportInternational) {
+        if (totalWeight <= 50) {
+            // Faixa 1-50
+            scaledWeight = 1;
+            cost = rates["1-50"];
+        } else if (totalWeight <= 100) {
+            // Faixa 51-100
+            scaledWeight = 1;
+            cost = rates["51-100"];
+        } else if (totalWeight <= 200) {
+            // Faixa 101-200
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["101-200"];
+        } else if (totalWeight <= 300) {
+            // Faixa 201-300
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["201-300"];
+        } else if (totalWeight <= 500) {
+            // Faixa 301-500
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["301-500"];
+        } else if (totalWeight <= 750) {
+            // Faixa 501-750 (com lógica especial)
+            if (totalWeight <= 700) {
+                scaledWeight = Math.ceil(totalWeight / 100);
+            } else {
+                scaledWeight = 7; // Fixar em 7 entre 701 e 750 kg
+            }
+            cost = scaledWeight * rates["501-750"];
+        } else if (totalWeight <= 1000) {
+            // Faixa 751-1000 (com lógica especial)
+            if (totalWeight <= 800) {
+                scaledWeight = 8; // Fixar em 8 entre 751 e 800 kg
+            } else {
+                scaledWeight = Math.ceil(totalWeight / 100);
+            }
+            cost = scaledWeight * rates["751-1000"];
+        } else if (totalWeight <= 2000) {
+            // Faixa 1001-2000
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["1001-2000"];
+        } else if (totalWeight <= 3500) {
+            // Faixa 2001-3500
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["2001-3500"];
+        } else if (totalWeight <= 5000) {
+            // Faixa 3501-5000
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates["3501-5000"];
+        } else {
+            // Faixa >5000
+            scaledWeight = Math.ceil(totalWeight / 100);
+            cost = scaledWeight * rates[">5000"];
+        }
+    } else {
+        // Logic for international transport (unchanged)
+        const roundedWeight = Math.ceil(totalWeight / 100) * 100;
+        scaledWeight = roundedWeight / 100;
+        rateTier = getRateTier(totalWeight, rates, isTransportInternational);
+        rateValue = rates[rateTier];
+        cost = scaledWeight * rateValue;
+    }
 
-    // Calculate the cost
-    const calculatedCost = scaledWeight * rateValue;
-
-    // Apply the minimum if the calculated cost is less
-    cost = calculatedCost < rates.minimum ? rates.minimum : calculatedCost;
+    // Apply the minimum rate if necessary
+    cost = cost < rates.minimum ? rates.minimum : cost;
 
     // Display the results
     result.innerHTML = `
         <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
         <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-        <p>Rounded Weight: ${roundedWeight} kg</p>
-        <p>Scaled Weight: ${scaledWeight} (in hundreds)</p>
-        <p>Rate Value: €${rateValue.toFixed(2)}</p>
+        ${isTransportInternational ? `<p>Rounded Weight: ${Math.ceil(totalWeight / 100) * 100} kg</p>` : ""}
+        <p>Scaled Weight: ${scaledWeight}</p>
+        <p>Rate Value: €${rateValue ? rateValue.toFixed(2) : "N/A"}</p>
         <p>Final Cost: €${cost.toFixed(2)}</p>
     `;
 }
