@@ -51,8 +51,37 @@ function filterCountries() {
     const countryList = document.getElementById("country-list");
     const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
-    countryList.innerHTML = ""; // Clear previous options
+    countryList.innerHTML = ""; // Limpa as opções anteriores
 
+    // Caso 1: Se o campo está vazio, exibe todas as opções
+    if (input === "") {
+        uniqueCountries.forEach((country) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = country;
+            a.onclick = () => {
+                selectCountry(country);
+                hideDropdown("country-list");
+            };
+            countryList.appendChild(a);
+        });
+        return;
+    }
+
+    // Caso 2: Se o valor do input corresponde a um país selecionado
+    if (uniqueCountries.includes(input)) {
+        const a = document.createElement("a");
+        a.href = "#";
+        a.textContent = input; // Mostra apenas o país selecionado
+        a.onclick = () => {
+            selectCountry(input);
+            hideDropdown("country-list");
+        };
+        countryList.appendChild(a);
+        return;
+    }
+
+    // Caso 3: Caso contrário, filtra com base no texto digitado
     uniqueCountries
         .filter((country) => country.toLowerCase().startsWith(input))
         .forEach((country) => {
@@ -66,7 +95,6 @@ function filterCountries() {
             countryList.appendChild(a);
         });
 }
-
 // Function to handle country selection
 function selectCountry(country) {
     const countryInput = document.getElementById("country");
@@ -114,8 +142,37 @@ function filterZones() {
 
     const uniqueZones = [...new Set(zones)].sort();
 
-    zoneList.innerHTML = ""; // Clear previous options
+    zoneList.innerHTML = ""; // Limpa as opções anteriores
 
+    // Caso 1: Se o campo está vazio, exibe todas as opções
+    if (input === "") {
+        uniqueZones.forEach((zone) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = zone;
+            a.onclick = () => {
+                selectZone(zone);
+                hideDropdown("zone-list");
+            };
+            zoneList.appendChild(a);
+        });
+        return;
+    }
+
+    // Caso 2: Se o valor do input corresponde a uma zona selecionada
+    if (uniqueZones.includes(input)) {
+        const a = document.createElement("a");
+        a.href = "#";
+        a.textContent = input; // Mostra apenas a zona selecionada
+        a.onclick = () => {
+            selectZone(input);
+            hideDropdown("zone-list");
+        };
+        zoneList.appendChild(a);
+        return;
+    }
+
+    // Caso 3: Caso contrário, filtra com base no texto digitado
     uniqueZones
         .filter((zone) => zone.startsWith(input))
         .forEach((zone) => {
