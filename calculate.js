@@ -415,67 +415,78 @@ function calculateResults() {
 
     // Logic for national transport
     if (!isTransportInternational) {
-        if (totalWeight <= 50) {
-            // Faixa 1-50
-            scaledWeight = 1;
-            cost = rates["1-50"];
-        } else if (totalWeight <= 100) {
-            // Faixa 51-100
-            scaledWeight = 1;
-            cost = rates["51-100"];
-        } else if (totalWeight <= 200) {
-            // Faixa 101-200
+    if (totalWeight <= 50) {
+        // Faixa 1-50
+        scaledWeight = 1;
+        rateValue = rates["1-50"]; // Atribuir o valor da taxa
+        cost = rates["1-50"];
+    } else if (totalWeight <= 100) {
+        // Faixa 51-100
+        scaledWeight = 1;
+        rateValue = rates["51-100"]; // Atribuir o valor da taxa
+        cost = rates["51-100"];
+    } else if (totalWeight <= 200) {
+        // Faixa 101-200
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["101-200"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["101-200"];
+    } else if (totalWeight <= 300) {
+        // Faixa 201-300
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["201-300"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["201-300"];
+    } else if (totalWeight <= 500) {
+        // Faixa 301-500
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["301-500"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["301-500"];
+    } else if (totalWeight <= 750) {
+        // Faixa 501-750 (com lógica especial)
+        if (totalWeight <= 700) {
             scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["101-200"];
-        } else if (totalWeight <= 300) {
-            // Faixa 201-300
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["201-300"];
-        } else if (totalWeight <= 500) {
-            // Faixa 301-500
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["301-500"];
-        } else if (totalWeight <= 750) {
-            // Faixa 501-750 (com lógica especial)
-            if (totalWeight <= 700) {
-                scaledWeight = Math.ceil(totalWeight / 100);
-            } else {
-                scaledWeight = 7; // Fixar em 7 entre 701 e 750 kg
-            }
-            cost = scaledWeight * rates["501-750"];
-        } else if (totalWeight <= 1000) {
-            // Faixa 751-1000 (com lógica especial)
-            if (totalWeight <= 800) {
-                scaledWeight = 8; // Fixar em 8 entre 751 e 800 kg
-            } else {
-                scaledWeight = Math.ceil(totalWeight / 100);
-            }
-            cost = scaledWeight * rates["751-1000"];
-        } else if (totalWeight <= 2000) {
-            // Faixa 1001-2000
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["1001-2000"];
-        } else if (totalWeight <= 3500) {
-            // Faixa 2001-3500
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["2001-3500"];
-        } else if (totalWeight <= 5000) {
-            // Faixa 3501-5000
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates["3501-5000"];
         } else {
-            // Faixa >5000
-            scaledWeight = Math.ceil(totalWeight / 100);
-            cost = scaledWeight * rates[">5000"];
+            scaledWeight = 7; // Fixar em 7 entre 701 e 750 kg
         }
+        rateValue = rates["501-750"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["501-750"];
+    } else if (totalWeight <= 1000) {
+        // Faixa 751-1000 (com lógica especial)
+        if (totalWeight <= 800) {
+            scaledWeight = 8; // Fixar em 8 entre 751 e 800 kg
+        } else {
+            scaledWeight = Math.ceil(totalWeight / 100);
+        }
+        rateValue = rates["751-1000"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["751-1000"];
+    } else if (totalWeight <= 2000) {
+        // Faixa 1001-2000
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["1001-2000"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["1001-2000"];
+    } else if (totalWeight <= 3500) {
+        // Faixa 2001-3500
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["2001-3500"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["2001-3500"];
+    } else if (totalWeight <= 5000) {
+        // Faixa 3501-5000
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates["3501-5000"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates["3501-5000"];
     } else {
-        // Logic for international transport (unchanged)
-        const roundedWeight = Math.ceil(totalWeight / 100) * 100;
-        scaledWeight = roundedWeight / 100;
-        rateTier = getRateTier(totalWeight, rates, isTransportInternational);
-        rateValue = rates[rateTier];
-        cost = scaledWeight * rateValue;
+        // Faixa >5000
+        scaledWeight = Math.ceil(totalWeight / 100);
+        rateValue = rates[">5000"]; // Atribuir o valor da taxa
+        cost = scaledWeight * rates[">5000"];
     }
+} else {
+    // Lógica para transporte internacional permanece inalterada
+    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
+    scaledWeight = roundedWeight / 100;
+    rateTier = getRateTier(totalWeight, rates, isTransportInternational);
+    rateValue = rates[rateTier]; // Atribuir o valor da taxa
+    cost = scaledWeight * rateValue;
+}
 
     // Apply the minimum rate if necessary
     cost = cost < rates.minimum ? rates.minimum : cost;
