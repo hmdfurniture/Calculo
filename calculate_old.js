@@ -45,16 +45,64 @@ function populateCountryDropdown() {
     });
 }
 
+// Function to handle dynamic filtering for the country dropdown
+function filterCountries() {
+    const input = document.getElementById("country").value.toLowerCase();
+    const countryList = document.getElementById("country-list");
+    const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
+
+    countryList.innerHTML = ""; // Limpa as opções anteriores
+
+    // Caso 1: Se o campo está vazio, exibe todas as opções
+    if (input === "") {
+        uniqueCountries.forEach((country) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = country;
+            a.onclick = () => {
+                selectCountry(country);
+                hideDropdown("country-list");
+            };
+            countryList.appendChild(a);
+        });
+        return;
+    }
+
+    // Caso 2: Filtra os países com base no texto digitado
+    uniqueCountries
+        .filter((country) => country.toLowerCase().startsWith(input)) // Filtra países que começam com o texto digitado
+        .forEach((country) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = country;
+            a.onclick = () => {
+                selectCountry(country);
+                hideDropdown("country-list");
+            };
+            countryList.appendChild(a);
+        });
+}
+
 // Function to handle country selection
 function selectCountry(country) {
     const countryInput = document.getElementById("country");
     countryInput.value = country;
 
+    // Resetar o campo da zona quando o país for alterado
     const zoneInput = document.getElementById("zone");
-    zoneInput.disabled = false;
+    zoneInput.value = ""; // Limpa o valor da zona
+    zoneInput.disabled = false; // Habilita o campo da zona
+    const zoneList = document.getElementById("zone-list");
+    zoneList.innerHTML = ""; // Limpa o dropdown de zonas
+
+    // Atualiza a lista de zonas com base no novo país
     populateZoneDropdown(country);
 
+    // Dispara um evento de input para qualquer lógica associada
     countryInput.dispatchEvent(new Event("input"));
+
+    // Atualiza o dropdown para exibir apenas o valor selecionado
+    filterCountries();
 }
 
 // Populate the "Select Zone" dropdown based on the selected country
@@ -80,12 +128,60 @@ function populateZoneDropdown(country) {
     });
 }
 
+// Function to handle dynamic filtering for the zone dropdown
+function filterZones() {
+    const input = document.getElementById("zone").value.toLowerCase();
+    const zoneList = document.getElementById("zone-list");
+    const country = document.getElementById("country").value;
+
+    const zones = supplierData
+        .filter((item) => item.country === country)
+        .map((item) => item.code);
+
+    const uniqueZones = [...new Set(zones)].sort();
+
+    zoneList.innerHTML = ""; // Limpa as opções anteriores
+
+    // Caso 1: Se o campo está vazio, exibe todas as opções
+    if (input === "") {
+        uniqueZones.forEach((zone) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = zone;
+            a.onclick = () => {
+                selectZone(zone);
+                hideDropdown("zone-list");
+            };
+            zoneList.appendChild(a);
+        });
+        return;
+    }
+
+    // Caso 2: Filtra as zonas com base no texto digitado
+    uniqueZones
+        .filter((zone) => zone.startsWith(input)) // Filtra zonas que começam com o texto digitado
+        .forEach((zone) => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.textContent = zone;
+            a.onclick = () => {
+                selectZone(zone);
+                hideDropdown("zone-list");
+            };
+            zoneList.appendChild(a);
+        });
+}
+
 // Function to handle zone selection
 function selectZone(zone) {
     const zoneInput = document.getElementById("zone");
     zoneInput.value = zone;
 
+    // Dispara um evento 'input' manualmente para atualizar a lógica
     zoneInput.dispatchEvent(new Event("input"));
+
+    // Atualiza o dropdown para exibir apenas o valor selecionado
+    filterZones();
 }
 
 // Function to show the dropdown
@@ -429,6 +525,20 @@ function getRateTier(weight, rates) {
     // Default to "minimum" if no range matches
     return "minimum";
 }
+
+// Evento para monitorar mudanças no campo de país
+document.getElementById("country").addEventListener("input", () => {
+    const countryInput = document.getElementById("country");
+    const zoneInput = document.getElementById("zone");
+    const zoneList = document.getElementById("zone-list");
+
+    // Se o campo de país estiver vazio, reseta o campo de zona
+    if (countryInput.value.trim() === "") {
+        zoneInput.value = ""; // Limpa o valor da zona
+        zoneInput.disabled = true; // Desativa o campo da zona
+        zoneList.innerHTML = ""; // Limpa a lista de zonas
+    }
+});
 
 // Add event listeners for inputs
 document.getElementById("country").addEventListener("focus", () => {
