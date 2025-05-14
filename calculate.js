@@ -27,6 +27,13 @@ function loadSupplierData() {
         .catch((error) => console.error('Error loading supplier data:', error));
 }
 
+// Function to determine if the transport is international
+function isInternational(country, zone) {
+    return supplierData.some(
+        (item) => item.country === country && item.code === zone && item.rates["<500kgs"] !== undefined
+    );
+}
+
 // Function to populate the "Select Country" dropdown
 function populateCountryDropdown() {
     const countryList = document.getElementById("country-list");
