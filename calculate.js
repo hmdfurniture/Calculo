@@ -332,12 +332,14 @@ function calculateResults() {
     let hasPallet = false;
     let allPalletsHaveLowHeight = true;
     let allPalletsHaveHighHeight = true;
+    let allLengthsValid = true;
     const result = document.getElementById("result");
 
     // Step 1: Check for the presence of boxes and types of pallets
     lines.forEach((line) => {
         const type = line.querySelector(".type").value;
         const height = parseFloat(line.querySelector(".height").value) || 0;
+        const length = parseFloat(line.querySelector(".length").value) || 0;
 
         if (type === "box") {
             hasBox = true;
@@ -345,6 +347,9 @@ function calculateResults() {
             hasPallet = true;
             if (height > 125) {
                 allPalletsHaveLowHeight = false;
+                if (length < 100 || length > 125) {
+                    allLengthsValid = false;
+                }
             } else {
                 allPalletsHaveHighHeight = false;
             }
@@ -371,37 +376,56 @@ function calculateResults() {
     let totalWeight, scaledWeight, rates, rateTier, cost, rateValue;
 
     // Step 2: Calculate volumes (m³ or LDM)
-    lines.forEach((line) => {
-        const width = parseFloat(line.querySelector(".width").value) || 0;
-        const length = parseFloat(line.querySelector(".length").value) || 0;
-        const height = parseFloat(line.querySelector(".height").value) || 0;
-        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
-        const type = line.querySelector(".type").value;
-        const cubicCapacityField = line.querySelector(".cubic-capacity");
+    if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
+        // Calculate LDM for all high pallets
+        lines.forEach((line) => {
+            const type = line.querySelector(".type").value;
+            const width = parseFloat(line.querySelector(".width").value) || 0;
+            const length = parseFloat(line.querySelector(".length").value) || 0;
+            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
 
-        if (type === "box") {
-            const cubicMeters = (width * length * height) / 1000000;
-            const totalForLine = cubicMeters * quantity;
-            totalCubicMeters += totalForLine;
-            cubicCapacityField.value = totalForLine.toFixed(3);
-        } else if (type === "pallet") {
-            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-            const adjustedHeight = height > 125 ? 250 : height;
-            const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
-            const totalForLine = cubicMeters * quantity;
-            totalCubicMeters += totalForLine;
-            cubicCapacityField.value = totalForLine.toFixed(3);
+            if (type === "pallet") {
+                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
+            }
+        });
+
+        if (totalLdm === 0) {
+            result.textContent = "Cannot calculate: No valid LDM dimensions.";
+            return;
         }
-    });
 
-    if (totalCubicMeters === 0 && totalLdm === 0) {
-        result.textContent = "Please fill in dimensions.";
-        return;
-    }
-
-    if (totalLdm > 0 && !hasBox) {
+        // Calculate weight for LDM
         totalWeight = totalLdm * conversionFactors.LDM;
     } else {
+        // Fallback to cubic meter calculation
+        lines.forEach((line) => {
+            const type = line.querySelector(".type").value;
+            const width = parseFloat(line.querySelector(".width").value) || 0;
+            const length = parseFloat(line.querySelector(".length").value) || 0;
+            const height = parseFloat(line.querySelector(".height").value) || 0;
+            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+            const cubicCapacityField = line.querySelector(".cubic-capacity");
+
+            if (type === "box") {
+                const cubicMeters = (width * length * height) / 1000000;
+                const totalForLine = cubicMeters * quantity;
+                totalCubicMeters += totalForLine;
+                cubicCapacityField.value = totalForLine.toFixed(3);
+            } else if (type === "pallet") {
+                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                const adjustedHeight = height > 125 ? 250 : height;
+                const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
+                const totalForLine = cubicMeters * quantity;
+                totalCubicMeters += totalForLine;
+                cubicCapacityField.value = totalForLine.toFixed(3);
+            }
+        });
+
+        if (totalCubicMeters === 0) {
+            result.textContent = "Please fill in dimensions.";
+            return;
+        }
         totalWeight = totalCubicMeters * conversionFactors.m3;
     }
 
@@ -415,93 +439,78 @@ function calculateResults() {
 
     // Logic for national transport
     if (!isTransportInternational) {
-    if (totalWeight <= 50) {
-        // Faixa 1-50
-        scaledWeight = 1;
-        rateValue = rates["1-50"]; // Atribuir o valor da taxa
-        cost = rates["1-50"];
-    } else if (totalWeight <= 100) {
-        // Faixa 51-100
-        scaledWeight = 1;
-        rateValue = rates["51-100"]; // Atribuir o valor da taxa
-        cost = rates["51-100"];
-    } else if (totalWeight <= 200) {
-        // Faixa 101-200
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["101-200"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["101-200"];
-    } else if (totalWeight <= 300) {
-        // Faixa 201-300
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["201-300"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["201-300"];
-    } else if (totalWeight <= 500) {
-        // Faixa 301-500
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["301-500"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["301-500"];
-    } else if (totalWeight <= 750) {
-        // Faixa 501-750 (com lógica especial)
-        if (totalWeight <= 700) {
+        if (totalWeight <= 50) {
+            scaledWeight = 1;
+            rateValue = rates["1-50"];
+            cost = rates["1-50"];
+        } else if (totalWeight <= 100) {
+            scaledWeight = 1;
+            rateValue = rates["51-100"];
+            cost = rates["51-100"];
+        } else if (totalWeight <= 200) {
             scaledWeight = Math.ceil(totalWeight / 100);
-        } else {
-            scaledWeight = 7; // Fixar em 7 entre 701 e 750 kg
-        }
-        rateValue = rates["501-750"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["501-750"];
-    } else if (totalWeight <= 1000) {
-        // Faixa 751-1000 (com lógica especial)
-        if (totalWeight <= 800) {
-            scaledWeight = 8; // Fixar em 8 entre 751 e 800 kg
+            rateValue = rates["101-200"];
+            cost = scaledWeight * rates["101-200"];
+        } else if (totalWeight <= 300) {
+            scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates["201-300"];
+            cost = scaledWeight * rates["201-300"];
+        } else if (totalWeight <= 500) {
+            scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates["301-500"];
+            cost = scaledWeight * rates["301-500"];
+        } else if (totalWeight <= 750) {
+            if (totalWeight <= 700) {
+                scaledWeight = Math.ceil(totalWeight / 100);
+            } else {
+                scaledWeight = 7;
+            }
+            rateValue = rates["501-750"];
+            cost = scaledWeight * rates["501-750"];
+        } else if (totalWeight <= 1000) {
+            if (totalWeight <= 800) {
+                scaledWeight = 8;
+            } else {
+                scaledWeight = Math.ceil(totalWeight / 100);
+            }
+            rateValue = rates["751-1000"];
+            cost = scaledWeight * rates["751-1000"];
+        } else if (totalWeight <= 2000) {
+            scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates["1001-2000"];
+            cost = scaledWeight * rates["1001-2000"];
+        } else if (totalWeight <= 3500) {
+            scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates["2001-3500"];
+            cost = scaledWeight * rates["2001-3500"];
+        } else if (totalWeight <= 5000) {
+            scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates["3501-5000"];
+            cost = scaledWeight * rates["3501-5000"];
         } else {
             scaledWeight = Math.ceil(totalWeight / 100);
+            rateValue = rates[">5000"];
+            cost = scaledWeight * rates[">5000"];
         }
-        rateValue = rates["751-1000"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["751-1000"];
-    } else if (totalWeight <= 2000) {
-        // Faixa 1001-2000
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["1001-2000"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["1001-2000"];
-    } else if (totalWeight <= 3500) {
-        // Faixa 2001-3500
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["2001-3500"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["2001-3500"];
-    } else if (totalWeight <= 5000) {
-        // Faixa 3501-5000
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates["3501-5000"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates["3501-5000"];
     } else {
-        // Faixa >5000
-        scaledWeight = Math.ceil(totalWeight / 100);
-        rateValue = rates[">5000"]; // Atribuir o valor da taxa
-        cost = scaledWeight * rates[">5000"];
+        const roundedWeight = Math.ceil(totalWeight / 100) * 100;
+        scaledWeight = roundedWeight / 100;
+        rateTier = getRateTier(totalWeight, rates, isTransportInternational);
+        rateValue = rates[rateTier];
+        cost = scaledWeight * rateValue;
     }
-} else {
-    // Lógica para transporte internacional permanece inalterada
-    const roundedWeight = Math.ceil(totalWeight / 100) * 100;
-    scaledWeight = roundedWeight / 100;
-    rateTier = getRateTier(totalWeight, rates, isTransportInternational);
-    rateValue = rates[rateTier]; // Atribuir o valor da taxa
-    cost = scaledWeight * rateValue;
-}
 
-    // Apply the minimum rate if necessary
     cost = cost < rates.minimum ? rates.minimum : cost;
 
-    // Display the results
     result.innerHTML = `
-        <p>Total Cubic Meters: ${totalCubicMeters.toFixed(3)} m³</p>
+        <p>Total ${totalLdm > 0 ? "LDM" : "Cubic Meters"}: ${totalLdm > 0 ? totalLdm.toFixed(2) : totalCubicMeters.toFixed(3)} ${totalLdm > 0 ? "m" : "m³"}</p>
         <p>Total Weight: ${totalWeight.toFixed(2)} kg</p>
-        ${isTransportInternational ? `<p>Rounded Weight: ${Math.ceil(totalWeight / 100) * 100} kg</p>` : ""}
+        ${isTransportInternational && totalLdm === 0 ? `<p>Rounded Weight: ${Math.ceil(totalWeight / 100) * 100} kg</p>` : ""}
         <p>Scaled Weight: ${scaledWeight}</p>
         <p>Rate Value: €${rateValue ? rateValue.toFixed(2) : "N/A"}</p>
         <p>Final Cost: €${cost.toFixed(2)}</p>
     `;
 }
-
 function getRateTier(weight, rates, isInternational) {
     // Excluir a chave "minimum" da lógica de seleção
     const rateKeys = Object.keys(rates).filter(key => key !== "minimum");
