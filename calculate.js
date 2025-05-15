@@ -324,6 +324,7 @@ function removeHighlight(field) {
     field.classList.remove("highlight");
 }
 
+// Function to validate all lines and highlight missing fields
 function calculateResults() {
     const lines = document.querySelectorAll(".dimension-line");
     let totalCubicMeters = 0;
@@ -428,6 +429,9 @@ function calculateResults() {
         }
         totalWeight = totalCubicMeters * conversionFactors.m3;
     }
+
+    // Remaining logic for calculating rates and displaying the result...
+}
 
     // Find the corresponding rates
     rates = supplierData.find((item) => item.country === country && item.code === zone)?.rates;
