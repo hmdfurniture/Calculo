@@ -5,7 +5,8 @@
     <title>Administração de Destinos de Transporte</title>
     <style>
         body { font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        .scroll-table { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; min-width: 900px; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
         th { background: #ececec; }
         input[type="text"], input[type="number"] { width: 80px; }
@@ -32,7 +33,7 @@
         <button onclick="loadJson()">Carregar</button>
         <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
     </div>
-    <div id="table-container"></div>
+    <div class="scroll-table"><div id="table-container"></div></div>
     <div style="margin-top:12px">
         <button onclick="addRow()">Adicionar novo destino</button>
         <button onclick="downloadJson()">Descarregar JSON</button>
@@ -46,6 +47,7 @@
         let allPriceKeys = [];
         let editLineIdx = null;
         let editLineBackup = null;
+        let confirmDeleteIdx = null;
 
         function loadJson() {
             const select = document.getElementById('json-select');
@@ -53,6 +55,7 @@
             clearMsg();
             editLineIdx = null;
             editLineBackup = null;
+            confirmDeleteIdx = null;
             if (file === '_new_') {
                 const nome = prompt('Nome do novo ficheiro (ex: novo_ficheiro.json):');
                 if (!nome || !nome.endsWith('.json')) {
@@ -130,6 +133,7 @@
 
             currentJson.destinations.forEach((dest, idx) => {
                 const isEditing = (editLineIdx === idx);
+                const isConfirmDelete = (confirmDeleteIdx === idx);
                 html += `<tr class="${isEditing ? '' : 'readonly'}">`;
                 // País
                 html += `<td><input type="text" value="${htmlEscape(dest.country ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
@@ -152,6 +156,10 @@
                 if (isEditing) {
                     html += `<button onclick="saveEditRow(${idx})">Gravar</button>`;
                     html += `<button onclick="cancelEditRow()">Cancelar</button>`;
+                } else if (isConfirmDelete) {
+                    html += `<span>Tem a certeza?</span> `;
+                    html += `<button onclick="removeRow(${idx})">Sim</button>`;
+                    html += `<button onclick="cancelDeleteRow()">Não</button>`;
                 } else {
                     html += `<button onclick="editRow(${idx})">Editar</button>`;
                     if (currentJson.destinations.length > 1) {
@@ -165,32 +173,25 @@
             container.innerHTML = html;
         }
 
-        // Util para escapar HTML nos valores dos inputs
         function htmlEscape(s) {
             return (s || '').replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
         }
 
-        // Só permite números e no máximo 1 ponto
         function onlyAllowNumericWithSingleDot(input) {
             let v = input.value;
-            // remove tudo que não seja dígito ou ponto
             v = v.replace(/[^0-9.]/g, '');
-            // só permite um ponto
             let parts = v.split('.');
             if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
             input.value = v;
         }
 
-        // Quando clica em Editar
         function editRow(idx) {
-            if (editLineIdx !== null) return; // já há uma linha em edição
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return; // já há uma linha em edição/confirmação
             editLineIdx = idx;
-            // Faz backup profundo da linha
             editLineBackup = JSON.parse(JSON.stringify(currentJson.destinations[idx]));
             renderTable();
         }
 
-        // Durante edição, atualiza o buffer
         function rowBufferChange(field, value, key) {
             if (editLineIdx === null) return;
             if (field === 'rates') {
@@ -201,9 +202,7 @@
             }
         }
 
-        // Gravar as alterações da linha
         function saveEditRow(idx) {
-            // Valida obrigatórios
             if (!editLineBackup.country || editLineBackup.country.trim() === '') {
                 showErr('País não pode ficar vazio!');
                 return;
@@ -227,7 +226,6 @@
                     return;
                 }
             }
-            // Grava no array original
             currentJson.destinations[idx] = JSON.parse(JSON.stringify(editLineBackup));
             editLineIdx = null;
             editLineBackup = null;
@@ -235,7 +233,6 @@
             clearMsg();
         }
 
-        // Cancelar edição da linha
         function cancelEditRow() {
             editLineIdx = null;
             editLineBackup = null;
@@ -243,24 +240,30 @@
             clearMsg();
         }
 
-        // Apagar linha com popup de confirmação
         function confirmDeleteRow(idx) {
-            if (window.confirm('Tem a certeza que deseja apagar esta linha?')) {
-                removeRow(idx);
-            }
+            if (editLineIdx !== null) return; // não permite apagar enquanto edita
+            confirmDeleteIdx = idx;
+            renderTable();
+        }
+
+        function cancelDeleteRow() {
+            confirmDeleteIdx = null;
+            renderTable();
         }
 
         function removeRow(idx) {
             if (currentJson.destinations.length <= 1) {
                 alert('Pelo menos um destino tem de existir!');
+                confirmDeleteIdx = null;
                 return;
             }
             currentJson.destinations.splice(idx, 1);
+            confirmDeleteIdx = null;
             renderTable();
         }
 
         function addRow() {
-            if (editLineIdx !== null) return; // não permite adicionar enquanto edita
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
             const emptyRates = {};
             allPriceKeys.forEach(key => { emptyRates[key] = ''; });
             currentJson.destinations.push({
@@ -278,7 +281,6 @@
                 showErr("Nada para exportar!");
                 return;
             }
-            // Validação antes de exportar!
             for (let i=0; i<currentJson.destinations.length; i++) {
                 const d = currentJson.destinations[i];
                 if (!d.country || d.country.trim() === '') {
@@ -304,7 +306,6 @@
                     }
                 }
             }
-            // Ordenar países/códigos
             currentJson.destinations.sort((a, b) => {
                 let pa = (a.country || '').toLowerCase();
                 let pb = (b.country || '').toLowerCase();
@@ -324,7 +325,6 @@
             link.click();
             document.body.removeChild(link);
             showMsg("Ficheiro descarregado! Sobe-o manualmente para o repositório.");
-            // Limpa e volta ao estado inicial
             setTimeout(() => {
                 document.getElementById('json-select').value = "";
                 document.getElementById('table-container').innerHTML = "";
@@ -333,11 +333,12 @@
                 currentFilename = '';
                 editLineIdx = null;
                 editLineBackup = null;
+                confirmDeleteIdx = null;
             }, 500);
         }
 
         function addEscalao() {
-            if (editLineIdx !== null) return; // não permite adicionar enquanto edita
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
             let novaCol = prompt('Nome do novo escalão/coluna (ex: "1001-2000" ou "minimum")');
             if (!novaCol) return;
             novaCol = novaCol.trim();
