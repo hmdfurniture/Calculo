@@ -1,21 +1,26 @@
-// dataLoader.js
-window.supplierData = [];
-window.conversionFactorsInternational = {};
-window.conversionFactorsNational = {};
+let supplierData = [];
+let conversionFactorsInternational = {};
+let conversionFactorsNational = {};
 
-window.loadSupplierData = function(callback) {
+function loadSupplierData() {
     Promise.all([
-        fetch('./Tables/xbslog_international.json').then(response => response.json()),
-        fetch('./Tables/xbslog_nacional.json').then(response => response.json())
+        fetch('./Tables/xbslog_international.json').then((response) => response.json()),
+        fetch('./Tables/xbslog_nacional.json').then((response) => response.json())
     ])
     .then(([internationalData, nacionalData]) => {
-        window.supplierData = [
+        supplierData = [
             ...internationalData.destinations,
             ...nacionalData.destinations
         ];
-        window.conversionFactorsInternational = internationalData.conversion || {};
-        window.conversionFactorsNational = nacionalData.conversion || {};
-        if (typeof callback === "function") callback();
+        conversionFactorsInternational = internationalData.conversion;
+        conversionFactorsNational = nacionalData.conversion;
+        populateCountryDropdown();
     })
     .catch((error) => console.error('Error loading supplier data:', error));
-};
+}
+
+function isInternational(country, zone) {
+    return supplierData.some(
+        (item) => item.country === country && item.code === zone && item.rates["<500kgs"] !== undefined
+    );
+}
