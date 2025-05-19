@@ -17,6 +17,7 @@
         .warn { color: #b90000; font-size: 90%;}
         .conversion-section { margin: 20px 0 10px 0; background: #f6f6f6; padding: 10px; border-radius: 6px;}
         .conversion-section label { margin-right: 10px; }
+        .readonly input { background: #f5f5f5; border: none; }
     </style>
 </head>
 <body>
@@ -43,11 +44,15 @@
         let currentJson = null;
         let currentFilename = '';
         let allPriceKeys = [];
+        let editLineIdx = null;
+        let editLineBackup = null;
 
         function loadJson() {
             const select = document.getElementById('json-select');
             const file = select.value;
             clearMsg();
+            editLineIdx = null;
+            editLineBackup = null;
             if (file === '_new_') {
                 const nome = prompt('Nome do novo ficheiro (ex: novo_ficheiro.json):');
                 if (!nome || !nome.endsWith('.json')) {
@@ -83,7 +88,6 @@
                 })
                 .then(data => {
                     currentJson = data;
-                    // Garante pelo menos 1 destino
                     if (!Array.isArray(currentJson.destinations) || currentJson.destinations.length === 0) {
                         currentJson.destinations = [{
                             country: '',
@@ -92,7 +96,6 @@
                             rates: {}
                         }];
                     }
-                    // Garante bloco de conversão
                     if (!currentJson.conversion) {
                         currentJson.conversion = { m3: "", LDM: "" };
                     }
@@ -112,7 +115,6 @@
                 container.innerHTML = '<p>Nenhum dado carregado.</p>';
                 return;
             }
-
             // Descobrir todos os escalões de preços existentes no ficheiro!
             const allKeys = new Set();
             currentJson.destinations.forEach(dest => {
@@ -121,26 +123,40 @@
             });
             allPriceKeys = Array.from(allKeys);
 
-            // Cabeçalho
             let html = '<table><tr>';
             html += '<th>País</th><th>Código</th><th>Nome</th>';
             allPriceKeys.forEach(key => html += `<th>${key}</th>`);
             html += '<th class="actions">Ações</th></tr>';
 
-            // Linhas
             currentJson.destinations.forEach((dest, idx) => {
-                html += `<tr>
-                    <td><input type="text" value="${dest.country ?? ''}" onchange="editCell(${idx},'country',this.value)"></td>
-                    <td><input type="text" value="${dest.code ?? ''}" onchange="editCell(${idx},'code',this.value)"></td>
-                    <td><input type="text" value="${dest.name ?? ''}" onchange="editCell(${idx},'name',this.value)"></td>`;
+                const isEditing = (editLineIdx === idx);
+                html += `<tr class="${isEditing ? '' : 'readonly'}">`;
+                // País
+                html += `<td><input type="text" value="${htmlEscape(dest.country ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
+                // Código
+                html += `<td><input type="text" value="${htmlEscape(dest.code ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
+                // Nome
+                html += `<td><input type="text" value="${htmlEscape(dest.name ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
+                // Escalões/rates
                 allPriceKeys.forEach(key => {
                     let val = '';
                     if (dest.rates && dest.rates[key] !== undefined) val = dest.rates[key];
-                    html += `<td><input type="text" pattern="^[0-9]+(\\.[0-9]+)?$" value="${val}" onchange="editRate(${idx},'${key}',this.value)" oninput="this.value=this.value.replace(/[^0-9.]/g,'')"></td>`;
+                    html += `<td><input type="text" 
+                        value="${htmlEscape(val)}" 
+                        ${isEditing ? '' : 'readonly'}
+                        oninput="onlyAllowNumericWithSingleDot(this)" 
+                        onchange="rowBufferChange('rates', this.value, '${key}')"></td>`;
                 });
+                // Ações
                 html += `<td class="actions">`;
-                if (currentJson.destinations.length > 1) {
-                    html += `<button onclick="removeRow(${idx})">Apagar</button>`;
+                if (isEditing) {
+                    html += `<button onclick="saveEditRow(${idx})">Gravar</button>`;
+                    html += `<button onclick="cancelEditRow()">Cancelar</button>`;
+                } else {
+                    html += `<button onclick="editRow(${idx})">Editar</button>`;
+                    if (currentJson.destinations.length > 1) {
+                        html += `<button onclick="confirmDeleteRow(${idx})">Apagar</button>`;
+                    }
                 }
                 html += `</td></tr>`;
             });
@@ -149,44 +165,102 @@
             container.innerHTML = html;
         }
 
-        function renderConversion() {
-            const container = document.getElementById('conversion-container');
-            if (!currentJson || !currentJson.conversion) {
-                container.innerHTML = '';
+        // Util para escapar HTML nos valores dos inputs
+        function htmlEscape(s) {
+            return (s || '').replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+        }
+
+        // Só permite números e no máximo 1 ponto
+        function onlyAllowNumericWithSingleDot(input) {
+            let v = input.value;
+            // remove tudo que não seja dígito ou ponto
+            v = v.replace(/[^0-9.]/g, '');
+            // só permite um ponto
+            let parts = v.split('.');
+            if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+            input.value = v;
+        }
+
+        // Quando clica em Editar
+        function editRow(idx) {
+            if (editLineIdx !== null) return; // já há uma linha em edição
+            editLineIdx = idx;
+            // Faz backup profundo da linha
+            editLineBackup = JSON.parse(JSON.stringify(currentJson.destinations[idx]));
+            renderTable();
+        }
+
+        // Durante edição, atualiza o buffer
+        function rowBufferChange(field, value, key) {
+            if (editLineIdx === null) return;
+            if (field === 'rates') {
+                editLineBackup.rates = editLineBackup.rates || {};
+                editLineBackup.rates[key] = value;
+            } else {
+                editLineBackup[field] = value;
+            }
+        }
+
+        // Gravar as alterações da linha
+        function saveEditRow(idx) {
+            // Valida obrigatórios
+            if (!editLineBackup.country || editLineBackup.country.trim() === '') {
+                showErr('País não pode ficar vazio!');
                 return;
             }
-            let html = `<div class="conversion-section">
-                <b>Conversão (final do ficheiro):</b>
-                <label>M3: <input id="conv-m3" type="number" value="${currentJson.conversion.m3 ?? ''}" step="any" onchange="editConversion('m3', this.value)"></label>
-                <label>LDM: <input id="conv-ldm" type="number" value="${currentJson.conversion.LDM ?? ''}" step="any" onchange="editConversion('LDM', this.value)"></label>
-            </div>`;
-            container.innerHTML = html;
+            if (!editLineBackup.code || editLineBackup.code.trim() === '') {
+                showErr('Código não pode ficar vazio!');
+                return;
+            }
+            if (!editLineBackup.rates || Object.keys(editLineBackup.rates).length === 0) {
+                showErr('Pelo menos um escalão é obrigatório.');
+                return;
+            }
+            for (const key of allPriceKeys) {
+                const val = editLineBackup.rates[key];
+                if (val === undefined || val === '') {
+                    showErr('Escalão "'+key+'" não pode ficar vazio.');
+                    return;
+                }
+                if (!/^[0-9]+(\.[0-9]+)?$/.test(val)) {
+                    showErr('Escalão "'+key+'" só pode conter números e ponto.');
+                    return;
+                }
+            }
+            // Grava no array original
+            currentJson.destinations[idx] = JSON.parse(JSON.stringify(editLineBackup));
+            editLineIdx = null;
+            editLineBackup = null;
+            renderTable();
+            clearMsg();
         }
 
-        function editCell(idx, field, value) {
-            currentJson.destinations[idx][field] = value;
+        // Cancelar edição da linha
+        function cancelEditRow() {
+            editLineIdx = null;
+            editLineBackup = null;
+            renderTable();
+            clearMsg();
         }
 
-        function editRate(idx, rate, value) {
-            if (!currentJson.destinations[idx].rates) currentJson.destinations[idx].rates = {};
-            // Aceita valor vazio (remove o escalão)
-            if (value === '') delete currentJson.destinations[idx].rates[rate];
-            else currentJson.destinations[idx].rates[rate] = value;
+        // Apagar linha com popup de confirmação
+        function confirmDeleteRow(idx) {
+            if (window.confirm('Tem a certeza que deseja apagar esta linha?')) {
+                removeRow(idx);
+            }
         }
 
         function removeRow(idx) {
-            // Só permite apagar se houver mais de 1 destino!
             if (currentJson.destinations.length <= 1) {
                 alert('Pelo menos um destino tem de existir!');
                 return;
             }
-            if (confirm('Deseja remover este destino?')) {
-                currentJson.destinations.splice(idx, 1);
-                renderTable();
-            }
+            currentJson.destinations.splice(idx, 1);
+            renderTable();
         }
 
         function addRow() {
+            if (editLineIdx !== null) return; // não permite adicionar enquanto edita
             const emptyRates = {};
             allPriceKeys.forEach(key => { emptyRates[key] = ''; });
             currentJson.destinations.push({
@@ -224,13 +298,24 @@
                         showErr(`Linha ${i+1}: Escalão "${key}" não pode ficar vazio.`);
                         return;
                     }
-                    // Só pode ser número válido (com ou sem ponto)
                     if (!/^[0-9]+(\.[0-9]+)?$/.test(d.rates[key])) {
                         showErr(`Linha ${i+1}: Escalão "${key}" só pode conter números e ponto.`);
                         return;
                     }
                 }
             }
+            // Ordenar países/códigos
+            currentJson.destinations.sort((a, b) => {
+                let pa = (a.country || '').toLowerCase();
+                let pb = (b.country || '').toLowerCase();
+                if (pa < pb) return -1;
+                if (pa > pb) return 1;
+                let ca = (a.code || '').toLowerCase();
+                let cb = (b.code || '').toLowerCase();
+                if (ca < cb) return -1;
+                if (ca > cb) return 1;
+                return 0;
+            });
             const blob = new Blob([JSON.stringify(currentJson, null, 2)], {type:'application/json'});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -239,9 +324,20 @@
             link.click();
             document.body.removeChild(link);
             showMsg("Ficheiro descarregado! Sobe-o manualmente para o repositório.");
+            // Limpa e volta ao estado inicial
+            setTimeout(() => {
+                document.getElementById('json-select').value = "";
+                document.getElementById('table-container').innerHTML = "";
+                document.getElementById('conversion-container').innerHTML = "";
+                currentJson = null;
+                currentFilename = '';
+                editLineIdx = null;
+                editLineBackup = null;
+            }, 500);
         }
 
         function addEscalao() {
+            if (editLineIdx !== null) return; // não permite adicionar enquanto edita
             let novaCol = prompt('Nome do novo escalão/coluna (ex: "1001-2000" ou "minimum")');
             if (!novaCol) return;
             novaCol = novaCol.trim();
@@ -256,6 +352,20 @@
                 dest.rates[novaCol] = '';
             });
             renderTable();
+        }
+
+        function renderConversion() {
+            const container = document.getElementById('conversion-container');
+            if (!currentJson || !currentJson.conversion) {
+                container.innerHTML = '';
+                return;
+            }
+            let html = `<div class="conversion-section">
+                <b>Conversão (final do ficheiro):</b>
+                <label>M3: <input id="conv-m3" type="number" value="${currentJson.conversion.m3 ?? ''}" step="any" onchange="editConversion('m3', this.value)"></label>
+                <label>LDM: <input id="conv-ldm" type="number" value="${currentJson.conversion.LDM ?? ''}" step="any" onchange="editConversion('LDM', this.value)"></label>
+            </div>`;
+            container.innerHTML = html;
         }
 
         function editConversion(field, value) {
