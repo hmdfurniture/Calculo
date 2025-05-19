@@ -136,11 +136,11 @@
                 const isConfirmDelete = (confirmDeleteIdx === idx);
                 html += `<tr class="${isEditing ? '' : 'readonly'}">`;
                 // País
-                html += `<td><input type="text" value="${htmlEscape(dest.country ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
+                html += `<td><input type="text" value="${htmlEscape(dest.country)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
                 // Código
-                html += `<td><input type="text" value="${htmlEscape(dest.code ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
+                html += `<td><input type="text" value="${htmlEscape(dest.code)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
                 // Nome
-                html += `<td><input type="text" value="${htmlEscape(dest.name ?? '')}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
+                html += `<td><input type="text" value="${htmlEscape(dest.name)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
                 // Escalões/rates
                 allPriceKeys.forEach(key => {
                     let val = '';
@@ -173,8 +173,13 @@
             container.innerHTML = html;
         }
 
+        // Corrigido para garantir sempre string
         function htmlEscape(s) {
-            return (s || '').replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+            return String(s === undefined || s === null ? '' : s)
+                .replace(/&/g,"&amp;")
+                .replace(/"/g,"&quot;")
+                .replace(/</g,"&lt;")
+                .replace(/>/g,"&gt;");
         }
 
         function onlyAllowNumericWithSingleDot(input) {
@@ -186,7 +191,7 @@
         }
 
         function editRow(idx) {
-            if (editLineIdx !== null || confirmDeleteIdx !== null) return; // já há uma linha em edição/confirmação
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
             editLineIdx = idx;
             editLineBackup = JSON.parse(JSON.stringify(currentJson.destinations[idx]));
             renderTable();
@@ -241,7 +246,7 @@
         }
 
         function confirmDeleteRow(idx) {
-            if (editLineIdx !== null) return; // não permite apagar enquanto edita
+            if (editLineIdx !== null) return;
             confirmDeleteIdx = idx;
             renderTable();
         }
