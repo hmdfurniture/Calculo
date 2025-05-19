@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Administração de Destinos</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+        th { background: #ececec; }
+        input { width: 80px; }
+        .actions button { margin: 0 2px; }
+        #json-select { margin-bottom: 10px; }
+        .file-section { margin-bottom: 18px; }
+        .msg { color: green; margin-left: 10px;}
+        .warn { color: #b90000; font-size: 90%;}
+    </style>
+</head>
+<body>
+    <h2>Administração de Destinos de Transporte</h2>
+    <div class="file-section">
+        <label for="json-select">Selecionar ficheiro:</label>
+        <select id="json-select">
+            <option value="xbslog_nacional.json">xbslog_nacional.json</option>
+            <option value="xbslog_international.json">xbslog_international.json</option>
+            <option value="_new_">Criar novo ficheiro...</option>
+        </select>
+        <button onclick="loadJson()">Carregar</button>
+        <span class="warn">(Após criar um novo ficheiro, não te esqueças de descarregar e subir manualmente ao repositório!)</span>
+    </div>
+    <div id="table-container"></div>
+    <div style="margin-top:12px">
+        <button onclick="addRow()">Adicionar novo destino</button>
+        <button onclick="downloadJson()">Descarregar JSON</button>
+        <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
+        <span id="msg" class="msg"></span>
+    </div>
+    <script>
+        let currentJson = null;
+        let currentFilename = '';
+        let allPriceKeys = [];
+
+        function loadJson() {
+            const select = document.getElementById('json-select');
+            const file = select.value;
+            document.getElementById('msg').textContent = "";
+            if (file === '_new_') {
+                const nome = prompt('Nome do novo ficheiro (ex: novo_ficheiro.json):');
+                if (!nome || !nome.endsWith('.json')) {
+                    alert('Nome inválido. O nome deve terminar em .json');
+                    select.value = "xbslog_nacional.json";
+                    return;
+                }
+                currentFilename = nome;
+                currentJson = {
+                    name: nome.replace('.json',''),
+                    type: '',
+                    destinations: []
+                };
+                allPriceKeys = [];
+                renderTable();
+                return;
+            }
+            currentFilename = file;
+            fetch('Tables/' + file)
+                .then(r => {
+                    if (!r.ok) throw new Error("Ficheiro não encontrado.");
+                    return r.json()
+                })
+                .then(data => {
+                    currentJson = data;
+                    renderTable();
+                })
+                .catch(err => {
+                    document.getElementById('table-container').innerHTML = '<p style="color:red;">Erro ao carregar o ficheiro: ' + err.message + '</p>';
+                    currentJson = null;
+                });
+        }
+
+        function renderTable() {
+            const container = document.getElementById('table-container');
+            if (!currentJson || !Array.isArray(currentJson.destinations)) {
+                container.innerHTML = '<p>Nenhum dado carregado.</p>';
+                return;
+            }
+
+            // Descobrir todos os escalões de preços existentes no ficheiro!
+            const allKeys = new Set();
+            currentJson.destinations.forEach(dest => {
+                if (dest.rates)
+                    Object.keys(dest.rates).forEach(k => allKeys.add(k));
+            });
+            allPriceKeys = Array.from(allKeys);
+
+            // Cabeçalho
+            let html = '<table><tr>';
+            html += '<th>País</th><th>Código</th>';
+            allPriceKeys.forEach(key => html += `<th>${key}</th>`);
+            html += '<th class="actions">Ações</th></tr>';
+
+            // Linhas
+            currentJson.destinations.forEach((dest, idx) => {
+                html += `<tr>
+                    <td><input value="${dest.country ?? ''}" onchange="editCell(${idx},'country',this.value)"></td>
+                    <td><input value="${dest.code ?? ''}" onchange="editCell(${idx},'code',this.value)"></td>`;
+                allPriceKeys.forEach(key => {
+                    let val = '';
+                    if (dest.rates && dest.rates[key] !== undefined) val = dest.rates[key];
+                    html += `<td><input value="${val}" onchange="editRate(${idx},'${key}',this.value)"></td>`;
+                });
+                html += `<td class="actions">
+                    <button onclick="removeRow(${idx})">Apagar</button>
+                </td></tr>`;
+            });
+
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        function editCell(idx, field, value) {
+            currentJson.destinations[idx][field] = value;
+        }
+
+        function editRate(idx, rate, value) {
+            if (!currentJson.destinations[idx].rates) currentJson.destinations[idx].rates = {};
+            // Aceita valor vazio (remove o escalão)
+            if (value === '') delete currentJson.destinations[idx].rates[rate];
+            else currentJson.destinations[idx].rates[rate] = isNaN(value) || value.trim() === '' ? value : Number(value);
+        }
+
+        function removeRow(idx) {
+            if (confirm('Deseja remover este destino?')) {
+                currentJson.destinations.splice(idx, 1);
+                renderTable();
+            }
+        }
+
+        function addRow() {
+            const emptyRates = {};
+            allPriceKeys.forEach(key => { emptyRates[key] = ''; });
+            currentJson.destinations.push({
+                country: '',
+                code: '',
+                name: '',
+                rates: emptyRates
+            });
+            renderTable();
+        }
+
+        function downloadJson() {
+            if (!currentJson) {
+                alert("Nada para exportar!");
+                return;
+            }
+            const blob = new Blob([JSON.stringify(currentJson, null, 2)], {type:'application/json'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = currentFilename || 'destinos.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            document.getElementById('msg').textContent = "Ficheiro descarregado! Sobe-o manualmente para o repositório.";
+            setTimeout(()=>{document.getElementById('msg').textContent=''},3000);
+        }
+
+        function addEscalao() {
+            let novaCol = prompt('Nome do novo escalão/coluna (ex: "1001-2000" ou "minimum")');
+            if (!novaCol) return;
+            novaCol = novaCol.trim();
+            if (!novaCol) return;
+            if (allPriceKeys.includes(novaCol)) {
+                alert("Esse escalão já existe!");
+                return;
+            }
+            allPriceKeys.push(novaCol);
+            currentJson.destinations.forEach(dest => {
+                if (!dest.rates) dest.rates = {};
+                dest.rates[novaCol] = '';
+            });
+            renderTable();
+        }
+    </script>
+</body>
+</html>
