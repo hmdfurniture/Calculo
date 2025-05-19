@@ -375,29 +375,33 @@ function calculateResults() {
 
     let totalWeight, scaledWeight, rates, rateTier, cost, rateValue;
 
-    // Step 2: Calculate volumes (m³ or LDM)
-    if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
-        // Calculate LDM for all high pallets
-        lines.forEach((line) => {
-            const type = line.querySelector(".type").value;
-            const width = parseFloat(line.querySelector(".width").value) || 0;
-            const length = parseFloat(line.querySelector(".length").value) || 0;
-            const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+// Step 2: Calculate volumes (m³ or LDM)
+if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
+    // Calculate LDM for all high pallets
+    lines.forEach((line) => {
+        const type = line.querySelector(".type").value;
+        const width = parseFloat(line.querySelector(".width").value) || 0;
+        const length = parseFloat(line.querySelector(".length").value) || 0;
+        const quantity = parseInt(line.querySelector(".quantity").value, 10) || 0;
+        const volumetricWeightField = line.querySelector(".cubic-capacity"); // Field displaying "Volume (m³)" or "LDM"
 
-            if (type === "pallet") {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
-            }
-        });
+        if (type === "pallet") {
+            const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+            totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
 
-        if (totalLdm === 0) {
-            result.textContent = "Cannot calculate: No valid LDM dimensions.";
-            return;
+            // Update the field to show "LDM"
+            volumetricWeightField.value = "LDM";
         }
+    });
 
-        // Calculate weight for LDM
-        totalWeight = totalLdm * conversionFactors.LDM;
-    } else {
+    if (totalLdm === 0) {
+        result.textContent = "Cannot calculate: No valid LDM dimensions.";
+        return;
+    }
+
+    // Calculate weight for LDM
+    totalWeight = totalLdm * conversionFactors.LDM;
+} else {
         // Fallback to cubic meter calculation
         lines.forEach((line) => {
             const type = line.querySelector(".type").value;
