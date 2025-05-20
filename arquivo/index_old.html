@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .login-container {
+            border: 1px solid #ccc;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            width: 300px; /* Increased width */
+            text-align: center; /* Center-align text */
+        }
+        .login-container h1 {
+            margin-bottom: 30px;
+            font-size: 24px; /* Increased font size */
+        }
+        .login-container input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px; /* Increased font size */
+        }
+        .login-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Hardcoded credentials for testing purposes
+            if (username === 'a' && password === 'b') {
+                // Generate a session token (for demonstration purposes, we'll use a simple string)
+                const sessionToken = 'your-session-token';
+                
+                // Store the session token in local storage
+                localStorage.setItem('sessionToken', sessionToken);
+
+                // Redirect to the main page
+                window.location.href = 'main.html';
+            } else {
+                alert('Invalid username or password.');
+            }
+        }
+
+        // Check if the user is already logged in
+        window.onload = function() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) {
+                // Redirect to the main page
+                window.location.href = 'main.html';
+            }
+        }
+    </script>
+</body>
+</html>
