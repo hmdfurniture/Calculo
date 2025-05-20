@@ -5,15 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
-        /* ... (todo o CSS original, sem alterações) ... */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
             display: flex;
             position: relative;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Allow wrapping for smaller screens */
         }
-        /* ... resto do CSS igual ao teu ... */
+        .form-container {
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
+        }
+        .map-container {
+            flex: 1 1 50%; /* Take 50% of the available width */
+            max-width: 600px; /* Prevent stretching too wide */
+            padding-left: 20px;
+        }
+        .map {
+            height: 500px;
+            width: 100%;
+            background-color: white;
+        }
+        .form-group {
+            display: flex;
+            align-items: center; /* Align dropdowns with the logout button */
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px; /* Add space below the dropdowns */
+        }
+        .header-row, .dimension-line {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .dimension-line {
+            background-color: #f9f9f9;
+            padding: 2px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        .dimension-line:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .dimension-line > div, .header-row > div {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center; /* Align labels with input fields */
+        }
+        input[type="text"], select, input.cubic-capacity, button.remove-button {
+            width: 70px;
+            height: 25px;
+            padding: 4px 6px;
+            box-sizing: border-box;
+        }
+        input[type="number"] {
+            width: 70px;
+            height: 25px;
+            padding: 4px 6px;
+            box-sizing: border-box;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .remove-button {
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 4px 6px;
+            height: 25px;
+        }
+        .remove-button:hover {
+            background-color: #FF4500;
+        }
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 25px;
+            padding: 2px;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #FF4500;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 4px;
+            height: 25px;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .highlight {
+            border-color: red;
+        }
+
+        /* Add separation between country/zone and the first line */
+        #dimension-container {
+            margin-top: 20px; /* Add space above the input line */
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Stack form and map vertically */
+            }
+            .form-container, .map-container {
+                flex: 1 1 100%; /* Take full width */
+                max-width: none; /* Allow full width stacking */
+                padding-left: 0; /* Remove map padding for smaller screens */
+            }
+            .map {
+                height: 300px; /* Reduce map height for smaller screens */
+            }
+        }
+        @media (max-width: 480px) {
+            .logout-button {
+                width: 100%; /* Full width logout button on very small screens */
+                position: static; /* Adjust position */
+                margin-bottom: 10px;
+            }
+            input[type="text"], select, input.cubic-capacity, button.remove-button {
+                width: 100%; /* Full width inputs for mobile */
+            }
+            input[type="number"] {
+                width: 100%; /* Full width number inputs for mobile */
+            }
+            button {
+                width: 100%; /* Full width buttons for mobile */
+            }
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        /* FOOTER FIXO NO CANTO INFERIOR DIREITO */
         footer {
             position: fixed;
             bottom: 0;
@@ -107,7 +285,7 @@
     <script src="js/validation.js"></script>
     <script src="js/calculator.js"></script>
     <script src="js/main.js"></script>
-    <!-- Carregamento dinâmico dos scripts de cálculo -->
+    <!-- Carregamento dinâmico dos scripts de cálculo (único extra face ao v5) -->
     <script>
     function loadScript(src) {
         return new Promise((resolve, reject) => {
