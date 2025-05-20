@@ -70,3 +70,55 @@ document.getElementById("zone").addEventListener("blur", () => {
 
 // Carregar dados ao iniciar a página
 window.onload = loadSupplierData;
+
+// Função de cálculo central dinâmica
+function calculateResults() {
+    // 1. Recolher dimensões
+    const lines = document.querySelectorAll(".dimension-line");
+    const dimensoes = Array.from(lines).map(line => ({
+        type: line.querySelector(".type").value,
+        width: parseFloat(line.querySelector(".width").value),
+        length: parseFloat(line.querySelector(".length").value),
+        height: parseFloat(line.querySelector(".height").value),
+        quantity: parseInt(line.querySelector(".quantity").value, 10)
+    }));
+
+    // 2. Obter país e zona selecionados
+    const country = document.getElementById("country").value;
+    const zone = document.getElementById("zone").value;
+
+    // 3. Determinar destinos e tabelas ativas
+    const destinos = [];
+    tables.forEach(table => {
+        const destino = table.destinations.find(dest => dest.country === country && dest.code === zone);
+        if (destino) destinos.push({ table, destino });
+    });
+
+    // 4. Cálculo dinâmico
+    const resultados = calcularParaTodasTabelas(destinos, dimensoes);
+
+    // 5. Mostrar resultados
+    const resultDiv = document.getElementById("result");
+    if (resultados.length === 0) {
+        resultDiv.innerHTML = "<p>Nenhuma tabela/cálculo disponível para este destino.</p>";
+        return;
+    }
+    let html = "";
+    resultados.forEach(r => {
+        if (r.resultado.erro) {
+            html += `<div class="resultado-bloco"><strong>${r.tabela}:</strong> ${r.resultado.erro}</div>`;
+        } else {
+            html += `<div class="resultado-bloco">
+                <strong>${r.tabela}:</strong>
+                <p>Total LDM: ${r.resultado.totalLdm?.toFixed(2) ?? "0"}</p>
+                <p>Total m³: ${r.resultado.totalCubicMeters?.toFixed(3) ?? "0"}</p>
+                <p>Peso Total: ${r.resultado.totalWeight?.toFixed(2) ?? "0"} kg</p>
+                <p>Peso Escalado: ${r.resultado.scaledWeight ?? "0"}</p>
+                <p>Escalão: ${r.resultado.rateLabel ?? "-"}</p>
+                <p>Valor Tarifa: €${r.resultado.rateValue?.toFixed(2) ?? "-"}</p>
+                <p>Custo Final: <b>€${r.resultado.cost?.toFixed(2) ?? "0"}</b></p>
+            </div>`;
+        }
+    });
+    resultDiv.innerHTML = html;
+}
