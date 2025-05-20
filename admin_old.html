@@ -9,7 +9,15 @@
         table { border-collapse: collapse; width: 100%; min-width: 900px; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
         th { background: #ececec; }
-        input[type="text"], input[type="number"] { width: 80px; }
+        input[type="text"], input[type="number"] {
+            width: 80px;
+            font-size: 17px;
+        }
+        .actions {
+            width: 170px;
+            min-width: 170px;
+            max-width: 170px;
+        }
         .actions button { margin: 0 2px; }
         #json-select { margin-bottom: 10px; }
         .file-section { margin-bottom: 18px; }
@@ -19,35 +27,135 @@
         .conversion-section { margin: 20px 0 10px 0; background: #f6f6f6; padding: 10px; border-radius: 6px;}
         .conversion-section label { margin-right: 10px; }
         .readonly input { background: #f5f5f5; border: none; }
+        .conversion-actions { display: inline-block; margin-left: 10px; }
+        .conversion-section input { font-size: 17px; }
+        /* Login modal styles */
+        #login-box {
+            position: fixed;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.13);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #login-inner {
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px 32px 18px 32px;
+            box-shadow: 0 2px 12px #0002;
+            min-width: 260px;
+        }
+        #login-inner h3 { margin-bottom: 16px; }
+        #login-inner input { margin-bottom: 10px; width: 90%; padding: 7px; font-size: 16px;}
+        #login-inner button { padding: 7px 18px; font-size: 16px;}
+        #login-error { color: #b90000; margin-top: 6px; font-size: 15px;}
+        #main-content { display: none; }
     </style>
 </head>
 <body>
-    <h2>Administração de Destinos de Transporte</h2>
-    <div class="file-section">
-        <label for="json-select">Selecionar ficheiro:</label>
-        <select id="json-select">
-            <option value="xbslog_nacional.json">xbslog_nacional.json</option>
-            <option value="xbslog_international.json">xbslog_international.json</option>
-            <option value="_new_">Criar novo ficheiro...</option>
-        </select>
-        <button onclick="loadJson()">Carregar</button>
-        <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
+    <!-- Login box -->
+    <div id="login-box">
+      <div id="login-inner">
+        <h3>Área restrita</h3>
+        <input type="text" id="login-user" placeholder="Utilizador"><br>
+        <input type="password" id="login-pass" placeholder="Password"><br>
+        <button onclick="checkLogin()">Entrar</button>
+        <div id="login-error"></div>
+      </div>
     </div>
-    <div class="scroll-table"><div id="table-container"></div></div>
-    <div style="margin-top:12px">
-        <button onclick="addRow()">Adicionar novo destino</button>
-        <button onclick="downloadJson()">Descarregar JSON</button>
-        <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
-        <span id="msg" class="msg"></span>
+
+    <!-- MAIN CONTENT: tudo o resto fica aqui dentro -->
+    <div id="main-content">
+      <h2>Administração de Destinos de Transporte</h2>
+      <div class="file-section">
+          <label for="json-select">Selecionar ficheiro:</label>
+          <select id="json-select"></select>
+          <button onclick="loadJson()">Carregar</button>
+          <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
+      </div>
+      <div class="scroll-table"><div id="table-container"></div></div>
+      <div style="margin-top:12px">
+          <button onclick="addRow()">Adicionar novo destino</button>
+          <button onclick="downloadJson()">Descarregar JSON</button>
+          <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
+          <span id="msg" class="msg"></span>
+      </div>
+      <div id="conversion-container"></div>
     </div>
-    <div id="conversion-container"></div>
+
     <script>
+        // LOGIN LOGIC
+        const LOGIN_USER = "a";
+        const LOGIN_PASS = "b";
+        function checkLogin() {
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            if(user === LOGIN_USER && pass === LOGIN_PASS) {
+                sessionStorage.setItem('admin_logged_in', '1');
+                document.getElementById('main-content').style.display = '';
+                document.getElementById('login-box').style.display = 'none';
+            } else {
+                document.getElementById('login-error').textContent = "Utilizador ou password incorretos.";
+            }
+        }
+        // Enter key submits login
+        document.getElementById('login-user').addEventListener('keydown', function(e){
+            if(e.key === "Enter") document.getElementById('login-pass').focus();
+        });
+        document.getElementById('login-pass').addEventListener('keydown', function(e){
+            if(e.key === "Enter") checkLogin();
+        });
+        // On load, check if session already authenticated
+        window.onload = function() {
+            if(sessionStorage.getItem('admin_logged_in') === '1') {
+                document.getElementById('main-content').style.display = '';
+                document.getElementById('login-box').style.display = 'none';
+            } else {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('login-box').style.display = '';
+                document.getElementById('login-user').focus();
+            }
+        };
+        // END LOGIN LOGIC
+
+        // ---- RESTANTE JS ADMIN (igual ao já fornecido) ----
+        const GITHUB_OWNER = "hmdfurniture";
+        const GITHUB_REPO = "Calculo";
+        const GITHUB_PATH = "Tables";
+
+        async function populateJsonSelect() {
+            const select = document.getElementById('json-select');
+            select.innerHTML = '<option value="">A carregar ficheiros...</option>';
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+                const res = await fetch(url);
+                const files = await res.json();
+                select.innerHTML = '';
+                files.filter(f => f.type === "file" && f.name.endsWith('.json')).forEach(f => {
+                    const opt = document.createElement("option");
+                    opt.value = f.name;
+                    opt.textContent = f.name;
+                    select.appendChild(opt);
+                });
+                const optNew = document.createElement("option");
+                optNew.value = '_new_';
+                optNew.textContent = 'Criar novo ficheiro...';
+                select.appendChild(optNew);
+            } catch (e) {
+                select.innerHTML = '<option value="">Erro ao carregar ficheiros</option>';
+            }
+        }
+        populateJsonSelect();
+
         let currentJson = null;
         let currentFilename = '';
         let allPriceKeys = [];
         let editLineIdx = null;
         let editLineBackup = null;
         let confirmDeleteIdx = null;
+        let editConversionActive = false;
+        let editConversionBackup = null;
 
         function loadJson() {
             const select = document.getElementById('json-select');
@@ -56,11 +164,18 @@
             editLineIdx = null;
             editLineBackup = null;
             confirmDeleteIdx = null;
+            editConversionActive = false;
+            editConversionBackup = null;
+            if (!file) {
+                document.getElementById('table-container').innerHTML = '';
+                document.getElementById('conversion-container').innerHTML = '';
+                return;
+            }
             if (file === '_new_') {
                 const nome = prompt('Nome do novo ficheiro (ex: novo_ficheiro.json):');
                 if (!nome || !nome.endsWith('.json')) {
                     alert('Nome inválido. O nome deve terminar em .json');
-                    select.value = "xbslog_nacional.json";
+                    populateJsonSelect();
                     return;
                 }
                 currentFilename = nome;
@@ -84,7 +199,7 @@
                 return;
             }
             currentFilename = file;
-            fetch('Tables/' + file)
+            fetch(`Tables/${file}`)
                 .then(r => {
                     if (!r.ok) throw new Error("Ficheiro não encontrado.");
                     return r.json()
@@ -118,7 +233,6 @@
                 container.innerHTML = '<p>Nenhum dado carregado.</p>';
                 return;
             }
-            // Descobrir todos os escalões de preços existentes no ficheiro!
             const allKeys = new Set();
             currentJson.destinations.forEach(dest => {
                 if (dest.rates)
@@ -135,13 +249,9 @@
                 const isEditing = (editLineIdx === idx);
                 const isConfirmDelete = (confirmDeleteIdx === idx);
                 html += `<tr class="${isEditing ? '' : 'readonly'}">`;
-                // País
                 html += `<td><input type="text" value="${htmlEscape(dest.country)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
-                // Código
                 html += `<td><input type="text" value="${htmlEscape(dest.code)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
-                // Nome
                 html += `<td><input type="text" value="${htmlEscape(dest.name)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
-                // Escalões/rates
                 allPriceKeys.forEach(key => {
                     let val = '';
                     if (dest.rates && dest.rates[key] !== undefined) val = dest.rates[key];
@@ -151,7 +261,6 @@
                         oninput="onlyAllowNumericWithSingleDot(this)" 
                         onchange="rowBufferChange('rates', this.value, '${key}')"></td>`;
                 });
-                // Ações
                 html += `<td class="actions">`;
                 if (isEditing) {
                     html += `<button onclick="saveEditRow(${idx})">Gravar</button>`;
@@ -173,7 +282,6 @@
             container.innerHTML = html;
         }
 
-        // Corrigido para garantir sempre string
         function htmlEscape(s) {
             return String(s === undefined || s === null ? '' : s)
                 .replace(/&/g,"&amp;")
@@ -331,6 +439,7 @@
             document.body.removeChild(link);
             showMsg("Ficheiro descarregado! Sobe-o manualmente para o repositório.");
             setTimeout(() => {
+                populateJsonSelect();
                 document.getElementById('json-select').value = "";
                 document.getElementById('table-container').innerHTML = "";
                 document.getElementById('conversion-container').innerHTML = "";
@@ -366,17 +475,55 @@
                 container.innerHTML = '';
                 return;
             }
-            let html = `<div class="conversion-section">
-                <b>Conversão (final do ficheiro):</b>
-                <label>M3: <input id="conv-m3" type="number" value="${currentJson.conversion.m3 ?? ''}" step="any" onchange="editConversion('m3', this.value)"></label>
-                <label>LDM: <input id="conv-ldm" type="number" value="${currentJson.conversion.LDM ?? ''}" step="any" onchange="editConversion('LDM', this.value)"></label>
-            </div>`;
-            container.innerHTML = html;
+            if (editConversionActive) {
+                let html = `<div class="conversion-section">
+                    <b>Conversão (final do ficheiro):</b>
+                    <label>M3: <input id="conv-m3" type="number" value="${editConversionBackup.m3 ?? ''}" step="any" onchange="editConversionBuffer('m3', this.value)"></label>
+                    <label>LDM: <input id="conv-ldm" type="number" value="${editConversionBackup.LDM ?? ''}" step="any" onchange="editConversionBuffer('LDM', this.value)"></label>
+                    <span class="conversion-actions">
+                        <button onclick="saveEditConversion()">Gravar</button>
+                        <button onclick="cancelEditConversion()">Cancelar</button>
+                    </span>
+                </div>`;
+                container.innerHTML = html;
+            } else {
+                let html = `<div class="conversion-section">
+                    <b>Conversão (final do ficheiro):</b>
+                    <label>M3: <input id="conv-m3" type="number" value="${currentJson.conversion.m3 ?? ''}" step="any" readonly></label>
+                    <label>LDM: <input id="conv-ldm" type="number" value="${currentJson.conversion.LDM ?? ''}" step="any" readonly></label>
+                    <span class="conversion-actions">
+                        <button onclick="editConversion()">Editar</button>
+                    </span>
+                </div>`;
+                container.innerHTML = html;
+            }
         }
 
-        function editConversion(field, value) {
-            if (!currentJson.conversion) currentJson.conversion = {};
-            currentJson.conversion[field] = isNaN(value) || value.trim() === '' ? value : Number(value);
+        function editConversion() {
+            editConversionActive = true;
+            editConversionBackup = {
+                m3: currentJson.conversion.m3,
+                LDM: currentJson.conversion.LDM
+            };
+            renderConversion();
+        }
+        function editConversionBuffer(field, value) {
+            if (!editConversionBackup) return;
+            editConversionBackup[field] = value;
+        }
+        function saveEditConversion() {
+            currentJson.conversion.m3 = editConversionBackup.m3;
+            currentJson.conversion.LDM = editConversionBackup.LDM;
+            editConversionActive = false;
+            editConversionBackup = null;
+            renderConversion();
+            showMsg("Conversão alterada.");
+        }
+        function cancelEditConversion() {
+            editConversionActive = false;
+            editConversionBackup = null;
+            renderConversion();
+            clearMsg();
         }
 
         function showMsg(msg) {
