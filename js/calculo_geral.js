@@ -29,6 +29,7 @@ function calcularParaTodasTabelas(destinos, dimensoes) {
   const calculoMap = getDynamicCalculoMap();
   let resultados = [];
   for (const { table, destino } of destinos) {
+    // table.name precisa de estar presente em cada JSON carregado (adapte o loader se necessário)
     const func = calculoMap[table.name];
     if (typeof func === "function") {
       const resultado = func(destino, dimensoes, table.conversion);
