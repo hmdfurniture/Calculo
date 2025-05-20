@@ -3,8 +3,8 @@
     "type": "International",
     "destinations": [
         {
-            "country": "Alemanha",
-            "code": "10",
+            "country": "Russia",
+            "code": "108",
             "name": "",
             "rates": {
                 "minimum": 104,
@@ -17,3 +17,24 @@
                 ">5000kgs": 18.5
             }
         },
+ {
+            "country": "China",
+            "code": "XX",
+            "name": "",
+            "rates": {
+                "minimum": 121,
+                "<500kgs": 54.1,
+                "<1000kgs": 42.2,
+                "<2000kgs": 34.2,
+                "<3000kgs": 31.05,
+                "<4000kgs": 24.7,
+                "<5000kgs": 21.5,
+                ">5000kgs": 19.9
+            }
+        }
+    ],
+    "conversion": {
+        "m3": 350,
+        "LDM": 1950
+    }
+}
