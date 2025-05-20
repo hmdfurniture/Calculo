@@ -58,7 +58,7 @@ function finalCalculate() {
         errorMessage.textContent = "Please fill in all the required fields.";
     } else {
         errorMessage.textContent = "";
-        calculateResults();
+        calculateResults(); // Chama a função dinâmica
     }
 }
 
