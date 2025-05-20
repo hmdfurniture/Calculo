@@ -1,1 +1,19 @@
-
+{
+    "name": "Xbslog International",
+    "type": "International",
+    "destinations": [
+        {
+            "country": "Alemanha",
+            "code": "10",
+            "name": "",
+            "rates": {
+                "minimum": 104,
+                "<500kgs": 36.6,
+                "<1000kgs": 35,
+                "<2000kgs": 27.05,
+                "<3000kgs": 23.9,
+                "<4000kgs": 22.3,
+                "<5000kgs": 20.7,
+                ">5000kgs": 18.5
+            }
+        },
