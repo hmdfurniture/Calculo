@@ -185,12 +185,31 @@
                 width: 100%; /* Full width buttons for mobile */
             }
         }
-    .button-container {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 10px;
-    }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        /* FOOTER FIXO NO CANTO INFERIOR DIREITO */
+        footer {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: auto;
+            background: transparent;
+            padding: 10px 20px;
+            text-align: right;
+            z-index: 100;
+        }
+        footer a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+        footer a:hover {
+            color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -251,8 +270,8 @@
         </div>
         <button id="add-line" onclick="addLine()">+ Add More Lines</button>
         <div class="button-container">
-    <button onclick="finalCalculate()">Calculate</button>
-    </div>
+            <button onclick="finalCalculate()">Calculate</button>
+        </div>
         <button onclick="resetForm()">Reset</button>
         <div class="result" id="result"></div>
         <div class="error-message" id="error-message"></div>
