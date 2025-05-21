@@ -1,7 +1,3 @@
-/**
- * Função de cálculo para tabela XBS Nacional.
- * O nome da função deve ser calcular_xbslog_nacional para ser detetada automaticamente.
- */
 function calcular_xbslog_nacional(destino, dimensoes, conversion) {
     let totalCubicMeters = 0;
     let totalLdm = 0;
@@ -32,8 +28,7 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
         dimensoes.forEach(d => {
             const { type, width, length, quantity } = d;
             if (type === "pallet") {
-                let adjustedLength = length; // Declaração inicial para evitar erro
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                let adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Correção aplicada
                 totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
             }
         });
@@ -44,18 +39,17 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
     } else {
         dimensoes.forEach(d => {
             const { type, width, length, height, quantity } = d;
-            if (type === "box") {
-                const cubicMeters = (width * length * height) / 1000000;
-                totalCubicMeters += cubicMeters * quantity;
-            } else if (type === "pallet") {
-                const adjustedHeight = height > 125 ? 250 : height;
-                const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
-                totalCubicMeters += cubicMeters * quantity;
-            }
+            let adjustedHeight = height > 125 ? 250 : height; // Correção aplicada
+
+            let adjustedLength = length; // Definição corrigida
+            let cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
+            totalCubicMeters += cubicMeters * quantity;
         });
+
         if (totalCubicMeters === 0) {
             return { erro: "Por favor preencha as dimensões." };
         }
+
         totalWeight = totalCubicMeters * (conversion?.m3 || 333);
     }
 
@@ -64,7 +58,8 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
     if (!rates) {
         return { erro: "Não existem tarifas para este destino nacional." };
     }
-    // Faixas: "1-50", "51-100", ..., ">5000", "minimum"
+
+    // Faixas tarifárias
     if (totalWeight <= 50) {
         scaledWeight = 1;
         rateValue = rates["1-50"];
