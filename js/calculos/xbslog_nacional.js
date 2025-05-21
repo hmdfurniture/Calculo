@@ -47,7 +47,6 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
                 const cubicMeters = (width * length * height) / 1000000;
                 totalCubicMeters += cubicMeters * quantity;
             } else if (type === "pallet") {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
                 const adjustedHeight = height > 125 ? 250 : height;
                 const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
                 totalCubicMeters += cubicMeters * quantity;
