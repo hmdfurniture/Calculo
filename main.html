@@ -7,20 +7,18 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px 0 20px 8px; /* Reduz margem esquerda, mantém topo/baixo */
-            position: relative;
-        }
-        .main-wrapper {
+            margin: 20px;
             display: flex;
-            width: 100%;
-            margin: 0 auto;
+            position: relative;
+            flex-wrap: wrap;
         }
         .form-container {
-            flex: 1 1 60%;
-            padding-left: 20px;
+            flex: 1 1 50%;
+            max-width: 600px;
         }
         .map-container {
-            flex: 1 1 40%;
+            flex: 1 1 50%;
+            max-width: 600px;
             padding-left: 20px;
         }
         .map {
@@ -35,14 +33,10 @@
             gap: 10px;
             margin-bottom: 20px;
         }
-        .header-row {
+        .header-row, .dimension-line {
             display: flex;
             gap: 10px;
             align-items: center;
-            padding: 2px;
-            border: 1px solid #ddd;
-            margin-bottom: 5px;
-            background: none;
         }
         .dimension-line {
             background-color: #f9f9f9;
@@ -157,42 +151,9 @@
         #dimension-container {
             margin-top: 20px;
         }
-        /* --- INÍCIO: CSS para resultados lado a lado e logos --- */
-        #result {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .resultado-bloco {
-            width: 220px;
-            min-height: 320px;
-            background: #fafafa;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 16px 12px 8px 12px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .logo-tabela {
-            width: 120px;
-            height: 60px;
-            object-fit: contain;
-            margin-bottom: 12px;
-            background: #fff;
-            border-radius: 6px;
-            border: 1px solid #eee;
-            display: block;
-        }
-        /* --- FIM: CSS para resultados lado a lado e logos --- */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
-            }
-            .main-wrapper {
-                flex-direction: column;
-                max-width: none;
             }
             .form-container, .map-container {
                 flex: 1 1 100%;
@@ -201,14 +162,6 @@
             }
             .map {
                 height: 300px;
-            }
-            #result {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .resultado-bloco {
-                width: 100%;
-                min-width: 0;
             }
         }
         @media (max-width: 480px) {
@@ -255,68 +208,66 @@
 </head>
 <body>
     <button class="logout-button" onclick="logout()">Logout</button>
-    <div class="main-wrapper">
-        <div class="form-container">
-            <div class="form-group">
-                <label for="country">Select Country:</label>
-                <div class="dropdown">
-                    <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                    <div class="dropdown-content" id="country-list">
-                        <!-- Country options will be dynamically populated here -->
-                    </div>
-                </div>
-                <label for="zone">Select Zone:</label>
-                <div class="dropdown">
-                    <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                    <div class="dropdown-content" id="zone-list">
-                        <!-- Zone options will be dynamically populated here -->
-                    </div>
+    <div class="form-container">
+        <div class="form-group">
+            <label for="country">Select Country:</label>
+            <div class="dropdown">
+                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+                <div class="dropdown-content" id="country-list">
+                    <!-- Country options will be dynamically populated here -->
                 </div>
             </div>
-            <div class="header-row">
-                <div>Type:</div>
-                <div>Width (cm):</div>
-                <div>Length (cm):</div>
-                <div>Height (cm):</div>
-                <div>Quantity:</div>
-                <div>Action:</div>
-            </div>
-            <div id="dimension-container">
-                <div class="form-group dimension-line">
-                   <div>
-                        <select class="type" oninput="removeHighlight(this)">
-                            <option value="box">Box</option>
-                            <option value="pallet">Pallet</option>
-                        </select>
-                    </div>
-                    <div>
-                        <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <button class="remove-button" onclick="removeLine(this)">Remove</button>
-                    </div>
+            <label for="zone">Select Zone:</label>
+            <div class="dropdown">
+                <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                <div class="dropdown-content" id="zone-list">
+                    <!-- Zone options will be dynamically populated here -->
                 </div>
             </div>
-            <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-            <div class="button-container">
-                <button onclick="finalCalculate()">Calculate</button>
-            </div>
-            <button onclick="resetForm()">Reset</button>
-            <div class="result" id="result"></div>
-            <div class="error-message" id="error-message"></div>
         </div>
-        <div class="map-container">
-            <div id="map" class="map"></div>
+        <div class="header-row">
+            <div>Type:</div>
+            <div>Width (cm):</div>
+            <div>Length (cm):</div>
+            <div>Height (cm):</div>
+            <div>Quantity:</div>
+            <div>Action:</div>
         </div>
+        <div id="dimension-container">
+            <div class="form-group dimension-line">
+               <div>
+                    <select class="type" oninput="removeHighlight(this)">
+                        <option value="box">Box</option>
+                        <option value="pallet">Pallet</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                </div>
+                <div>
+                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                </div>
+                <div>
+                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                </div>
+                <div>
+                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                </div>
+                <div>
+                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                </div>
+            </div>
+        </div>
+        <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+        <div class="button-container">
+            <button onclick="finalCalculate()">Calculate</button>
+        </div>
+        <button onclick="resetForm()">Reset</button>
+        <div class="result" id="result"></div>
+        <div class="error-message" id="error-message"></div>
+    </div>
+    <div class="map-container">
+        <div id="map" class="map"></div>
     </div>
     <!-- Ordem dos scripts ajustada para garantir o funcionamento correto! -->
     <script src="js/calculo_geral.js"></script>
