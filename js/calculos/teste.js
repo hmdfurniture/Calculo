@@ -1,8 +1,3 @@
-/**
- * Função de cálculo para tabela "teste" baseada na estrutura de xbslog_international.js,
- * mas preparada para usar os dados de Tables/teste.json.
- * Garante compatibilidade com o sistema dinâmico.
- */
 function calcular_teste(destino, dimensoes, conversion) {
     let totalCubicMeters = 0;
     let totalLdm = 0;
@@ -27,16 +22,17 @@ function calcular_teste(destino, dimensoes, conversion) {
         }
     });
 
-    let totalWeight, scaledWeight, rates, rateTier, cost, rateValue, rateLabel;
+    let totalWeight, scaledWeight, rates, cost, rateValue, rateLabel;
 
     if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
         dimensoes.forEach(d => {
             const { type, width, length, quantity } = d;
             if (type === "pallet") {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+                let adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Correção aplicada
                 totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
             }
         });
+
         if (totalLdm === 0) {
             return { erro: "Não é possível calcular: Nenhuma dimensão LDM válida." };
         }
@@ -44,16 +40,13 @@ function calcular_teste(destino, dimensoes, conversion) {
     } else {
         dimensoes.forEach(d => {
             const { type, width, length, height, quantity } = d;
-            if (type === "box") {
-                const cubicMeters = (width * length * height) / 1000000;
-                totalCubicMeters += cubicMeters * quantity;
-            } else if (type === "pallet") {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-                const adjustedHeight = height > 125 ? 250 : height;
-                const cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
-                totalCubicMeters += cubicMeters * quantity;
-            }
+            let adjustedHeight = height > 125 ? 250 : height; // Correção aplicada
+            let adjustedLength = length; // Definição corrigida
+
+            let cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
+            totalCubicMeters += cubicMeters * quantity;
         });
+
         if (totalCubicMeters === 0) {
             return { erro: "Por favor preencha as dimensões." };
         }
@@ -65,7 +58,7 @@ function calcular_teste(destino, dimensoes, conversion) {
         return { erro: "Não existem tarifas para este destino (tabela teste)." };
     }
 
-    // Exemplo de tiers tipo "<100", ">500", etc. (ajuste conforme a estrutura real de Tables/teste.json)
+    // Exemplo de tiers tipo "<100", ">500", etc.
     const roundedWeight = Math.ceil(totalWeight / 100) * 100;
     scaledWeight = roundedWeight / 100;
 
@@ -87,6 +80,7 @@ function calcular_teste(destino, dimensoes, conversion) {
             }
         }
     });
+
     if (!foundTier) foundTier = "minimum";
     if (foundRate === null) foundRate = rates[foundTier] || 0;
 
