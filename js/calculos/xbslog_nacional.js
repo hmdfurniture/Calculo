@@ -32,6 +32,7 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
         dimensoes.forEach(d => {
             const { type, width, length, quantity } = d;
             if (type === "pallet") {
+                let adjustedLength = length; // Declaração inicial para evitar erro
                 const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
                 totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
             }
