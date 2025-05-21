@@ -112,7 +112,7 @@ function calculateResults() {
             </div>`;
         } else {
             html += `<div class="resultado-bloco">
-                <img src="Calculo/images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
+                <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
                 <p>Total LDM: ${r.resultado.totalLdm?.toFixed(2) ?? "0"}</p>
                 <p>Total m³: ${r.resultado.totalCubicMeters?.toFixed(3) ?? "0"}</p>
                 <p>Peso Total: ${r.resultado.totalWeight?.toFixed(2) ?? "0"} kg</p>
