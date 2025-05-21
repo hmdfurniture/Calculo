@@ -24,9 +24,6 @@ function addLine() {
             <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
         </div>
         <div>
-            <input type="text" class="cubic-capacity" readonly>
-        </div>
-        <div>
             <button class="remove-button" onclick="removeLine(this)">Remove</button>
         </div>
     `;
