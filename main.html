@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 20px 0 20px 8px; /* Reduz margem esquerda, mantém topo/baixo */
             position: relative;
         }
         .main-wrapper {
@@ -35,10 +35,14 @@
             gap: 10px;
             margin-bottom: 20px;
         }
-        .header-row, .dimension-line {
+        .header-row {
             display: flex;
             gap: 10px;
             align-items: center;
+            padding: 2px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            background: none;
         }
         .dimension-line {
             background-color: #f9f9f9;
