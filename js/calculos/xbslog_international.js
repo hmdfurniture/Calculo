@@ -30,12 +30,14 @@ function calcular_xbslog_international(destino, dimensoes, conversion) {
 
     if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
         dimensoes.forEach(d => {
-            const { type, width, length, quantity } = d;
-            if (type === "pallet") {
-                const adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
-                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
-            }
-        });
+dimensoes.forEach(d => {
+    const { type, width, length, quantity } = d;
+    if (type === "pallet") {
+        let adjustedLength = (length >= 100 && length <= 125) ? 120 : length;
+        totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
+    }
+});
+
         if (totalLdm === 0) {
             return { erro: "Não é possível calcular: Nenhuma dimensão LDM válida." };
         }
