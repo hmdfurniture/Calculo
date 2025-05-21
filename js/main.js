@@ -116,9 +116,9 @@ function calculateResults() {
                 <p>Total LDM: ${r.resultado.totalLdm?.toFixed(2) ?? "0"}</p>
                 <p>Total m³: ${r.resultado.totalCubicMeters?.toFixed(3) ?? "0"}</p>
                 <p>Peso Total: ${r.resultado.totalWeight?.toFixed(2) ?? "0"} kg</p>
-                <p>Peso Escalado: ${r.resultado.scaledWeight ?? "0"}</p>
+                <p>Peso tarifário: ${r.resultado.scaledWeight ?? "0"}</p>
                 <p>Escalão: ${r.resultado.rateLabel ?? "-"}</p>
-                <p>Valor Tarifa: €${r.resultado.rateValue?.toFixed(2) ?? "-"}</p>
+                <p>Valor Escalão: €${r.resultado.rateValue?.toFixed(2) ?? "-"}</p>
                 <p>Custo Final: <b>€${r.resultado.cost?.toFixed(2) ?? "0"}</b></p>
             </div>`;
         }
