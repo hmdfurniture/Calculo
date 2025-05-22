@@ -1,4 +1,4 @@
-function calcular_xbslog_international(destino, dimensoes, conversion) {
+function calcular_teste(destino, dimensoes, conversion) {
     let totalLdm = 0;
     let onlyPallets = true;
     let allPalletsHigh = true;
