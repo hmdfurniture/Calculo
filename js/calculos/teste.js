@@ -87,7 +87,7 @@ function calcular_teste(destino, dimensoes, conversion) {
         }
 
         return {
-            transportadora: "XBS Internacional",
+            transportadora: "Teste",
             totalLdm,
             totalCubicMeters: 0,
             totalWeight,
