@@ -105,7 +105,7 @@ function calculateResults() {
     resultados.forEach(r => {
         if (r.resultado.erro) {
             html += `<div class="resultado-bloco">
-                <img src="Calculo/images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
+                <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
                 <p>${r.resultado.erro}</p>
             </div>`;
         } else {
