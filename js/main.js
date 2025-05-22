@@ -125,20 +125,20 @@ function calculateResults() {
     });
     resultDiv.innerHTML = html;
 
-    // 6. Mostrar mensagens explicativas/contextuais
-    const mensagensDiv = document.getElementById("mensagens");
-    let htmlMensagens = "";
-    resultados.forEach(r => {
-        if (r.resultado.mensagens && r.resultado.mensagens.length > 0) {
-            htmlMensagens += `
-                <div class="mensagens-bloco">
-                    <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
-                    <ul class="mensagens-lista">
-                        ${r.resultado.mensagens.map(m => `<li>${m}</li>`).join("")}
-                    </ul>
-                </div>
-            `;
-        }
-    });
-    mensagensDiv.innerHTML = htmlMensagens;
+// 6. Mostrar mensagens explicativas/contextuais
+const mensagensDiv = document.getElementById("mensagens");
+let htmlMensagens = "";
+resultados.forEach(r => {
+    if (r.resultado.mensagens && r.resultado.mensagens.length > 0) {
+        htmlMensagens += `
+            <div class="mensagem-explicativa-bloco">
+                <img src="images/${r.tabela}.png" class="mensagem-explicativa-logo" alt="${r.tabela}">
+                <ul class="mensagem-explicativa-lista">
+                    ${r.resultado.mensagens.map(m => `<li>${m}</li>`).join("")}
+                </ul>
+            </div>
+        `;
+    }
+});
+mensagensDiv.innerHTML = htmlMensagens;
 }
