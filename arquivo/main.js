@@ -24,9 +24,6 @@ function addLine() {
             <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
         </div>
         <div>
-            <input type="text" class="cubic-capacity" readonly>
-        </div>
-        <div>
             <button class="remove-button" onclick="removeLine(this)">Remove</button>
         </div>
     `;
@@ -49,6 +46,7 @@ document.getElementById("country").addEventListener("input", () => {
         zoneInput.value = "";
         zoneInput.disabled = true;
         zoneList.innerHTML = "";
+        document.getElementById("result").innerHTML = "";  // Limpa os resultados
     }
 });
 
@@ -106,16 +104,19 @@ function calculateResults() {
     let html = "";
     resultados.forEach(r => {
         if (r.resultado.erro) {
-            html += `<div class="resultado-bloco"><strong>${r.tabela}:</strong> ${r.resultado.erro}</div>`;
+            html += `<div class="resultado-bloco">
+                <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
+                <p>${r.resultado.erro}</p>
+            </div>`;
         } else {
             html += `<div class="resultado-bloco">
-                <strong>${r.tabela}:</strong>
+                <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
                 <p>Total LDM: ${r.resultado.totalLdm?.toFixed(2) ?? "0"}</p>
                 <p>Total m³: ${r.resultado.totalCubicMeters?.toFixed(3) ?? "0"}</p>
                 <p>Peso Total: ${r.resultado.totalWeight?.toFixed(2) ?? "0"} kg</p>
-                <p>Peso Escalado: ${r.resultado.scaledWeight ?? "0"}</p>
+                <p>Peso tarifário: ${r.resultado.scaledWeight ?? "0"}</p>
                 <p>Escalão: ${r.resultado.rateLabel ?? "-"}</p>
-                <p>Valor Tarifa: €${r.resultado.rateValue?.toFixed(2) ?? "-"}</p>
+                <p>Valor Escalão: €${r.resultado.rateValue?.toFixed(2) ?? "-"}</p>
                 <p>Custo Final: <b>€${r.resultado.cost?.toFixed(2) ?? "0"}</b></p>
             </div>`;
         }
