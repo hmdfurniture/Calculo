@@ -41,6 +41,7 @@ document.getElementById("country").addEventListener("input", () => {
     const countryInput = document.getElementById("country");
     const zoneInput = document.getElementById("zone");
     const zoneList = document.getElementById("zone-list");
+    const document.getElementById("result").innerHTML = "";
 
     if (countryInput.value.trim() === "") {
         zoneInput.value = "";
