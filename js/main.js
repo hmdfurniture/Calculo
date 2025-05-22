@@ -47,6 +47,7 @@ document.getElementById("country").addEventListener("input", () => {
         zoneInput.disabled = true;
         zoneList.innerHTML = "";
         document.getElementById("result").innerHTML = "";  // Limpa os resultados
+        document.getElementById("mensagens").innerHTML = ""; // Limpa mensagens também
     }
 });
 
@@ -99,6 +100,7 @@ function calculateResults() {
     const resultDiv = document.getElementById("result");
     if (resultados.length === 0) {
         resultDiv.innerHTML = "<p>Nenhuma tabela/cálculo disponível para este destino.</p>";
+        document.getElementById("mensagens").innerHTML = "";
         return;
     }
     let html = "";
@@ -122,4 +124,21 @@ function calculateResults() {
         }
     });
     resultDiv.innerHTML = html;
+
+    // 6. Mostrar mensagens explicativas/contextuais
+    const mensagensDiv = document.getElementById("mensagens");
+    let htmlMensagens = "";
+    resultados.forEach(r => {
+        if (r.resultado.mensagens && r.resultado.mensagens.length > 0) {
+            htmlMensagens += `
+                <div class="mensagens-bloco">
+                    <img src="images/${r.tabela}.png" class="logo-tabela" alt="${r.tabela}">
+                    <ul class="mensagens-lista">
+                        ${r.resultado.mensagens.map(m => `<li>${m}</li>`).join("")}
+                    </ul>
+                </div>
+            `;
+        }
+    });
+    mensagensDiv.innerHTML = htmlMensagens;
 }
