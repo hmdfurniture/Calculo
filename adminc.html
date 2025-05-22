@@ -1,1 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Administração de Cálculos de Transportadores</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 10px; }
+        .section { border: 1px solid #eee; border-radius: 7px; margin-bottom: 18px; padding: 12px 14px; background: #fafbfc;}
+        h2 { margin-top: 0; }
+        .regra-bloco { border: 1px solid #ccc; border-radius: 5px; margin: 12px 0; padding: 10px; background: #fcfcfc; }
+        label { font-weight: bold; display: block; margin-top: 5px; }
+        input[type="number"], input[type="text"], select, textarea { width: 180px; padding: 3px; margin-right: 6px; }
+        textarea { width: 90%; min-height: 36px; }
+        .tipos-validos { width: 120px; }
+        .regras-lista { margin-bottom: 8px; }
+        .botao-pequeno { font-size: 13px; margin-left: 8px; }
+        .msg { color: green; margin-left: 10px;}
+        .err { color: #b90000; }
+        .warn { color: #b90000; font-size: 90%;}
+        .flex-row { display: flex; align-items: center; gap: 14px; }
+        .flex-row > * { margin-bottom: 0; }
+        .js-preview { background: #f3f5f8; border: 1px solid #ccc; border-radius: 6px; padding: 10px; white-space: pre-wrap; font-family: monospace; font-size: 15px; max-height: 400px; overflow: auto;}
+        .file-section { margin-bottom: 18px; }
+    </style>
+</head>
+<body>
+    <h2>Administração de Cálculos de Transportadores</h2>
+    <div class="file-section">
+        <label for="js-select">Selecionar ficheiro:</label>
+        <select id="js-select"></select>
+        <button onclick="loadJs()">Carregar</button>
+        <button onclick="resetForm()">Novo cálculo</button>
+        <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
+    </div>
+    <div class="section">
+        <div class="flex-row">
+            <label>Nome da função:</label>
+            <input id="func-name" type="text" value="calcular_novo" />
+            <label>Nome transportadora:</label>
+            <input id="transportadora" type="text" value="Nova Transportadora" />
+        </div>
+    </div>
+    <div class="section" id="regras-ldm-section">
+        <h3>Regras LDM</h3>
+        <div id="regras-ldm-lista" class="regras-lista"></div>
+        <button onclick="addLdmRegra()">+ Adicionar Regra LDM</button>
+    </div>
+    <div class="section" id="regras-m3-section">
+        <h3>Regras m³ / Misturas</h3>
+        <div id="regras-m3-lista" class="regras-lista"></div>
+        <button onclick="addM3Regra()">+ Adicionar Regra m³</button>
+    </div>
+    <div class="section">
+        <h3>Pré-visualização do ficheiro .js</h3>
+        <div id="js-preview" class="js-preview"></div>
+        <button onclick="downloadJS()">Descarregar ficheiro .js</button>
+        <span id="msg" class="msg"></span>
+    </div>
+    <script>
+        // --------- CONFIG ---------
+        const GITHUB_OWNER = "hmdfurniture";
+        const GITHUB_REPO = "Calculo";
+        const GITHUB_PATH = "js/calculos";
 
+        // --------- DADOS PARA EDIÇÃO ---------
+        let regrasLdm = [];
+        let regrasM3 = [];
+        let funcName = "calcular_novo";
+        let transportadora = "Nova Transportadora";
+
+        // --------- LISTA FICHEIROS .JS DO REPO ---------
+        async function populateJsSelect() {
+            const select = document.getElementById('js-select');
+            select.innerHTML = '<option value="">A carregar ficheiros...</option>';
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+                const res = await fetch(url);
+                const files = await res.json();
+                select.innerHTML = '';
+                files.filter(f => f.type === "file" && f.name.endsWith('.js')).forEach(f => {
+                    const opt = document.createElement("option");
+                    opt.value = f.name;
+                    opt.textContent = f.name;
+                    select.appendChild(opt);
+                });
+                const optNew = document.createElement("option");
+                optNew.value = '_new_';
+                optNew.textContent = 'Criar novo ficheiro...';
+                select.appendChild(optNew);
+            } catch (e) {
+                select.innerHTML = '<option value="">Erro ao carregar ficheiros</option>';
+            }
+        }
+        populateJsSelect();
+
+        // --------- CARREGAR JS EXISTENTE ---------
+        function loadJs() {
+            const select = document.getElementById('js-select');
+            const file = select.value;
+            if (!file) {
+                document.getElementById('js-preview').textContent = '';
+                resetForm();
+                return;
+            }
+            if (file === '_new_') {
+                resetForm();
+                return;
+            }
+            fetch(`js/calculos/${file}`)
+                .then(r => r.text())
+                .then(js => {
+                    document.getElementById('js-preview').textContent = js;
+                    document.getElementById("msg").textContent = "Atenção: edição visual só disponível para novos cálculos!";
+                    resetForm(); // Limpa regras para evitar confusão
+                });
+        }
+
+        // --------- EDIÇÃO DAS REGRAS ---------
+        function renderLdmRegras() {
+            const lista = document.getElementById('regras-ldm-lista');
+            lista.innerHTML = '';
+            regrasLdm.forEach((r, i) => {
+                lista.innerHTML += `
+                  <div class="regra-bloco">
+                    <label>Título:</label>
+                    <input type="text" value="${r.titulo||""}" onchange="updateLdm(${i},'titulo',this.value)">
+                    <label>Altura mín:</label>
+                    <input type="number" value="${r.altura_min||''}" onchange="updateLdm(${i},'altura_min',this.value)">
+                    <label>Altura máx:</label>
+                    <input type="number" value="${r.altura_max||''}" onchange="updateLdm(${i},'altura_max',this.value)">
+                    <label>Comprimento mín:</label>
+                    <input type="number" value="${r.comprimento_min||''}" onchange="updateLdm(${i},'comprimento_min',this.value)">
+                    <label>Comprimento máx:</label>
+                    <input type="number" value="${r.comprimento_max||''}" onchange="updateLdm(${i},'comprimento_max',this.value)">
+                    <label>Comprimento LDM:</label>
+                    <input type="number" value="${r.comprimento_ldm||''}" onchange="updateLdm(${i},'comprimento_ldm',this.value)">
+                    <label>Tipos válidos (separar por vírgula):</label>
+                    <input class="tipos-validos" type="text" value="${(r.tipos_validos||[]).join(',')}" onchange="updateLdm(${i},'tipos_validos',this.value)">
+                    <label>Mensagem:</label>
+                    <textarea onchange="updateLdm(${i},'mensagem',this.value)">${r.mensagem||""}</textarea>
+                    <button class="botao-pequeno" onclick="delLdmRegra(${i})">Eliminar</button>
+                  </div>
+                `;
+            });
+            previewJS();
+        }
+
+        function renderM3Regras() {
+            const lista = document.getElementById('regras-m3-lista');
+            lista.innerHTML = '';
+            regrasM3.forEach((r, i) => {
+                lista.innerHTML += `
+                  <div class="regra-bloco">
+                    <label>Título:</label>
+                    <input type="text" value="${r.titulo||""}" onchange="updateM3(${i},'titulo',this.value)">
+                    <label>Condição (ex: existePalletAlta && existeBox):</label>
+                    <input type="text" value="${r.condicao||''}" onchange="updateM3(${i},'condicao',this.value)">
+                    <label>Mensagem:</label>
+                    <textarea onchange="updateM3(${i},'mensagem',this.value)">${r.mensagem||""}</textarea>
+                    <button class="botao-pequeno" onclick="delM3Regra(${i})">Eliminar</button>
+                  </div>
+                `;
+            });
+            previewJS();
+        }
+
+        function updateLdm(i, campo, valor) {
+            if (campo === 'tipos_validos') valor = valor.split(',').map(v=>v.trim()).filter(Boolean);
+            regrasLdm[i][campo] = valor;
+            previewJS();
+        }
+        function updateM3(i, campo, valor) {
+            regrasM3[i][campo] = valor;
+            previewJS();
+        }
+        function addLdmRegra() {
+            regrasLdm.push({
+                titulo: "Nova Regra LDM",
+                altura_min: "",
+                altura_max: "",
+                comprimento_min: "",
+                comprimento_max: "",
+                comprimento_ldm: "",
+                tipos_validos: ["pallet"],
+                mensagem: ""
+            });
+            renderLdmRegras();
+        }
+        function delLdmRegra(i) {
+            regrasLdm.splice(i, 1);
+            renderLdmRegras();
+        }
+        function addM3Regra() {
+            regrasM3.push({
+                titulo: "Nova Regra m³",
+                condicao: "",
+                mensagem: ""
+            });
+            renderM3Regras();
+        }
+        function delM3Regra(i) {
+            regrasM3.splice(i, 1);
+            renderM3Regras();
+        }
+        function resetForm() {
+            regrasLdm = [];
+            regrasM3 = [];
+            document.getElementById("func-name").value = "calcular_novo";
+            document.getElementById("transportadora").value = "Nova Transportadora";
+            renderLdmRegras();
+            renderM3Regras();
+            previewJS();
+            document.getElementById("msg").textContent = "";
+        }
+
+        document.getElementById("func-name").onchange = function() { funcName = this.value; previewJS(); }
+        document.getElementById("transportadora").onchange = function() { transportadora = this.value; previewJS(); }
+
+        // ---- GERAÇÃO DO JS FINAL ----
+        function previewJS() {
+            funcName = document.getElementById("func-name").value;
+            transportadora = document.getElementById("transportadora").value;
+            let js = `function ${funcName}(destino, dimensoes, conversion) {\n  let mensagens = [];\n  let totalLdm = 0;\n  let totalCubicMeters = 0;\n`;
+            // Gera regras LDM
+            regrasLdm.forEach((r,i) => {
+                js += `  // Regra LDM: ${r.titulo}\n`;
+                js += `  if (dimensoes.every(d => ${JSON.stringify(r.tipos_validos)}.includes(d.type) && d.height >= ${r.altura_min} && d.height <= ${r.altura_max} && d.length >= ${r.comprimento_min} && d.length <= ${r.comprimento_max})) {\n`;
+                js += `    mensagens.push(${JSON.stringify(r.mensagem)});\n`;
+                js += `    dimensoes.forEach(d => { totalLdm += (d.width / 240) * (${r.comprimento_ldm} / 100) * d.quantity; });\n`;
+                js += `    // ...restante cálculo LDM aqui...\n    // ...\n  }\n`;
+            });
+            // Gera regras m³/mistura
+            regrasM3.forEach((r,i) => {
+                js += `  // Regra m³: ${r.titulo} (${r.condicao})\n`;
+                js += `  // if (${r.condicao}) {\n    mensagens.push(${JSON.stringify(r.mensagem)});\n    // ...restante cálculo m3 aqui...\n  // }\n`;
+            });
+            js += `  return {\n    transportadora: ${JSON.stringify(transportadora)},\n    totalLdm, totalCubicMeters, mensagens\n    // ...outros campos calculados...\n  };\n}`;
+            document.getElementById("js-preview").textContent = js;
+        }
+
+        function downloadJS() {
+            const blob = new Blob([document.getElementById("js-preview").textContent], {type:'application/javascript'});
+            const link = document.createElement('a');
+            let fname = (document.getElementById("func-name").value || "calculo") + ".js";
+            link.href = URL.createObjectURL(blob);
+            link.download = fname;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            document.getElementById("msg").textContent = "Ficheiro descarregado!";
+            setTimeout(()=>{document.getElementById("msg").textContent = "";}, 3000);
+        }
+
+        // Inicializa
+        renderLdmRegras();
+        renderM3Regras();
+        previewJS();
+    </script>
+</body>
+</html>
