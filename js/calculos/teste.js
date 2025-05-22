@@ -161,9 +161,9 @@ function calcular_xbslog_international(destino, dimensoes, conversion) {
 
     // Mensagens explicativas dinâmicas
     if (existePalletAlta && (existePalletBaixa || existeBox)) {
-        mensagens.push("Embora uma ou mais paletes tenham altura superior a 125cm, o cálculo foi feito por m³ porque há mistura de tipos (paletes altas com paletes baixas e/ou caixas). Nestes casos, as paletes altas são consideradas com altura de 250cm.");
+        mensagens.push("Embora uma ou mais paletes tenham altura superior a 125cm, o cálculo foi feito por m³ porque há mistura de tipos. Nestes casos, as paletes altas são consideradas com altura de 250cm. e a baixas consideradas como uma caixa");
     } else if (existePalletBaixa && !existePalletAlta) {
-        mensagens.push("O cálculo foi feito por m³ porque existem apenas paletes baixas (≤ 125cm) ou caixas.");
+        mensagens.push("O cálculo foi feito por m³ porque a palete tem ≤ 125cm, que considerado sobreponivel.");
     } else if (existeBox && !existePalletAlta && !existePalletBaixa) {
         mensagens.push("O cálculo foi feito por m³ porque existem caixas nas linhas.");
     } else if (existePalletAlta && !existePalletBaixa && !existeBox) {
