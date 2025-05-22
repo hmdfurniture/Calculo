@@ -1,49 +1,63 @@
 function calcular_xbslog_nacional(destino, dimensoes, conversion) {
     let totalCubicMeters = 0;
     let totalLdm = 0;
-    let hasBox = false;
-    let hasPallet = false;
-    let allPalletsHaveLowHeight = true;
-    let allPalletsHaveHighHeight = true;
-    let allLengthsValid = true;
+    let mensagens = [];
 
+    let onlyPallets = true;
+    let allPalletsHigh = true;
+    let allLengthsValid = true;
+    let existePalletAlta = false;
+    let existePalletBaixa = false;
+    let existeBox = false;
+
+    // Verifica condições para LDM e mistura de tipos
     dimensoes.forEach(d => {
-        const { type, width, length, height, quantity } = d;
-        if (type === "box") {
-            hasBox = true;
-        } else if (type === "pallet") {
-            hasPallet = true;
-            if (height > 125) {
-                allPalletsHaveLowHeight = false;
-                if (length < 100 || length > 125) allLengthsValid = false;
-            } else {
-                allPalletsHaveHighHeight = false;
-            }
+        if (d.type !== "pallet") onlyPallets = false;
+        if (d.type === "pallet") {
+            if (d.height <= 125) allPalletsHigh = false;
+            if (d.height > 125) existePalletAlta = true;
+            if (d.height <= 125) existePalletBaixa = true;
+            if (d.length < 100 || d.length > 125) allLengthsValid = false;
         }
+        if (d.type === "box") existeBox = true;
     });
 
-    let totalWeight, scaledWeight, rates, rateTier, cost, rateValue, rateLabel;
+    let totalWeight, scaledWeight, rates, rateValue, rateLabel, cost;
 
-    if (hasPallet && !hasBox && allPalletsHaveHighHeight && allLengthsValid) {
+    // 1. Cálculo por LDM (caso especial)
+    if (onlyPallets && allPalletsHigh) {
+        if (!allLengthsValid) {
+            return { erro: "Palete com o comprimento fora de medida, não é possivel calcular!!!" };
+        }
+
+        mensagens.push("Cálculo feito por LDM porque todas as paletes têm altura superior a 125cm e comprimento entre 100 e 125cm.");
+
         dimensoes.forEach(d => {
-            const { type, width, length, quantity } = d;
-            if (type === "pallet") {
-                let adjustedLength = (length >= 100 && length <= 125) ? 120 : length; // Correção aplicada
-                totalLdm += (width / 240) * (adjustedLength / 100) * quantity;
-            }
+            // Para cada palete, usar sempre comprimento 120
+            let adjustedLength = 120;
+            totalLdm += (d.width / 240) * (adjustedLength / 100) * d.quantity;
         });
+
         if (totalLdm === 0) {
             return { erro: "Não é possível calcular: Nenhuma dimensão LDM válida." };
         }
         totalWeight = totalLdm * (conversion?.LDM || 333);
-    } else {
-        dimensoes.forEach(d => {
-            const { type, width, length, height, quantity } = d;
-            let adjustedHeight = height > 125 ? 250 : height; // Correção aplicada
 
-            let adjustedLength = length; // Definição corrigida
-            let cubicMeters = (width * adjustedLength * adjustedHeight) / 1000000;
-            totalCubicMeters += cubicMeters * quantity;
+    } else {
+        // 2. Cálculo por m3 (todas as outras situações)
+        dimensoes.forEach(d => {
+            if (d.type === "pallet" && d.height > 125) existePalletAlta = true;
+            if (d.type === "pallet" && d.height <= 125) existePalletBaixa = true;
+            if (d.type === "box") existeBox = true;
+
+            let adjustedHeight = d.height;
+            // Se for palete alta (>125), força altura 250cm
+            if (d.type === "pallet" && d.height > 125) {
+                adjustedHeight = 250;
+            }
+            // Caixas e paletes baixas usam altura original
+            let cubicMeters = (d.width * d.length * adjustedHeight) / 1000000;
+            totalCubicMeters += cubicMeters * d.quantity;
         });
 
         if (totalCubicMeters === 0) {
@@ -51,6 +65,17 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
         }
 
         totalWeight = totalCubicMeters * (conversion?.m3 || 333);
+
+        // Mensagens explicativas dinâmicas
+        if (existePalletAlta && (existePalletBaixa || existeBox)) {
+            mensagens.push("Embora uma ou mais paletes tenham altura superior a 125cm, o cálculo foi feito por m³ porque há mistura de tipos (paletes altas com paletes baixas e/ou caixas). Nestes casos, as paletes altas são consideradas com altura de 250cm.");
+        } else if (existePalletBaixa && !existePalletAlta) {
+            mensagens.push("O cálculo foi feito por m³ porque existem apenas paletes baixas (≤ 125cm) ou caixas.");
+        } else if (existeBox && !existePalletAlta && !existePalletBaixa) {
+            mensagens.push("O cálculo foi feito por m³ porque existem caixas nas linhas.");
+        } else if (existePalletAlta && !existePalletBaixa && !existeBox) {
+            mensagens.push("O cálculo foi feito por m³ porque as dimensões das paletes não permitem o cálculo por LDM.");
+        }
     }
 
     // Tarifário nacional
@@ -59,7 +84,7 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
         return { erro: "Não existem tarifas para este destino nacional." };
     }
 
-    // Faixas tarifárias
+    // Faixas tarifárias (mantém sua lógica original)
     if (totalWeight <= 50) {
         scaledWeight = 1;
         rateValue = rates["1-50"];
@@ -118,6 +143,22 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
     }
     cost = cost < rates.minimum ? rates.minimum : cost;
 
+    // Mensagem condicional baseada no peso (opcional para nacional, ajuste conforme necessário)
+    if (totalWeight <= 2500) {
+        mensagens.push("Entrega prevista por agente local (peso tarifário ≤ 2500kg).");
+    } else {
+        mensagens.push("Valores apresentados para entrega direta (peso tarifário > 2500kg).");
+    }
+
+    // Exemplo de mensagem extra para zonas específicas (ajuste conforme necessário)
+    if (
+        destino?.country &&
+        destino.country.toLowerCase() === "portugal" &&
+        (destino.code === "acores" || destino.code === "madeira")
+    ) {
+        mensagens.push("Atenção: Para as ilhas dos Açores e Madeira, podem ser aplicadas taxas adicionais.");
+    }
+
     return {
         transportadora: "XBS Nacional",
         totalLdm,
@@ -127,6 +168,7 @@ function calcular_xbslog_nacional(destino, dimensoes, conversion) {
         rateValue,
         rateLabel,
         cost,
-        erro: null
+        erro: null,
+        mensagens
     };
 }
