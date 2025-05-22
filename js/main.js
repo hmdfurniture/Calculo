@@ -46,6 +46,7 @@ document.getElementById("country").addEventListener("input", () => {
         zoneInput.value = "";
         zoneInput.disabled = true;
         zoneList.innerHTML = "";
+        document.getElementById("result").innerHTML = "";  // Limpa os resultados
     }
 });
 
