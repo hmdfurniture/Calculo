@@ -20,11 +20,48 @@
             flex: 1 1 40%;
             max-width: 760px;
             padding-left: 20px;
+            display: flex;
+            flex-direction: column;
         }
         .map {
             height: 500px;
             width: 100%;
             background-color: white;
+        }
+        .mensagens-container {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+        .mensagem-explicativa-bloco {
+            display: flex;
+            align-items: flex-start;
+            background: #eef6ff;
+            border: 1px solid #acd3fa;
+            border-radius: 12px;
+            padding: 14px 16px 8px 12px;
+            min-height: 70px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 16px;
+        }
+        .mensagem-explicativa-logo {
+            width: 80px;
+            height: 44px;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            margin-right: 12px;
+            display: block;
+        }
+        .mensagem-explicativa-lista {
+            margin: 0;
+            padding-left: 20px;
+            color: #174b7a;
+            font-size: 15px;
         }
         .form-group {
             display: flex;
@@ -192,6 +229,9 @@
             .map {
                 height: 300px;
             }
+            .mensagens-container {
+                margin-top: 12px;
+            }
         }
         @media (max-width: 480px) {
             .logout-button {
@@ -207,6 +247,14 @@
             }
             button {
                 width: 100%;
+            }
+            .mensagem-explicativa-bloco {
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+            .mensagem-explicativa-logo {
+                margin-bottom: 8px;
             }
         }
         .button-container {
@@ -297,6 +345,8 @@
     </div>
     <div class="map-container">
         <div id="map" class="map"></div>
+        <!-- BLOCO DE MENSAGENS EXPLICATIVAS -->
+        <div class="mensagens-container" id="mensagens"></div>
     </div>
     <!-- Ordem dos scripts ajustada para garantir o funcionamento correto! -->
     <script src="js/calculo_geral.js"></script>
@@ -357,6 +407,7 @@
         document.getElementById('zone').disabled = true;
         document.getElementById('result').innerHTML = '';
         document.getElementById('error-message').innerHTML = '';
+        document.getElementById('mensagens').innerHTML = '';
         populateCountryDropdown();
     }
     </script>
