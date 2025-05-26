@@ -46,11 +46,20 @@
         }
         .form-container {
             flex: 1 1 60%;
+            /* REMOVIDO max-width: 760px; para ocupar todo o espaço disponível */
+            display: flex;
+            flex-direction: column;
+            /* Deixe o fundo padrão, ou ajuste se desejar */
+        }
+        .form-inner {
             max-width: 760px;
+            margin: 0;
+            background: #fff;
+            /* Pode manter outras regras de .form-container aqui, se desejar */
         }
         .map-container {
             flex: 1 1 40%;
-            max-width: 760px;
+            /* REMOVIDO max-width: 760px; para ocupar todo o espaço disponível */
             padding-left: 20px;
             display: flex;
             flex-direction: column;
@@ -241,7 +250,7 @@
             }
             .form-container, .map-container {
                 flex: 1 1 100%;
-                max-width: none;
+                /* max-width: none; */
                 padding-left: 0;
             }
             .map {
@@ -249,6 +258,9 @@
             }
             .mensagens-container {
                 margin-top: 12px;
+            }
+            .form-inner {
+                max-width: none;
             }
         }
         @media (max-width: 480px) {
@@ -309,58 +321,60 @@
         <button class="logout-button" onclick="logout()">Logout</button>
     </header>
     <div class="form-container">
-        <div class="form-group">
-            <label for="country">Select Country:</label>
-            <div class="dropdown">
-                <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                <div class="dropdown-content" id="country-list"></div>
-            </div>
-            <label for="zone">Select Zone:</label>
-            <div class="dropdown">
-                <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                <div class="dropdown-content" id="zone-list"></div>
-            </div>
-        </div>
-        <div class="header-row">
-            <div>Type:</div>
-            <div>Width (cm):</div>
-            <div>Length (cm):</div>
-            <div>Height (cm):</div>
-            <div>Quantity:</div>
-            <div>Action:</div>
-        </div>
-        <div id="dimension-container">
-            <div class="form-group dimension-line">
-                <div>
-                    <select class="type" oninput="removeHighlight(this)">
-                        <option value="box">Box</option>
-                        <option value="pallet">Pallet</option>
-                    </select>
+        <div class="form-inner">
+            <div class="form-group">
+                <label for="country">Select Country:</label>
+                <div class="dropdown">
+                    <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+                    <div class="dropdown-content" id="country-list"></div>
                 </div>
-                <div>
-                    <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                </div>
-                <div>
-                    <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                <label for="zone">Select Zone:</label>
+                <div class="dropdown">
+                    <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                    <div class="dropdown-content" id="zone-list"></div>
                 </div>
             </div>
+            <div class="header-row">
+                <div>Type:</div>
+                <div>Width (cm):</div>
+                <div>Length (cm):</div>
+                <div>Height (cm):</div>
+                <div>Quantity:</div>
+                <div>Action:</div>
+            </div>
+            <div id="dimension-container">
+                <div class="form-group dimension-line">
+                    <div>
+                        <select class="type" oninput="removeHighlight(this)">
+                            <option value="box">Box</option>
+                            <option value="pallet">Pallet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    </div>
+                    <div>
+                        <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    </div>
+                    <div>
+                        <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    </div>
+                    <div>
+                        <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                    </div>
+                    <div>
+                        <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+            <div class="button-container">
+                <button onclick="finalCalculate()">Calculate</button>
+            </div>
+            <button onclick="resetForm()">Reset</button>
+            <div class="result" id="result"></div>
+            <div class="error-message" id="error-message"></div>
         </div>
-        <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-        <div class="button-container">
-            <button onclick="finalCalculate()">Calculate</button>
-        </div>
-        <button onclick="resetForm()">Reset</button>
-        <div class="result" id="result"></div>
-        <div class="error-message" id="error-message"></div>
     </div>
     <div class="map-container">
         <div id="map" class="map"></div>
