@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
+        /* GITHUB FONT STACK E TAMANHO */
+        body, input, select, button, textarea,
+        .dropdown-menu, .dropdown-menu a, .dropdown-menu button,
+        .mensagens-container, .result {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+            font-size: 12px !important;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -29,37 +36,114 @@
             height: 38px;
             margin: 8px 0;
             display: block;
+            max-width: 90vw;
         }
-        .logout-button {
-            width: 60px;
-            height: 25px;
-            padding: 2px 0;
-            background-color: #FF6347;
-            color: white;
+        /* ==== NOVO: Estilos dos botões modernos e dropdowns ==== */
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            position: relative;
+        }
+        .icon-btn {
+            background: none;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            position: static;
+            padding: 6px;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
-        .logout-button:hover {
-            background-color: #FF4500;
+        .icon-btn:focus,
+        .icon-btn:hover {
+            background: #eee;
+        }
+        .icon-svg {
+            width: 26px;
+            height: 26px;
+            display: block;
+            fill: #111;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 48px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 200px;
+            box-shadow: 0 4px 16px 0 rgba(0,0,0,0.13);
+            z-index: 9999;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .dropdown-menu li {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .dropdown-menu li:last-child {
+            border-bottom: none;
+        }
+        .dropdown-menu a,
+        .dropdown-menu button {
+            width: 100%;
+            text-align: left;
+            padding: 12px 18px;
+            background: none;
+            border: none;
+            color: #222;
+            font-size: 15px;
+            cursor: pointer;
+            outline: none;
+        }
+        .dropdown-menu a:hover,
+        .dropdown-menu button:hover {
+            background: #f5f5f5;
+        }
+        /* Avatar */
+        .avatar-icon {
+            border-radius: 50%;
+            border: 2px solid #222;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .avatar-dropdown { right: 0; }
+        .hamburger-dropdown { right: 58px; }
+        /* ==== FIM dos estilos dos botões modernos ==== */
+
+        /* ... mantém o restante do seu CSS ... */
+        .logout-button {
+            display: none; /* ESCONDE O BOTÃO ORIGINAL */
         }
         .form-container {
             flex: 1 1 60%;
-            /* REMOVIDO max-width: 760px; para ocupar todo o espaço disponível */
             display: flex;
             flex-direction: column;
-            /* Deixe o fundo padrão, ou ajuste se desejar */
         }
         .form-inner {
             max-width: 760px;
             margin: 0;
             background: #fff;
-            /* Pode manter outras regras de .form-container aqui, se desejar */
         }
         .map-container {
             flex: 1 1 40%;
-            /* REMOVIDO max-width: 760px; para ocupar todo o espaço disponível */
             padding-left: 20px;
             display: flex;
             flex-direction: column;
@@ -250,7 +334,6 @@
             }
             .form-container, .map-container {
                 flex: 1 1 100%;
-                /* max-width: none; */
                 padding-left: 0;
             }
             .map {
@@ -318,7 +401,39 @@
 <body>
     <header>
         <img src="images/logo.png" alt="Logo" class="logo-header" />
-        <button class="logout-button" onclick="logout()">Logout</button>
+        <div class="header-actions">
+            <!-- Hamburger -->
+            <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
+                <svg class="icon-svg" viewBox="0 0 24 24">
+                    <rect y="4" width="24" height="3"/>
+                    <rect y="10.5" width="24" height="3"/>
+                    <rect y="17" width="24" height="3"/>
+                </svg>
+            </button>
+            <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
+                <ul>
+                    <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
+                    <li><button onclick="printResult()">Imprimir</button></li>
+                    <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
+                </ul>
+            </div>
+            <!-- Avatar -->
+            <button class="icon-btn" id="avatarBtn" aria-label="Conta">
+                <span class="avatar-icon">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+  <circle cx="12" cy="8" r="4" fill="#222"/>
+  <ellipse cx="12" cy="17" rx="7" ry="4.5" fill="#222"/>
+</svg
+                </span>
+            </button>
+            <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
+                <ul>
+                    <li><a href="admin.html" target="_blank">Admin</a></li>
+                    <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
+                    <li><button onclick="logout()">Logout</button></li>
+                </ul>
+            </div>
+        </div>
     </header>
     <div class="form-container">
         <div class="form-inner">
@@ -438,6 +553,31 @@
         document.getElementById('mensagens').innerHTML = '';
         populateCountryDropdown();
     }
+    </script>
+    <!-- NOVO: Script para dropdown dos botões modernos -->
+    <script>
+    function closeAllDropdowns() {
+        document.getElementById('hamburgerMenu').classList.remove('show');
+        document.getElementById('avatarMenu').classList.remove('show');
+    }
+    document.getElementById('hamburgerBtn').onclick = function(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('hamburgerMenu');
+        menu.classList.toggle('show');
+        document.getElementById('avatarMenu').classList.remove('show');
+    };
+    document.getElementById('avatarBtn').onclick = function(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('avatarMenu');
+        menu.classList.toggle('show');
+        document.getElementById('hamburgerMenu').classList.remove('show');
+    };
+    document.addEventListener('click', closeAllDropdowns);
+
+    function copyToExcel() { alert('Função de copiar para Excel ainda não implementada.'); }
+    function printResult() { alert('Função de imprimir resultado ainda não implementada.'); }
+    function sendByEmail() { alert('Função de enviar por e-mail ainda não implementada.'); }
+    function logout() { alert('Logout! (implementar redirecionamento)'); }
     </script>
     <footer>
         <a href="https://hmdfurniture.github.io/Calculo/admin.html" target="_blank">admin</a>
