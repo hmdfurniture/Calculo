@@ -59,6 +59,21 @@
             height: 500px;
             width: 100%;
             background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            min-width: 200px;
+            position: relative;
+        }
+        .placeholder-map-img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: auto;
+            object-fit: contain;
         }
         .mensagens-container {
             margin-top: 18px;
@@ -363,7 +378,13 @@
         <div class="error-message" id="error-message"></div>
     </div>
     <div class="map-container">
-        <div id="map" class="map"></div>
+        <div id="map" class="map">
+            <img 
+                src="images/mapa/europa_main.png" 
+                alt="Mapa da Europa" 
+                class="placeholder-map-img"
+            />
+        </div>
         <div class="mensagens-container" id="mensagens"></div>
     </div>
     <script src="js/calculo_geral.js"></script>
