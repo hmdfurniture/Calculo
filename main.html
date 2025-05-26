@@ -346,20 +346,80 @@
                 max-width: none;
             }
         }
+
+        /* ===== MOBILE HEADER + LAYOUT AJUSTADO PARA TELAS PEQUENAS ===== */
         @media (max-width: 480px) {
-            .logout-button {
-                width: 100%;
-                position: static;
-                margin-bottom: 10px;
+            body {
+                margin: 8px !important;
             }
-            input[type="text"], select, button.remove-button {
-                width: 100%;
+            header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 4px;
+                gap: 0;
             }
-            input[type="number"] {
-                width: 100%;
+            .logo-header {
+                width: 90px !important;
+                height: 22px !important;
+                margin: 0 !important;
+                max-width: 48vw;
+            }
+            .header-actions {
+                flex-direction: row;
+                gap: 6px;
+                margin: 0;
+            }
+            .icon-btn, .avatar-icon {
+                width: 24px !important;
+                height: 24px !important;
+                min-width: 24px !important;
+                min-height: 24px !important;
+            }
+            .icon-svg {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            .form-container, .map-container, .form-inner {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100vw !important;
+            }
+            .form-group, .header-row, .dimension-line {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .form-group > label,
+            .form-group > .dropdown,
+            .header-row > div,
+            .dimension-line > div {
+                flex: 1 1 48%;
+                min-width: 0;
+                max-width: 100%;
+            }
+            input[type="text"], select, input[type="number"], button.remove-button {
+                width: 100% !important;
+                min-width: 0;
+                padding: 4px 4px;
+                font-size: 16px !important;
+            }
+            .button-container {
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
             }
             button {
-                width: 100%;
+                width: auto !important;
+                min-width: 80px;
+                padding: 5px 12px;
+                font-size: 14px;
+                margin-left: 0;
+                margin-right: 0;
+                display: inline-block;
+            }
+            #add-line {
+                display: block;
+                margin: 14px auto 0 auto;
             }
             .mensagem-explicativa-bloco {
                 flex-direction: column;
@@ -369,7 +429,28 @@
             .mensagem-explicativa-logo {
                 margin-bottom: 8px;
             }
+            .dropdown-content {
+                left: 0;
+                right: 0;
+                max-width: 100vw;
+                min-width: 0;
+                box-sizing: border-box;
+                z-index: 1000;
+            }
+            .logout-button {
+                width: 100%;
+                position: static;
+                margin-bottom: 10px;
+            }
+            footer {
+                position: static;
+                width: 100%;
+                padding: 8px 0;
+                text-align: center;
+                font-size: 14px;
+            }
         }
+        /* ===== FIM MOBILE HEADER + LAYOUT ===== */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -423,7 +504,7 @@
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
   <circle cx="12" cy="8" r="4" fill="#222"/>
   <ellipse cx="12" cy="17" rx="7" ry="4.5" fill="#222"/>
-</svg
+</svg>
                 </span>
             </button>
             <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
@@ -485,8 +566,8 @@
             <button id="add-line" onclick="addLine()">+ Add More Lines</button>
             <div class="button-container">
                 <button onclick="finalCalculate()">Calculate</button>
+                <button onclick="resetForm()">Reset</button>
             </div>
-            <button onclick="resetForm()">Reset</button>
             <div class="result" id="result"></div>
             <div class="error-message" id="error-message"></div>
         </div>
