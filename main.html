@@ -392,6 +392,25 @@
             background: transparent;
             min-width: 0;
         }
+        /* NOVO: Main content lado-a-lado */
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+        @media (max-width: 900px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .map-container {
+                padding-left: 0;
+                margin-top: 24px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -430,66 +449,68 @@
             </div>
         </div>
     </header>
-    <div class="form-container">
-        <div class="form-inner">
-            <div class="form-group">
-                <label for="country">Select Country:</label>
-                <div class="dropdown">
-                    <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                    <div class="dropdown-content" id="country-list"></div>
-                </div>
-                <label for="zone">Select Zone:</label>
-                <div class="dropdown">
-                    <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                    <div class="dropdown-content" id="zone-list"></div>
-                </div>
-            </div>
-            <div class="header-row">
-                <div>Type:</div>
-                <div>Width (cm):</div>
-                <div>Length (cm):</div>
-                <div>Height (cm):</div>
-                <div>Quantity:</div>
-                <div>Action:</div>
-            </div>
-            <div id="dimension-container">
-                <div class="form-group dimension-line">
-                    <div>
-                        <select class="type" oninput="removeHighlight(this)">
-                            <option value="box">Box</option>
-                            <option value="pallet">Pallet</option>
-                        </select>
+    <div class="main-content">
+        <div class="form-container">
+            <div class="form-inner">
+                <div class="form-group">
+                    <label for="country">Select Country:</label>
+                    <div class="dropdown">
+                        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+                        <div class="dropdown-content" id="country-list"></div>
                     </div>
-                    <div>
-                        <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                    <label for="zone">Select Zone:</label>
+                    <div class="dropdown">
+                        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                        <div class="dropdown-content" id="zone-list"></div>
                     </div>
                 </div>
+                <div class="header-row">
+                    <div>Type:</div>
+                    <div>Width (cm):</div>
+                    <div>Length (cm):</div>
+                    <div>Height (cm):</div>
+                    <div>Quantity:</div>
+                    <div>Action:</div>
+                </div>
+                <div id="dimension-container">
+                    <div class="form-group dimension-line">
+                        <div>
+                            <select class="type" oninput="removeHighlight(this)">
+                                <option value="box">Box</option>
+                                <option value="pallet">Pallet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Botões, todos numa linha, Calculate à direita -->
+                <div class="row-actions">
+                    <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+                    <button onclick="resetForm()">Reset</button>
+                    <button class="calculate-btn" onclick="finalCalculate()">Calculate</button>
+                </div>
+                <div class="result" id="result"></div>
+                <div class="error-message" id="error-message"></div>
             </div>
-            <!-- Botões, todos numa linha, Calculate à direita -->
-            <div class="row-actions">
-                <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-                <button onclick="resetForm()">Reset</button>
-                <button class="calculate-btn" onclick="finalCalculate()">Calculate</button>
-            </div>
-            <div class="result" id="result"></div>
-            <div class="error-message" id="error-message"></div>
         </div>
-    </div>
-    <div class="map-container">
-    <div id="map" class="map"></div>
-    <div class="mensagens-container" id="mensagens"></div>
+        <div class="map-container">
+            <div id="map" class="map"></div>
+            <div class="mensagens-container" id="mensagens"></div>
+        </div>
     </div>
     <script src="js/calculo_geral.js"></script>
     <script src="js/dataLoader.js"></script>
