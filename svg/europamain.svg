@@ -1,1 +1,13 @@
-
+<svg viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg">
+   <g class="map">
+      <g class="regions">
+         <g class="region" id="europa">
+            <path class="geo region"
+             d="M100,100 L400,100 L400,400 L100,400 Z"/>
+         </g>
+      </g>
+      <path class="geo borders"
+        d="M100,100 L400,100 L400,400 L100,400 Z"
+        style="fill:none;stroke:#222;stroke-width:3;"/>
+   </g>
+</svg>
