@@ -362,6 +362,25 @@
             gap: 10px;
             margin-top: 10px;
         }
+#map svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0 auto;
+}
+.region path {
+    fill: #b0c4de;
+    stroke: #333;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: fill 0.2s;
+}
+.region.selected path {
+    fill: #007bff;
+}
+.region:hover path {
+    fill: #6fa9e6;
+}
         /* Footer sempre ao fundo, letra pequena */
         footer {
             margin-top: auto;
