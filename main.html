@@ -128,7 +128,6 @@
         .hamburger-dropdown { right: 58px; }
         /* ==== FIM dos estilos dos botões modernos ==== */
 
-        /* ... mantém o restante do seu CSS ... */
         .logout-button {
             display: none; /* ESCONDE O BOTÃO ORIGINAL */
         }
@@ -347,10 +346,13 @@
             }
         }
 
-        /* ===== MOBILE HEADER + LAYOUT AJUSTADO PARA TELAS PEQUENAS ===== */
-        @media (max-width: 480px) {
+        /* MOBILE E LANDSCAPE PARA TELAS PEQUENAS */
+        @media (max-width: 480px), (max-width: 767px) and (orientation: landscape) {
             body {
-                margin: 8px !important;
+                margin-left: 8px !important;
+                margin-right: 8px !important;
+                margin-top: 8px !important;
+                margin-bottom: 60px !important; /* espaço para o footer */
             }
             header {
                 flex-direction: row;
@@ -380,68 +382,38 @@
                 width: 16px !important;
                 height: 16px !important;
             }
-            .form-container, .map-container, .form-inner {
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: 100vw !important;
-            }
+            /* NÃO altera linhas nem cabeçalhos! */
             .form-group, .header-row, .dimension-line {
-                flex-wrap: wrap;
-                gap: 4px;
+                flex-wrap: nowrap !important;
+                gap: 10px;
             }
             .form-group > label,
             .form-group > .dropdown,
             .header-row > div,
             .dimension-line > div {
-                flex: 1 1 48%;
+                flex: 1 1 auto !important;
                 min-width: 0;
-                max-width: 100%;
+                max-width: none;
             }
-            input[type="text"], select, input[type="number"], button.remove-button {
-                width: 100% !important;
-                min-width: 0;
-                padding: 4px 4px;
-                font-size: 16px !important;
-            }
-            .button-container {
+            /* Botões numa linha só, centralizados, tamanho igual */
+            .actions-row {
+                display: flex;
                 justify-content: center;
+                align-items: center;
                 gap: 10px;
-                margin-top: 10px;
+                margin-top: 12px;
+                margin-bottom: 12px;
             }
-            button {
+            .actions-row > button {
                 width: auto !important;
                 min-width: 80px;
                 padding: 5px 12px;
                 font-size: 14px;
-                margin-left: 0;
-                margin-right: 0;
-                display: inline-block;
             }
-            #add-line {
-                display: block;
-                margin: 14px auto 0 auto;
+            .button-container, #add-line {
+                display: none !important;
             }
-            .mensagem-explicativa-bloco {
-                flex-direction: column;
-                gap: 4px;
-                align-items: flex-start;
-            }
-            .mensagem-explicativa-logo {
-                margin-bottom: 8px;
-            }
-            .dropdown-content {
-                left: 0;
-                right: 0;
-                max-width: 100vw;
-                min-width: 0;
-                box-sizing: border-box;
-                z-index: 1000;
-            }
-            .logout-button {
-                width: 100%;
-                position: static;
-                margin-bottom: 10px;
-            }
+            /* Footer estático e central */
             footer {
                 position: static;
                 width: 100%;
@@ -450,7 +422,6 @@
                 font-size: 14px;
             }
         }
-        /* ===== FIM MOBILE HEADER + LAYOUT ===== */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -563,8 +534,8 @@
                     </div>
                 </div>
             </div>
-            <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-            <div class="button-container">
+            <div class="actions-row">
+                <button id="add-line" onclick="addLine()">+ Add More Lines</button>
                 <button onclick="finalCalculate()">Calculate</button>
                 <button onclick="resetForm()">Reset</button>
             </div>
