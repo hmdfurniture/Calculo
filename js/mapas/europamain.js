@@ -11,7 +11,7 @@ const svgEuropa = `
       </g>
       <path class="geo borders"
         d="M100,100 L400,100 L400,400 L100,400 Z"
-        style="fill:none;stroke:#222;stroke-width:3;"/>
+        style="fill:none;stroke:#fff;stroke-width:3;"/>
    </g>
 </svg>
 `;
@@ -65,6 +65,10 @@ style.textContent = `
 }
 .region:hover path {
     fill: #6fa9e6;
+}
+/* Fronteiras do mapa: branco */
+.geo.borders, .geo.borders, .borders {
+    stroke: #fff !important;
 }
 `;
 document.head.appendChild(style);
