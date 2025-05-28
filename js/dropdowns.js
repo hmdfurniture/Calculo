@@ -146,3 +146,20 @@ function hideDropdown(dropdownId) {
     const dropdown = document.getElementById(dropdownId);
     dropdown.style.display = "none";
 }
+function selectCountry(country) {
+    const countryInput = document.getElementById("country");
+    countryInput.value = country;
+
+    const zoneInput = document.getElementById("zone");
+    zoneInput.value = "";
+    zoneInput.disabled = false;
+    const zoneList = document.getElementById("zone-list");
+    zoneList.innerHTML = "";
+
+    populateZoneDropdown(country);
+
+    countryInput.dispatchEvent(new Event("input"));
+    // PATCH para disparar o evento de mapa:
+    countryInput.dispatchEvent(new Event("change"));
+    filterCountries();
+}
