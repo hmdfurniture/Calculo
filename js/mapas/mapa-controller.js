@@ -12,7 +12,10 @@ const PAISES_LIST = [
 // Função genérica para carregar qualquer SVG no div #map
 function carregarMapa(svgPath, selectedId = null, callback = null) {
     fetch(svgPath)
-      .then(r => r.text())
+      .then(r => {
+          if (!r.ok) throw new Error("SVG não encontrado");
+          return r.text();
+      })
       .then(svg => {
           const mapDiv = document.getElementById('map');
           mapDiv.innerHTML = svg;
@@ -31,8 +34,13 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           if (typeof callback === 'function') callback();
       })
       .catch(() => {
-          const mapDiv = document.getElementById('map');
-          mapDiv.innerHTML = "<b>Erro ao carregar o mapa.</b>";
+          // Se falhar a carregar um país, volta ao mapa inicial da Europa
+          if (svgPath !== 'svg/europamain.svg') {
+              carregarMapa('svg/europamain.svg');
+          } else {
+              const mapDiv = document.getElementById('map');
+              mapDiv.innerHTML = "<b>Erro ao carregar o mapa.</b>";
+          }
       });
 }
 
