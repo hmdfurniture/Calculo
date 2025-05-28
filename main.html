@@ -21,12 +21,10 @@
             box-sizing: border-box;
             overflow-x: hidden;
         }
-        /* Centralização e largura igual a 98vw para header, main e footer */
         .header-content, .main-content, .footer-content {
             width: 98vw;
             margin: 0 auto;
             box-sizing: border-box;
-            /* Removido o max-width: 1400px */
         }
         header {
             background: #fff;
@@ -168,6 +166,8 @@
             margin-left: 0;
             margin-right: auto;
             background: #fff;
+            /* Alinha à esquerda do form-container */
+            display: block;
         }
         .map-container {
             flex: 0 1 40%;
@@ -179,8 +179,8 @@
             align-items: center;
         }
         .map {
-            width: 100%;
-            max-width: 440px;
+            width: 95%;
+            max-width: 95%;
             height: 600px;
             background-color: white;
             margin: 0 auto;
