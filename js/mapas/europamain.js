@@ -1,49 +1,98 @@
-// Mapa Europa Geral - Teste de uma região
+// mapa-controller.js
 
-const svgEuropa = `
-<svg viewBox="0 0 520 520" style="width:100%;height:100%;">
-   <g class="map">
-      <g class="regions">
-         <g class="region" id="europa">
-            <path class="geo region"
-             d="M100,100 L400,100 L400,400 L100,400 Z"/>
-         </g>
-      </g>
-      <path class="geo borders"
-        d="M100,100 L400,100 L400,400 L100,400 Z"
-        style="fill:none;stroke:#fff;stroke-width:3;"/>
-   </g>
-</svg>
-`;
+// Função genérica para carregar qualquer SVG no div #map
+function carregarMapa(svgPath, selectedId = null, callback = null) {
+    fetch(svgPath)
+      .then(r => r.text())
+      .then(svg => {
+          const mapDiv = document.getElementById('map');
+          mapDiv.innerHTML = svg;
+          mapDiv.style.display = "flex";
+          mapDiv.style.alignItems = "center";
+          mapDiv.style.justifyContent = "center";
+          mapDiv.style.background = "white";
 
-// Função para carregar o mapa geral no container #map
-function loadMapaEuropaMain() {
-    const mapDiv = document.getElementById('map');
-    mapDiv.innerHTML = svgEuropa;
+          // Destaca a região se um ID for especificado
+          if (selectedId) {
+              const reg = mapDiv.querySelector(`#${selectedId}.geo.region, .geo.region#${selectedId}`);
+              if (reg) reg.classList.add('selected');
+          }
 
-    // Torna o SVG responsivo
-    mapDiv.style.display = "flex";
-    mapDiv.style.alignItems = "center";
-    mapDiv.style.justifyContent = "center";
-    mapDiv.style.background = "white";
+          if (typeof callback === 'function') callback();
 
-    // Adiciona interação
-    mapDiv.querySelectorAll('.region').forEach(region => {
-        region.addEventListener('click', function() {
-            // Remove seleção anterior
-            mapDiv.querySelectorAll('.region').forEach(r => r.classList.remove('selected'));
-            this.classList.add('selected');
-            // Mensagem de teste
-            const msgDiv = document.getElementById('mensagens');
-            if(msgDiv) msgDiv.innerHTML = `Selecionou a região: <b>${this.id}</b>`;
-        });
-    });
+          // O mapa NÃO é interativo ao clique!
+      })
+      .catch(() => {
+          const mapDiv = document.getElementById('map');
+          mapDiv.innerHTML = "<b>Erro ao carregar o mapa.</b>";
+      });
 }
 
-// Carrega o mapa geral ao abrir a página
-window.addEventListener('DOMContentLoaded', loadMapaEuropaMain);
+// Carrega o mapa da Europa ao abrir a página
+window.addEventListener('DOMContentLoaded', () => {
+    carregarMapa('svg/europamain.svg');
+});
 
-// CSS para destaque da região selecionada (adicione no seu CSS global se não existir)
+// Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
+function destacarNoMapa(selectedId) {
+    const mapDiv = document.getElementById('map');
+    mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
+    if (selectedId) {
+        const reg = mapDiv.querySelector(`#${selectedId}.geo.region, .geo.region#${selectedId}`);
+        if (reg) reg.classList.add('selected');
+    }
+}
+
+// Lógica de integração com os selects do HTML
+let paisSelecionado = null;
+let zonaSelecionada = null;
+let timeoutPais = null;
+
+// Quando o utilizador escolhe um país
+document.getElementById('country').addEventListener('change', function() {
+    const paisId = this.value;
+    zonaSelecionada = null;
+
+    // Destaca o país no mapa Europa
+    carregarMapa('svg/europamain.svg', paisId);
+
+    // Após 2-3 segundos, carrega o mapa do país
+    clearTimeout(timeoutPais);
+    if (paisId) {
+        timeoutPais = setTimeout(() => {
+            carregarMapa(`svg/${paisId}.svg`);
+            paisSelecionado = paisId;
+        }, 2000);
+    } else {
+        paisSelecionado = null;
+    }
+});
+
+// Quando o utilizador escolhe uma zona
+document.getElementById('zone').addEventListener('change', function() {
+    const zonaId = this.value;
+    zonaSelecionada = zonaId;
+    if (paisSelecionado) {
+        carregarMapa(`svg/${paisSelecionado}.svg`, zonaId);
+    }
+});
+
+// Limpar zona: volta ao mapa do país sem destaque
+function limparZona() {
+    if (paisSelecionado) {
+        carregarMapa(`svg/${paisSelecionado}.svg`);
+        zonaSelecionada = null;
+    }
+}
+
+// Limpar país: volta ao mapa da Europa sem destaque
+function limparPais() {
+    carregarMapa('svg/europamain.svg');
+    paisSelecionado = null;
+    zonaSelecionada = null;
+}
+
+// CSS para destaque da região selecionada (caso não esteja já no global)
 const style = document.createElement('style');
 style.textContent = `
 #map svg {
@@ -52,22 +101,23 @@ style.textContent = `
     display: block;
     margin: 0 auto;
 }
-.region path {
+.geo.region {
     fill: #b0c4de;
     stroke: #333;
     stroke-width: 2;
-    cursor: pointer;
     transition: fill 0.2s;
 }
-.region.selected path {
+.geo.region.selected {
     fill: #007bff;
 }
-.region:hover path {
-    fill: #6fa9e6;
-}
-/* Fronteiras do mapa: branco */
-.geo.borders, .geo.borders, .borders {
+.geo.borders, .borders {
     stroke: #fff !important;
 }
 `;
 document.head.appendChild(style);
+
+// Torna os paths não interativos ao rato
+document.addEventListener('DOMContentLoaded', () => {
+    const mapDiv = document.getElementById('map');
+    mapDiv.style.pointerEvents = 'none';
+});
