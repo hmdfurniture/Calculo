@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
-        /* FONTES E LAYOUT ORIGINAL */
+        /* (Todo o teu CSS original mantido, incluindo media queries, mas podes remover os @media se quiser) */
         body, input, select, button, textarea,
         .dropdown-menu, .dropdown-menu a, .dropdown-menu button,
         .mensagens-container, .result {
@@ -117,7 +117,6 @@
         .dropdown-menu button:hover {
             background: #f5f5f5;
         }
-        /* Avatar sem círculo */
         .avatar-icon {
             border: none !important;
             background: none !important;
@@ -246,12 +245,6 @@
             -webkit-appearance: none;
             margin: 0;
         }
-        /* Só em mobile: evitar zoom ao focar inputs */
-        @media (max-width: 600px) {
-            input[type="text"], input[type="number"], select {
-                font-size: 16px;
-            }
-        }
         button {
             padding: 5px 10px;
             background-color: #007BFF;
@@ -343,7 +336,6 @@
             border: 1px solid #eee;
             display: block;
         }
-        /* Botões: espaço apenas entre Add e Reset, Calculate à direita */
         .row-actions {
             display: flex;
             align-items: center;
@@ -381,7 +373,6 @@
 .region:hover path {
     fill: #6fa9e6;
 }
-        /* Footer sempre ao fundo, letra pequena */
         footer {
             margin-top: auto;
             width: 100%;
@@ -392,7 +383,6 @@
             background: transparent;
             min-width: 0;
         }
-        /* NOVO: Main content lado-a-lado */
         .main-content {
             display: flex;
             flex-direction: row;
@@ -402,16 +392,14 @@
             margin: 0 auto;
             align-items: flex-start;
         }
-        @media (max-width: 900px) {
-            .main-content {
-                flex-direction: column;
-            }
-            .map-container {
-                padding-left: 0;
-                margin-top: 24px;
-            }
-        }
+        /* (Removidos os @media para mobile, opcional nesta versão desktop) */
     </style>
+    <script>
+    // Redireciona para a versão mobile se a largura for < 900px
+    if (window.innerWidth < 900) {
+        window.location.replace('m.main.html');
+    }
+    </script>
 </head>
 <body>
     <header>
@@ -452,6 +440,7 @@
     <div class="main-content">
         <div class="form-container">
             <div class="form-inner">
+                <!-- (Todo o conteúdo do formulário como já tens) -->
                 <div class="form-group">
                     <label for="country">Select Country:</label>
                     <div class="dropdown">
@@ -497,7 +486,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Botões, todos numa linha, Calculate à direita -->
                 <div class="row-actions">
                     <button id="add-line" onclick="addLine()">+ Add More Lines</button>
                     <button onclick="resetForm()">Reset</button>
