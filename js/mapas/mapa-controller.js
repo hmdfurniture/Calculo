@@ -1,4 +1,13 @@
-// mapa-controller.js
+// --- Adiciona o array de países válidos no topo deste ficheiro ---
+const PAISES_LIST = [
+  "Albania","Alemanha","Andorra","Armenia","Austria","Azerbaijão","Belgica","Bielorrussia",
+  "Bosnia e Herzegovina","Bulgaria","Chequia","Chipre","Croacia","Dinamarca","Eslovenia",
+  "Eslovaquia","Espanha","Estonia","Finlandia","França","Georgia","Grecia","Hungria",
+  "Irlanda","Islandia","Italia","Kosovo","Letonia","Liechtenstein","Lituania","Luxemburgo",
+  "Macedonia do Norte","Malta","Moldavia","Montenegro","Noruega","Paises Baixos","Polonia",
+  "Portugal","Reino Unido","Romenia","Russia","San Marino","Servia","Suecia","Suiça",
+  "Turquia","Ucrania"
+];
 
 // Função genérica para carregar qualquer SVG no div #map
 function carregarMapa(svgPath, selectedId = null, callback = null) {
@@ -14,16 +23,12 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
 
           // Destaca a região se um ID for especificado
           if (selectedId) {
-              // Espera o SVG ser injetado, e só então aplica a classe
-              // Não precisa de timeout pois é síncrono após innerHTML
               const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
               if (reg) reg.classList.add('selected');
               else console.warn('País não encontrado no SVG:', selectedId);
           }
 
           if (typeof callback === 'function') callback();
-
-          // O mapa NÃO é interativo ao clique!
       })
       .catch(() => {
           const mapDiv = document.getElementById('map');
@@ -37,7 +42,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
-// (Esta função não é usada no fluxo normal, mas pode ser útil se quiseres destacar sem recarregar SVG)
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
@@ -52,18 +56,18 @@ let paisSelecionado = null;
 let zonaSelecionada = null;
 let timeoutPais = null;
 
-// Quando o utilizador escolhe um país
+// --- ALTERADO: Evento para garantir país válido ---
 document.getElementById('country').addEventListener('change', function() {
-    const paisId = this.value;
+    const paisId = this.value.trim();
+    // Só permite países válidos (exatamente iguais aos do array)
+    if (!PAISES_LIST.includes(paisId)) {
+        carregarMapa('svg/europamain.svg');
+        paisSelecionado = null;
+        return;
+    }
     zonaSelecionada = null;
-
-    // Debug: mostra o valor selecionado
-    // console.log('Selecionado:', paisId);
-
-    // Destaca o país no mapa Europa
     carregarMapa('svg/europamain.svg', paisId);
 
-    // Após 2 segundos, carrega o mapa do país
     clearTimeout(timeoutPais);
     if (paisId) {
         timeoutPais = setTimeout(() => {
@@ -75,7 +79,6 @@ document.getElementById('country').addEventListener('change', function() {
     }
 });
 
-// Quando o utilizador escolhe uma zona
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value;
     zonaSelecionada = zonaId;
@@ -98,8 +101,6 @@ function limparPais() {
     paisSelecionado = null;
     zonaSelecionada = null;
 }
-
-// Remove o bloco de CSS injetado via JS para evitar conflitos
 
 // Torna os paths não interativos ao rato (mantém apenas pointer-events: none no container)
 document.addEventListener('DOMContentLoaded', () => {
