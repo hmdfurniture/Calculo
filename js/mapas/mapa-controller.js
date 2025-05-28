@@ -14,8 +14,11 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
 
           // Destaca a região se um ID for especificado
           if (selectedId) {
-              const reg = mapDiv.querySelector(`#${selectedId}.geo.region, .geo.region#${selectedId}`);
+              // Espera o SVG ser injetado, e só então aplica a classe
+              // Não precisa de timeout pois é síncrono após innerHTML
+              const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
               if (reg) reg.classList.add('selected');
+              else console.warn('País não encontrado no SVG:', selectedId);
           }
 
           if (typeof callback === 'function') callback();
@@ -34,11 +37,12 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
+// (Esta função não é usada no fluxo normal, mas pode ser útil se quiseres destacar sem recarregar SVG)
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
     if (selectedId) {
-        const reg = mapDiv.querySelector(`#${selectedId}.geo.region, .geo.region#${selectedId}`);
+        const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
         if (reg) reg.classList.add('selected');
     }
 }
@@ -53,10 +57,13 @@ document.getElementById('country').addEventListener('change', function() {
     const paisId = this.value;
     zonaSelecionada = null;
 
+    // Debug: mostra o valor selecionado
+    // console.log('Selecionado:', paisId);
+
     // Destaca o país no mapa Europa
     carregarMapa('svg/europamain.svg', paisId);
 
-    // Após 2-3 segundos, carrega o mapa do país
+    // Após 2 segundos, carrega o mapa do país
     clearTimeout(timeoutPais);
     if (paisId) {
         timeoutPais = setTimeout(() => {
@@ -92,31 +99,9 @@ function limparPais() {
     zonaSelecionada = null;
 }
 
-// CSS para destaque da região selecionada (caso não esteja já no global)
-const style = document.createElement('style');
-style.textContent = `
-#map svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    margin: 0 auto;
-}
-.geo.region {
-    fill: #b0c4de;
-    stroke: #333;
-    stroke-width: 2;
-    transition: fill 0.2s;
-}
-.geo.region.selected {
-    fill: #007bff;
-}
-.geo.borders, .borders {
-    stroke: #fff !important;
-}
-`;
-document.head.appendChild(style);
+// Remove o bloco de CSS injetado via JS para evitar conflitos
 
-// Torna os paths não interativos ao rato
+// Torna os paths não interativos ao rato (mantém apenas pointer-events: none no container)
 document.addEventListener('DOMContentLoaded', () => {
     const mapDiv = document.getElementById('map');
     mapDiv.style.pointerEvents = 'none';
