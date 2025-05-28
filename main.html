@@ -21,14 +21,12 @@
             box-sizing: border-box;
             overflow-x: hidden;
         }
-        /* Centralização e largura máxima igual para header, main e footer */
+        /* Centralização e largura igual a 98vw para header, main e footer */
         .header-content, .main-content, .footer-content {
-            max-width: 1400px;
-            width: 100%;
+            width: 98vw;
             margin: 0 auto;
             box-sizing: border-box;
-            padding-left: 30px;
-            padding-right: 30px;
+            /* Removido o max-width: 1400px */
         }
         header {
             background: #fff;
@@ -159,19 +157,21 @@
             flex: 1 0 auto;
         }
         .form-container {
-            flex: 1 1 60%;
+            flex: 0 1 60%;
+            max-width: 60%;
             display: flex;
             flex-direction: column;
             min-width: 340px;
         }
         .form-inner {
-            max-width: 760px;
+            width: 100%;
             margin-left: 0;
             margin-right: auto;
             background: #fff;
         }
         .map-container {
-            flex: 1 1 40%;
+            flex: 0 1 40%;
+            max-width: 40%;
             min-width: 320px;
             padding-left: 20px;
             display: flex;
@@ -399,12 +399,9 @@
     fill: #6fa9e6;
 }
         .footer-content {
-            width: 100%;
-            max-width: 1400px;
+            width: 98vw;
             margin: 0 auto;
             box-sizing: border-box;
-            padding-left: 30px;
-            padding-right: 30px;
         }
         footer {
             margin-top: auto;
