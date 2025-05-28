@@ -25,7 +25,6 @@ function loadMapaEuropaMain() {
     mapDiv.style.display = "flex";
     mapDiv.style.alignItems = "center";
     mapDiv.style.justifyContent = "center";
-    mapDiv.style.height = "500px";
     mapDiv.style.background = "white";
 
     // Adiciona interação
