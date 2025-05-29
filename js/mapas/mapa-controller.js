@@ -1,12 +1,6 @@
 // --- Adiciona o array de países válidos no topo deste ficheiro ---
 const PAISES_LIST = [
-  "Albania","Alemanha","Andorra","Armenia","Austria","Azerbaijão","Belgica","Bielorrussia",
-  "Bosnia e Herzegovina","Bulgaria","Chequia","Chipre","Croacia","Dinamarca","Eslovenia",
-  "Eslovaquia","Espanha","Estonia","Finlandia","França","Georgia","Grecia","Hungria",
-  "Irlanda","Islandia","Italia","Kosovo","Letonia","Liechtenstein","Lituania","Luxemburgo",
-  "Macedonia do Norte","Malta","Moldavia","Montenegro","Noruega","Paises Baixos","Polonia",
-  "Portugal","Reino Unido","Romenia","Russia","San Marino","Servia","Suecia","Suiça",
-  "Turquia","Ucrania"
+  "Albania","Alemanha","Andorra","Armenia","Austria","Azerbaijão","Belgica","Bielorrussia","Bosnia e Herzegovina","Bulgaria","Chequia","Chipre","Croacia","Dinamarca","Eslovenia","Eslovaquia","Espanha","Estonia","Finlandia","França","Georgia","Grecia","Hungria","Irlanda","Islandia","Italia","Kosovo","Letonia","Liechtenstein","Lituania","Luxemburgo","Macedonia do Norte","Malta","Moldavia","Montenegro","Noruega","Paises Baixos","Polonia","Portugal","Reino Unido","Romenia","Russiaaaa","San Marino","Servia","Suecia","Suiça","Turquia","Ucrania"
 ];
 
 // Função genérica para carregar qualquer SVG no div #map
