@@ -17,11 +17,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Sincronizar lista de países nos ficheiros JS
+      - name: Sincronizar países em todos os ficheiros
         run: node js/sync-paises.js
-
-      - name: Corrigir países nos ficheiros JSON em Tables
-        run: node js/sync-countries-in-tables.js
 
       - name: Commit e push se houver alterações
         run: |
