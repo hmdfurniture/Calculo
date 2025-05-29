@@ -20,10 +20,13 @@ jobs:
       - name: Sincronizar lista de países nos ficheiros JS
         run: node js/sync-paises.js
 
+      - name: Corrigir países nos ficheiros JSON em Tables
+        run: node js/sync-countries-in-tables.js
+
       - name: Commit e push se houver alterações
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add js/mapas/mapa-controller.js js/paises.js
-          git diff --cached --quiet || git commit -m "Sincronizar lista de países automaticamente"
+          git add js/mapas/mapa-controller.js js/paises.js Tables/*.json
+          git diff --cached --quiet || git commit -m "Sincronização automática de países"
           git push
