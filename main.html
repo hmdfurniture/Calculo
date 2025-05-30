@@ -424,6 +424,105 @@
             min-width: 0;
             border-top: 1px solid #eee;
         }
+/* ======= MOBILE RETRATO (PORTRAIT) ======= */
+@media (max-width: 900px) and (orientation: portrait) {
+    html, body {
+        width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    header, .header-content, .footer-content, footer {
+        width: 100vw !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    .main-content {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        width: 100vw !important;
+        margin: 0 !important;
+    }
+    .form-container,
+    .form-inner,
+    .map-container,
+    .mensagens-container,
+    #result {
+        width: 100vw !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .form-inner {
+        width: 98vw !important;
+        margin: 0 auto !important;
+    }
+    .map-container {
+        order: 3;
+        padding: 0 !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        margin: 0 auto !important;
+        width: 100vw !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    .mensagens-container {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        padding: 0 2vw !important;
+    }
+    .result {
+        margin-top: 10px !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    /* Resultados + mapa em até 2 por linha */
+    #result {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100vw !important;
+    }
+    .resultado-bloco, .map {
+        width: 44vw !important;
+        min-width: 120px !important;
+        max-width: 210px !important;
+        margin-bottom: 8px !important;
+        box-sizing: border-box !important;
+    }
+    .map {
+        min-height: 160px !important;
+        aspect-ratio: 1/1 !important;
+        background: #fff !important;
+        border-radius: 10px !important;
+        border: 1px solid #ddd !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+    }
+    /* Inputs: evitar zoom */
+    input, select, button, textarea {
+        font-size: 16px !important;
+    }
+}
+/* ======= MOBILE PAISAGEM (LANDSCAPE) = DESKTOP ======= */
+@media (max-width: 900px) and (orientation: landscape) {
+    html, body, .main-content, .header-content, .footer-content, footer {
+        width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+    input, select, button, textarea {
+        font-size: 16px !important;
+    }
+    /* Mantém a estrutura e cores do desktop */
+}
     </style>
     <script>
     if (window.innerWidth < 900) {
