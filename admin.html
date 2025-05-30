@@ -4,8 +4,47 @@
     <meta charset="UTF-8">
     <title>Administração de Destinos de Transporte</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .scroll-table { overflow-x: auto; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body, .main-layout { height: 100vh; min-height: 100vh; margin: 0; padding: 0; box-sizing: border-box; }
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header.file-section {
+            flex-shrink: 0;
+            background: #fafbfc;
+            padding: 16px 24px 8px 24px;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 10;
+        }
+        .scroll-table {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            min-height: 0;
+            background: #fff;
+            padding: 0 24px;
+        }
+        .action-footer {
+            flex-shrink: 0;
+            background: #fafbfc;
+            padding: 10px 24px 0 24px;
+            border-top: 1px solid #e0e0e0;
+            z-index: 10;
+            box-shadow: 0 -2px 6px #0001;
+            position: sticky;
+            bottom: 0;
+        }
+        .footer-buttons {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .msg { color: green; margin-left: 10px;}
+        .err { color: #b90000; }
+        .warn { color: #b90000; font-size: 90%;}
+        /* Tabela e conversão estilos originais */
         table { border-collapse: collapse; width: 100%; min-width: 900px; margin-top: 20px; }
         th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
         th { background: #ececec; }
@@ -19,12 +58,7 @@
             max-width: 170px;
         }
         .actions button { margin: 0 2px; }
-        #json-select { margin-bottom: 10px; }
-        .file-section { margin-bottom: 18px; }
-        .msg { color: green; margin-left: 10px;}
-        .err { color: #b90000; }
-        .warn { color: #b90000; font-size: 90%;}
-        .conversion-section { margin: 20px 0 10px 0; background: #f6f6f6; padding: 10px; border-radius: 6px;}
+        .conversion-section { margin: 0 0 10px 0; background: #f6f6f6; padding: 10px; border-radius: 6px;}
         .conversion-section label { margin-right: 10px; }
         .readonly input { background: #f5f5f5; border: none; }
         .conversion-actions { display: inline-block; margin-left: 10px; }
@@ -55,25 +89,34 @@
     </style>
 </head>
 <body>
-    <div id="main-content">
-      <h2>Administração de Destinos de Transporte</h2>
-      <div class="file-section">
+    <div class="main-layout">
+      <!-- Header: Seleção ficheiro -->
+      <header class="file-section">
+          <h2 style="margin-top:0">Administração de Destinos de Transporte</h2>
           <label for="json-select">Selecionar ficheiro:</label>
           <select id="json-select"></select>
           <button onclick="loadJson()">Carregar</button>
           <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
-      </div>
-      <div class="scroll-table"><div id="table-container"></div></div>
-      <div style="margin-top:12px">
-          <button onclick="addRow()">Adicionar novo destino</button>
-          <button onclick="downloadJson()">Descarregar JSON</button>
-          <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
-          <span id="msg" class="msg"></span>
-      </div>
-      <div id="conversion-container"></div>
-    </div>
+      </header>
 
+      <!-- Área central: Tabela de edição -->
+      <div class="scroll-table">
+        <div id="table-container"></div>
+      </div>
+
+      <!-- Rodapé: Botões de ação + conversão -->
+      <footer class="action-footer">
+        <div class="footer-buttons">
+            <button onclick="addRow()">Adicionar novo destino</button>
+            <button onclick="downloadJson()">Descarregar JSON</button>
+            <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
+            <span id="msg" class="msg"></span>
+        </div>
+        <div id="conversion-container"></div>
+      </footer>
+    </div>
     <script>
+        // (teu JS original, sem alterações)
         const GITHUB_OWNER = "hmdfurniture";
         const GITHUB_REPO = "Calculo";
         const GITHUB_PATH = "Tables";
