@@ -29,10 +29,32 @@
         .readonly input { background: #f5f5f5; border: none; }
         .conversion-actions { display: inline-block; margin-left: 10px; }
         .conversion-section input { font-size: 17px; }
+        /* Autocomplete styles */
+        .autocomplete-wrapper { position: relative; width: 160px; display: inline-block; }
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0; right: 0;
+            z-index: 10;
+            max-height: 185px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-top: none;
+            box-shadow: 0 2px 10px #0001;
+        }
+        .autocomplete-item {
+            padding: 6px 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .autocomplete-item.active,
+        .autocomplete-item:hover {
+            background: #e7f0ff;
+        }
     </style>
 </head>
 <body>
-    <!-- MAIN CONTENT: tudo o resto fica aqui dentro -->
     <div id="main-content">
       <h2>Administração de Destinos de Transporte</h2>
       <div class="file-section">
@@ -52,12 +74,31 @@
     </div>
 
     <script>
-        // ---- JS ADMIN (sem login) ----
         const GITHUB_OWNER = "hmdfurniture";
         const GITHUB_REPO = "Calculo";
         const GITHUB_PATH = "Tables";
+        let COUNTRY_LIST = [];
+        let countryListLoaded = false;
+
+        // Carregar lista de países antes de tudo
+        async function loadCountryList() {
+            try {
+                const res = await fetch('json/countries.json');
+                COUNTRY_LIST = await res.json();
+                if (!Array.isArray(COUNTRY_LIST)) COUNTRY_LIST = [];
+                countryListLoaded = true;
+                populateJsonSelect();
+            } catch (e) {
+                alert("Erro ao carregar lista de países!");
+                COUNTRY_LIST = [];
+                countryListLoaded = true;
+                populateJsonSelect();
+            }
+        }
+        loadCountryList();
 
         async function populateJsonSelect() {
+            if (!countryListLoaded) return; // Só depois dos países
             const select = document.getElementById('json-select');
             select.innerHTML = '<option value="">A carregar ficheiros...</option>';
             try {
@@ -79,7 +120,6 @@
                 select.innerHTML = '<option value="">Erro ao carregar ficheiros</option>';
             }
         }
-        populateJsonSelect();
 
         let currentJson = null;
         let currentFilename = '';
@@ -91,6 +131,10 @@
         let editConversionBackup = null;
 
         function loadJson() {
+            if (!countryListLoaded) {
+                showErr("Lista de países ainda não carregada.");
+                return;
+            }
             const select = document.getElementById('json-select');
             const file = select.value;
             clearMsg();
@@ -182,7 +226,13 @@
                 const isEditing = (editLineIdx === idx);
                 const isConfirmDelete = (confirmDeleteIdx === idx);
                 html += `<tr class="${isEditing ? '' : 'readonly'}">`;
-                html += `<td><input type="text" value="${htmlEscape(dest.country)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
+                // ----------- AUTOCOMPLETE DO PAÍS -----------
+                if (isEditing) {
+                    html += `<td>${renderCountryAutocomplete(dest.country, idx)}</td>`;
+                } else {
+                    html += `<td><input type="text" value="${htmlEscape(dest.country)}" readonly></td>`;
+                }
+                // ----------- RESTO INALTERADO -----------
                 html += `<td><input type="text" value="${htmlEscape(dest.code)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
                 html += `<td><input type="text" value="${htmlEscape(dest.name)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
                 allPriceKeys.forEach(key => {
@@ -213,6 +263,108 @@
 
             html += '</table>';
             container.innerHTML = html;
+            // Inicializa autocomplete país se necessário
+            if (editLineIdx !== null) {
+                setTimeout(() => {
+                    setupCountryAutocomplete(editLineIdx);
+                }, 0);
+            }
+        }
+
+        function renderCountryAutocomplete(value, idx) {
+            return `<div class="autocomplete-wrapper">
+                <input type="text" id="country-input-${idx}" value="${htmlEscape(value)}"
+                    autocomplete="off"
+                    oninput="countryAutocompleteInput(event, ${idx})"
+                    onfocus="countryAutocompleteInput(event, ${idx})"
+                    onblur="countryAutocompleteBlur(event, ${idx})"
+                    style="width: 160px">
+                <div id="country-list-${idx}" class="autocomplete-list" style="display:none"></div>
+            </div>`;
+        }
+
+        // Funções autocomplete país
+        function setupCountryAutocomplete(idx) {
+            const input = document.getElementById('country-input-' + idx);
+            const list = document.getElementById('country-list-' + idx);
+            let activeItem = -1;
+
+            input.addEventListener('keydown', function(e) {
+                const items = list.querySelectorAll('.autocomplete-item');
+                if (!items.length) return;
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    activeItem = Math.min(activeItem + 1, items.length - 1);
+                    updateActive();
+                } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    activeItem = Math.max(activeItem - 1, 0);
+                    updateActive();
+                } else if (e.key === "Enter" && activeItem >= 0) {
+                    e.preventDefault();
+                    items[activeItem].click();
+                }
+            });
+
+            function updateActive() {
+                const items = list.querySelectorAll('.autocomplete-item');
+                items.forEach((item, i) => {
+                    if (i === activeItem) item.classList.add('active');
+                    else item.classList.remove('active');
+                });
+                if (activeItem >= 0 && items[activeItem]) {
+                    items[activeItem].scrollIntoView({ block: "nearest" });
+                }
+            }
+
+            // Força sempre nome correto na saída do campo
+            input.addEventListener('change', () => {
+                let val = input.value.trim();
+                let match = COUNTRY_LIST.find(c => c.toLowerCase() === val.toLowerCase());
+                if (match) {
+                    input.value = match;
+                    rowBufferChange('country', match);
+                }
+            });
+        }
+
+        function countryAutocompleteInput(e, idx) {
+            const input = document.getElementById('country-input-' + idx);
+            const list = document.getElementById('country-list-' + idx);
+            let val = input.value.trim().toLowerCase();
+            let filtered = val
+                ? COUNTRY_LIST.filter(c => c.toLowerCase().includes(val))
+                : COUNTRY_LIST;
+            list.innerHTML = filtered.map(c =>
+                `<div class="autocomplete-item" onclick="selectCountryFromAutocomplete('${c.replace(/'/g, "\\'")}', ${idx})">${c}</div>`
+            ).join('');
+            list.style.display = filtered.length ? "block" : "none";
+        }
+
+        function selectCountryFromAutocomplete(c, idx) {
+            const input = document.getElementById('country-input-' + idx);
+            input.value = c;
+            rowBufferChange('country', c);
+            setTimeout(() => {
+                document.getElementById('country-list-' + idx).style.display = "none";
+            }, 50);
+        }
+
+        function countryAutocompleteBlur(e, idx) {
+            setTimeout(() => {
+                const input = document.getElementById('country-input-' + idx);
+                const list = document.getElementById('country-list-' + idx);
+                let val = input.value.trim();
+                let match = COUNTRY_LIST.find(c => c.toLowerCase() === val.toLowerCase());
+                if (match) {
+                    input.value = match;
+                    rowBufferChange('country', match);
+                } else {
+                    input.value = '';
+                    rowBufferChange('country', '');
+                }
+                list.style.display = "none";
+            }, 150);
         }
 
         function htmlEscape(s) {
@@ -243,16 +395,22 @@
             if (field === 'rates') {
                 editLineBackup.rates = editLineBackup.rates || {};
                 editLineBackup.rates[key] = value;
+            } else if (field === 'country') {
+                editLineBackup.country = value;
             } else {
                 editLineBackup[field] = value;
             }
         }
 
         function saveEditRow(idx) {
-            if (!editLineBackup.country || editLineBackup.country.trim() === '') {
-                showErr('País não pode ficar vazio!');
+            // País obrigatório e tem de existir na lista
+            let country = (editLineBackup.country||'').trim();
+            let match = COUNTRY_LIST.find(c => c.toLowerCase() === country.toLowerCase());
+            if (!match) {
+                showErr('Selecione um país válido da lista!');
                 return;
             }
+            editLineBackup.country = match; // sempre nome oficial
             if (!editLineBackup.code || editLineBackup.code.trim() === '') {
                 showErr('Código não pode ficar vazio!');
                 return;
@@ -329,10 +487,13 @@
             }
             for (let i=0; i<currentJson.destinations.length; i++) {
                 const d = currentJson.destinations[i];
-                if (!d.country || d.country.trim() === '') {
-                    showErr(`Linha ${i+1}: País não pode ficar vazio.`);
+                let country = (d.country||'').trim();
+                let match = COUNTRY_LIST.find(c => c.toLowerCase() === country.toLowerCase());
+                if (!match) {
+                    showErr(`Linha ${i+1}: Selecione um país válido da lista!`);
                     return;
                 }
+                d.country = match;
                 if (!d.code || d.code.trim() === '') {
                     showErr(`Linha ${i+1}: Código não pode ficar vazio.`);
                     return;
