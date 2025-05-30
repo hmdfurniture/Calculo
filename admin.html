@@ -29,146 +29,516 @@
         .readonly input { background: #f5f5f5; border: none; }
         .conversion-actions { display: inline-block; margin-left: 10px; }
         .conversion-section input { font-size: 17px; }
-
-        /* Autocomplete styles */
-        .autocomplete-items { border-radius: 4px; position: absolute; z-index: 1001; background: white; border: 1px solid #ccc; max-height: 180px; overflow-y: auto; }
-        .autocomplete-items div { padding: 6px; cursor: pointer; }
-        .autocomplete-items div:hover, .autocomplete-active { background: #e0e0ff; }
+        /* Login modal styles */
+        #login-box {
+            position: fixed;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.13);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #login-inner {
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px 32px 18px 32px;
+            box-shadow: 0 2px 12px #0002;
+            min-width: 260px;
+        }
+        #login-inner h3 { margin-bottom: 16px; }
+        #login-inner input { margin-bottom: 10px; width: 90%; padding: 7px; font-size: 16px;}
+        #login-inner button { padding: 7px 18px; font-size: 16px;}
+        #login-error { color: #b90000; margin-top: 6px; font-size: 15px;}
+        #main-content { display: none; }
     </style>
 </head>
 <body>
-    <h2>Administração de Destinos de Transporte</h2>
-    <div class="file-section">
-        <label for="json-select">Selecionar ficheiro:</label>
-        <select id="json-select"></select>
-        <button onclick="loadJson()">Carregar</button>
-        <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
+    <!-- Login box -->
+    <div id="login-box">
+      <div id="login-inner">
+        <h3>Área restrita</h3>
+        <input type="text" id="login-user" placeholder="Utilizador"><br>
+        <input type="password" id="login-pass" placeholder="Password"><br>
+        <button onclick="checkLogin()">Entrar</button>
+        <div id="login-error"></div>
+      </div>
     </div>
-    <div class="scroll-table"><div id="table-container"></div></div>
-    <div style="margin-top:12px">
-        <button onclick="addRow()">Adicionar novo destino</button>
-        <button onclick="downloadJson()">Descarregar JSON</button>
-        <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
-        <span id="msg" class="msg"></span>
-    </div>
-    <div id="conversion-container"></div>
 
-    <!-- Inclui autocomplete de países -->
+    <!-- MAIN CONTENT: tudo o resto fica aqui dentro -->
+    <div id="main-content">
+      <h2>Administração de Destinos de Transporte</h2>
+      <div class="file-section">
+          <label for="json-select">Selecionar ficheiro:</label>
+          <select id="json-select"></select>
+          <button onclick="loadJson()">Carregar</button>
+          <span class="warn">(Após criar novo ficheiro, não te esqueças de descarregar e subir ao repositório!)</span>
+      </div>
+      <div class="scroll-table"><div id="table-container"></div></div>
+      <div style="margin-top:12px">
+          <button onclick="addRow()">Adicionar novo destino</button>
+          <button onclick="downloadJson()">Descarregar JSON</button>
+          <button onclick="addEscalao()">Adicionar novo escalão/coluna</button>
+          <span id="msg" class="msg"></span>
+      </div>
+      <div id="conversion-container"></div>
+    </div>
+
     <script>
-        // Lista de países permitidos
-        const PAISES_LIST = [
-          "Albania","Alemanha","Andorra","Armenia","Austria","Azerbaijão","Belgica","Bielorrussia",
-          "Bosnia e Herzegovina","Bulgaria","Chequia","Chipre","Croacia","Dinamarca","Eslovania",
-          "Eslovaquia","Espanha","Estonia","Finlandia","França","Georgia","Grecia","Hungria",
-          "Irlanda","Islandia","Italia","Kosovo","Letonia","Liechtenstein","Lituania","Luxemburgo",
-          "Macedonia do Norte","Malta","Moldavia","Montenegro","Noruega","Paises Baixos","Polonia",
-          "Portugal","Reino Unido","Roménia","Russia","San Marino","Servia","Suecia","Suiça",
-          "Turquia","Ucrania"
-        ];
+        // LOGIN LOGIC
+        const LOGIN_USER = "a";
+        const LOGIN_PASS = "b";
+        function checkLogin() {
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            if(user === LOGIN_USER && pass === LOGIN_PASS) {
+                sessionStorage.setItem('admin_logged_in', '1');
+                document.getElementById('main-content').style.display = '';
+                document.getElementById('login-box').style.display = 'none';
+            } else {
+                document.getElementById('login-error').textContent = "Utilizador ou password incorretos.";
+            }
+        }
+        // Enter key submits login
+        document.getElementById('login-user').addEventListener('keydown', function(e){
+            if(e.key === "Enter") document.getElementById('login-pass').focus();
+        });
+        document.getElementById('login-pass').addEventListener('keydown', function(e){
+            if(e.key === "Enter") checkLogin();
+        });
+        // On load, check if session already authenticated
+        window.onload = function() {
+            if(sessionStorage.getItem('admin_logged_in') === '1') {
+                document.getElementById('main-content').style.display = '';
+                document.getElementById('login-box').style.display = 'none';
+            } else {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('login-box').style.display = '';
+                document.getElementById('login-user').focus();
+            }
+        };
+        // END LOGIN LOGIC
 
-        // Função para associar autocomplete ao input, agora dropdown flutuante
-        function attachCountryAutocomplete(input) {
-          let currentFocus;
-          input.setAttribute("autocomplete", "off");
+        // ---- RESTANTE JS ADMIN (igual ao já fornecido) ----
+        const GITHUB_OWNER = "hmdfurniture";
+        const GITHUB_REPO = "Calculo";
+        const GITHUB_PATH = "Tables";
 
-          input.addEventListener("input", function() {
-            closeAllLists();
-            const val = this.value;
-            if (!val) return false;
-            currentFocus = -1;
-
-            // Cria o container da lista NO BODY para ser flutuante!
-            const listDiv = document.createElement("div");
-            listDiv.setAttribute("class", "autocomplete-items");
-            listDiv.style.position = "absolute";
-            // Calcula posição do input na página
-            const rect = input.getBoundingClientRect();
-            listDiv.style.left = rect.left + window.scrollX + "px";
-            listDiv.style.top = rect.bottom + window.scrollY + "px";
-            listDiv.style.width = rect.width + "px";
-            document.body.appendChild(listDiv);
-
-            // Filtra e mostra as sugestões
-            const valNorm = val.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-            let count = 0;
-            for (let pais of PAISES_LIST) {
-              const paisNorm = pais.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-              if (paisNorm.startsWith(valNorm)) {
-                const itemDiv = document.createElement("div");
-                itemDiv.innerHTML = "<strong>" + pais.substr(0, val.length) + "</strong>" + pais.substr(val.length);
-                itemDiv.innerHTML += `<input type='hidden' value='${pais}'>`;
-                itemDiv.addEventListener("click", function() {
-                  input.value = this.getElementsByTagName("input")[0].value;
-                  closeAllLists();
-                  input.dispatchEvent(new Event("change"));
+        async function populateJsonSelect() {
+            const select = document.getElementById('json-select');
+            select.innerHTML = '<option value="">A carregar ficheiros...</option>';
+            try {
+                const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+                const res = await fetch(url);
+                const files = await res.json();
+                select.innerHTML = '';
+                files.filter(f => f.type === "file" && f.name.endsWith('.json')).forEach(f => {
+                    const opt = document.createElement("option");
+                    opt.value = f.name;
+                    opt.textContent = f.name;
+                    select.appendChild(opt);
                 });
-                listDiv.appendChild(itemDiv);
-                count++;
-              }
+                const optNew = document.createElement("option");
+                optNew.value = '_new_';
+                optNew.textContent = 'Criar novo ficheiro...';
+                select.appendChild(optNew);
+            } catch (e) {
+                select.innerHTML = '<option value="">Erro ao carregar ficheiros</option>';
             }
-            if (count === 0) {
-              const itemDiv = document.createElement("div");
-              itemDiv.innerHTML = "<span style='color:#999'>Nenhum país encontrado</span>";
-              listDiv.appendChild(itemDiv);
-            }
-          });
+        }
+        populateJsonSelect();
 
-          // Navegação por teclas
-          input.addEventListener("keydown", function(e) {
-            let lists = document.querySelectorAll(".autocomplete-items");
-            if (lists.length === 0) return;
-            let list = lists[lists.length-1].getElementsByTagName("div");
-            if (e.key === "ArrowDown") {
-              currentFocus++;
-              addActive(list);
-            } else if (e.key === "ArrowUp") {
-              currentFocus--;
-              addActive(list);
-            } else if (e.key === "Enter") {
-              e.preventDefault();
-              if (list && currentFocus > -1) {
-                list[currentFocus].click();
-              }
-            }
-          });
+        let currentJson = null;
+        let currentFilename = '';
+        let allPriceKeys = [];
+        let editLineIdx = null;
+        let editLineBackup = null;
+        let confirmDeleteIdx = null;
+        let editConversionActive = false;
+        let editConversionBackup = null;
 
-          function addActive(list) {
-            if (!list) return false;
-            removeActive(list);
-            if (currentFocus >= list.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = list.length - 1;
-            list[currentFocus].classList.add("autocomplete-active");
-            list[currentFocus].scrollIntoView({ block: "nearest" });
-          }
-          function removeActive(list) {
-            for (let i = 0; i < list.length; i++) {
-              list[i].classList.remove("autocomplete-active");
+        function loadJson() {
+            const select = document.getElementById('json-select');
+            const file = select.value;
+            clearMsg();
+            editLineIdx = null;
+            editLineBackup = null;
+            confirmDeleteIdx = null;
+            editConversionActive = false;
+            editConversionBackup = null;
+            if (!file) {
+                document.getElementById('table-container').innerHTML = '';
+                document.getElementById('conversion-container').innerHTML = '';
+                return;
             }
-          }
-          function closeAllLists(elmnt) {
-            const lists = document.querySelectorAll(".autocomplete-items");
-            for (let div of lists) {
-              if (elmnt !== div && elmnt !== input) div.parentNode.removeChild(div);
+            if (file === '_new_') {
+                const nome = prompt('Nome do novo ficheiro (ex: novo_ficheiro.json):');
+                if (!nome || !nome.endsWith('.json')) {
+                    alert('Nome inválido. O nome deve terminar em .json');
+                    populateJsonSelect();
+                    return;
+                }
+                currentFilename = nome;
+                currentJson = {
+                    name: nome.replace('.json',''),
+                    type: '',
+                    destinations: [{
+                        country: '',
+                        code: '',
+                        name: '',
+                        rates: {}
+                    }],
+                    conversion: {
+                        m3: "",
+                        LDM: ""
+                    }
+                };
+                allPriceKeys = [];
+                renderTable();
+                renderConversion();
+                return;
             }
-          }
-          document.addEventListener("click", function(e) {
-            closeAllLists(e.target);
-          });
+            currentFilename = file;
+            fetch(`Tables/${file}`)
+                .then(r => {
+                    if (!r.ok) throw new Error("Ficheiro não encontrado.");
+                    return r.json()
+                })
+                .then(data => {
+                    currentJson = data;
+                    if (!Array.isArray(currentJson.destinations) || currentJson.destinations.length === 0) {
+                        currentJson.destinations = [{
+                            country: '',
+                            code: '',
+                            name: '',
+                            rates: {}
+                        }];
+                    }
+                    if (!currentJson.conversion) {
+                        currentJson.conversion = { m3: "", LDM: "" };
+                    }
+                    renderTable();
+                    renderConversion();
+                })
+                .catch(err => {
+                    document.getElementById('table-container').innerHTML = '<p style="color:red;">Erro ao carregar o ficheiro: ' + err.message + '</p>';
+                    document.getElementById('conversion-container').innerHTML = '';
+                    currentJson = null;
+                });
         }
 
-        // Função para validar se o valor está na lista de países (exato)
-        function isPaisValido(valor) {
-          return PAISES_LIST.includes(valor);
-        }
-    </script>
+        function renderTable() {
+            const container = document.getElementById('table-container');
+            if (!currentJson || !Array.isArray(currentJson.destinations)) {
+                container.innerHTML = '<p>Nenhum dado carregado.</p>';
+                return;
+            }
+            const allKeys = new Set();
+            currentJson.destinations.forEach(dest => {
+                if (dest.rates)
+                    Object.keys(dest.rates).forEach(k => allKeys.add(k));
+            });
+            allPriceKeys = Array.from(allKeys);
 
-    <script>
-        // ... restante do seu código JS permanece igual ...
-        // Não é necessário alterar nada abaixo desta linha!
-        // (O autocomplete de países já está corrigido para flutuar sobre a tabela)
-        // (A função renderTable já chama attachCountryAutocomplete)
-        // (A validação já está feita via isPaisValido)
-        // ... (resto do código igual ao anterior, não mostrado por brevidade) ...
+            let html = '<table><tr>';
+            html += '<th>País</th><th>Código</th><th>Nome</th>';
+            allPriceKeys.forEach(key => html += `<th>${key}</th>`);
+            html += '<th class="actions">Ações</th></tr>';
+
+            currentJson.destinations.forEach((dest, idx) => {
+                const isEditing = (editLineIdx === idx);
+                const isConfirmDelete = (confirmDeleteIdx === idx);
+                html += `<tr class="${isEditing ? '' : 'readonly'}">`;
+                html += `<td><input type="text" value="${htmlEscape(dest.country)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('country', this.value)"></td>`;
+                html += `<td><input type="text" value="${htmlEscape(dest.code)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('code', this.value)"></td>`;
+                html += `<td><input type="text" value="${htmlEscape(dest.name)}" ${isEditing ? '' : 'readonly'} onchange="rowBufferChange('name', this.value)"></td>`;
+                allPriceKeys.forEach(key => {
+                    let val = '';
+                    if (dest.rates && dest.rates[key] !== undefined) val = dest.rates[key];
+                    html += `<td><input type="text" 
+                        value="${htmlEscape(val)}" 
+                        ${isEditing ? '' : 'readonly'}
+                        oninput="onlyAllowNumericWithSingleDot(this)" 
+                        onchange="rowBufferChange('rates', this.value, '${key}')"></td>`;
+                });
+                html += `<td class="actions">`;
+                if (isEditing) {
+                    html += `<button onclick="saveEditRow(${idx})">Gravar</button>`;
+                    html += `<button onclick="cancelEditRow()">Cancelar</button>`;
+                } else if (isConfirmDelete) {
+                    html += `<span>Tem a certeza?</span> `;
+                    html += `<button onclick="removeRow(${idx})">Sim</button>`;
+                    html += `<button onclick="cancelDeleteRow()">Não</button>`;
+                } else {
+                    html += `<button onclick="editRow(${idx})">Editar</button>`;
+                    if (currentJson.destinations.length > 1) {
+                        html += `<button onclick="confirmDeleteRow(${idx})">Apagar</button>`;
+                    }
+                }
+                html += `</td></tr>`;
+            });
+
+            html += '</table>';
+            container.innerHTML = html;
+        }
+
+        function htmlEscape(s) {
+            return String(s === undefined || s === null ? '' : s)
+                .replace(/&/g,"&amp;")
+                .replace(/"/g,"&quot;")
+                .replace(/</g,"&lt;")
+                .replace(/>/g,"&gt;");
+        }
+
+        function onlyAllowNumericWithSingleDot(input) {
+            let v = input.value;
+            v = v.replace(/[^0-9.]/g, '');
+            let parts = v.split('.');
+            if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+            input.value = v;
+        }
+
+        function editRow(idx) {
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
+            editLineIdx = idx;
+            editLineBackup = JSON.parse(JSON.stringify(currentJson.destinations[idx]));
+            renderTable();
+        }
+
+        function rowBufferChange(field, value, key) {
+            if (editLineIdx === null) return;
+            if (field === 'rates') {
+                editLineBackup.rates = editLineBackup.rates || {};
+                editLineBackup.rates[key] = value;
+            } else {
+                editLineBackup[field] = value;
+            }
+        }
+
+        function saveEditRow(idx) {
+            if (!editLineBackup.country || editLineBackup.country.trim() === '') {
+                showErr('País não pode ficar vazio!');
+                return;
+            }
+            if (!editLineBackup.code || editLineBackup.code.trim() === '') {
+                showErr('Código não pode ficar vazio!');
+                return;
+            }
+            if (!editLineBackup.rates || Object.keys(editLineBackup.rates).length === 0) {
+                showErr('Pelo menos um escalão é obrigatório.');
+                return;
+            }
+            for (const key of allPriceKeys) {
+                const val = editLineBackup.rates[key];
+                if (val === undefined || val === '') {
+                    showErr('Escalão "'+key+'" não pode ficar vazio.');
+                    return;
+                }
+                if (!/^[0-9]+(\.[0-9]+)?$/.test(val)) {
+                    showErr('Escalão "'+key+'" só pode conter números e ponto.');
+                    return;
+                }
+            }
+            currentJson.destinations[idx] = JSON.parse(JSON.stringify(editLineBackup));
+            editLineIdx = null;
+            editLineBackup = null;
+            renderTable();
+            clearMsg();
+        }
+
+        function cancelEditRow() {
+            editLineIdx = null;
+            editLineBackup = null;
+            renderTable();
+            clearMsg();
+        }
+
+        function confirmDeleteRow(idx) {
+            if (editLineIdx !== null) return;
+            confirmDeleteIdx = idx;
+            renderTable();
+        }
+
+        function cancelDeleteRow() {
+            confirmDeleteIdx = null;
+            renderTable();
+        }
+
+        function removeRow(idx) {
+            if (currentJson.destinations.length <= 1) {
+                alert('Pelo menos um destino tem de existir!');
+                confirmDeleteIdx = null;
+                return;
+            }
+            currentJson.destinations.splice(idx, 1);
+            confirmDeleteIdx = null;
+            renderTable();
+        }
+
+        function addRow() {
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
+            const emptyRates = {};
+            allPriceKeys.forEach(key => { emptyRates[key] = ''; });
+            currentJson.destinations.push({
+                country: '',
+                code: '',
+                name: '',
+                rates: emptyRates
+            });
+            renderTable();
+        }
+
+        function downloadJson() {
+            clearMsg();
+            if (!currentJson) {
+                showErr("Nada para exportar!");
+                return;
+            }
+            for (let i=0; i<currentJson.destinations.length; i++) {
+                const d = currentJson.destinations[i];
+                if (!d.country || d.country.trim() === '') {
+                    showErr(`Linha ${i+1}: País não pode ficar vazio.`);
+                    return;
+                }
+                if (!d.code || d.code.trim() === '') {
+                    showErr(`Linha ${i+1}: Código não pode ficar vazio.`);
+                    return;
+                }
+                if (!d.rates || Object.keys(d.rates).length === 0) {
+                    showErr(`Linha ${i+1}: Pelo menos um escalão é obrigatório.`);
+                    return;
+                }
+                for (const key of allPriceKeys) {
+                    if (d.rates[key] === undefined || d.rates[key] === '') {
+                        showErr(`Linha ${i+1}: Escalão "${key}" não pode ficar vazio.`);
+                        return;
+                    }
+                    if (!/^[0-9]+(\.[0-9]+)?$/.test(d.rates[key])) {
+                        showErr(`Linha ${i+1}: Escalão "${key}" só pode conter números e ponto.`);
+                        return;
+                    }
+                }
+            }
+            currentJson.destinations.sort((a, b) => {
+                let pa = (a.country || '').toLowerCase();
+                let pb = (b.country || '').toLowerCase();
+                if (pa < pb) return -1;
+                if (pa > pb) return 1;
+                let ca = (a.code || '').toLowerCase();
+                let cb = (b.code || '').toLowerCase();
+                if (ca < cb) return -1;
+                if (ca > cb) return 1;
+                return 0;
+            });
+            const blob = new Blob([JSON.stringify(currentJson, null, 2)], {type:'application/json'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = currentFilename || 'destinos.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showMsg("Ficheiro descarregado! Sobe-o manualmente para o repositório.");
+            setTimeout(() => {
+                populateJsonSelect();
+                document.getElementById('json-select').value = "";
+                document.getElementById('table-container').innerHTML = "";
+                document.getElementById('conversion-container').innerHTML = "";
+                currentJson = null;
+                currentFilename = '';
+                editLineIdx = null;
+                editLineBackup = null;
+                confirmDeleteIdx = null;
+            }, 500);
+        }
+
+        function addEscalao() {
+            if (editLineIdx !== null || confirmDeleteIdx !== null) return;
+            let novaCol = prompt('Nome do novo escalão/coluna (ex: "1001-2000" ou "minimum")');
+            if (!novaCol) return;
+            novaCol = novaCol.trim();
+            if (!novaCol) return;
+            if (allPriceKeys.includes(novaCol)) {
+                alert("Esse escalão já existe!");
+                return;
+            }
+            allPriceKeys.push(novaCol);
+            currentJson.destinations.forEach(dest => {
+                if (!dest.rates) dest.rates = {};
+                dest.rates[novaCol] = '';
+            });
+            renderTable();
+        }
+
+        function renderConversion() {
+            const container = document.getElementById('conversion-container');
+            if (!currentJson || !currentJson.conversion) {
+                container.innerHTML = '';
+                return;
+            }
+            if (editConversionActive) {
+                let html = `<div class="conversion-section">
+                    <b>Conversão (final do ficheiro):</b>
+                    <label>M3: <input id="conv-m3" type="number" value="${editConversionBackup.m3 ?? ''}" step="any" onchange="editConversionBuffer('m3', this.value)"></label>
+                    <label>LDM: <input id="conv-ldm" type="number" value="${editConversionBackup.LDM ?? ''}" step="any" onchange="editConversionBuffer('LDM', this.value)"></label>
+                    <span class="conversion-actions">
+                        <button onclick="saveEditConversion()">Gravar</button>
+                        <button onclick="cancelEditConversion()">Cancelar</button>
+                    </span>
+                </div>`;
+                container.innerHTML = html;
+            } else {
+                let html = `<div class="conversion-section">
+                    <b>Conversão (final do ficheiro):</b>
+                    <label>M3: <input id="conv-m3" type="number" value="${currentJson.conversion.m3 ?? ''}" step="any" readonly></label>
+                    <label>LDM: <input id="conv-ldm" type="number" value="${currentJson.conversion.LDM ?? ''}" step="any" readonly></label>
+                    <span class="conversion-actions">
+                        <button onclick="editConversion()">Editar</button>
+                    </span>
+                </div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        function editConversion() {
+            editConversionActive = true;
+            editConversionBackup = {
+                m3: currentJson.conversion.m3,
+                LDM: currentJson.conversion.LDM
+            };
+            renderConversion();
+        }
+        function editConversionBuffer(field, value) {
+            if (!editConversionBackup) return;
+            editConversionBackup[field] = value;
+        }
+        function saveEditConversion() {
+            currentJson.conversion.m3 = editConversionBackup.m3;
+            currentJson.conversion.LDM = editConversionBackup.LDM;
+            editConversionActive = false;
+            editConversionBackup = null;
+            renderConversion();
+            showMsg("Conversão alterada.");
+        }
+        function cancelEditConversion() {
+            editConversionActive = false;
+            editConversionBackup = null;
+            renderConversion();
+            clearMsg();
+        }
+
+        function showMsg(msg) {
+            document.getElementById('msg').textContent = msg;
+            document.getElementById('msg').className = "msg";
+            setTimeout(()=>{clearMsg()},4000);
+        }
+        function showErr(msg) {
+            document.getElementById('msg').textContent = msg;
+            document.getElementById('msg').className = "err";
+        }
+        function clearMsg() {
+            document.getElementById('msg').textContent = "";
+            document.getElementById('msg').className = "msg";
+        }
     </script>
 </body>
 </html>
