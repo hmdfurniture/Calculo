@@ -333,7 +333,7 @@
             const list = document.getElementById('country-list-' + idx);
             let val = input.value.trim().toLowerCase();
             let filtered = val
-                ? COUNTRY_LIST.filter(c => c.toLowerCase().includes(val))
+                ? COUNTRY_LIST.filter(c => c.toLowerCase().startsWith(val))
                 : COUNTRY_LIST;
             list.innerHTML = filtered.map(c =>
                 `<div class="autocomplete-item" onclick="selectCountryFromAutocomplete('${c.replace(/'/g, "\\'")}', ${idx})">${c}</div>`
