@@ -58,7 +58,7 @@ let paisSelecionado = null;
 let zonaSelecionada = null;
 let timeoutPais = null;
 
-// --- ALTERADO: Evento para garantir país válido ---
+// --- Evento para garantir país válido (mantém delay de 2 segundos) ---
 document.getElementById('country').addEventListener('change', function() {
     const paisId = this.value.trim();
     // Só permite países válidos (exatamente iguais aos do array)
@@ -91,12 +91,11 @@ document.getElementById('country').addEventListener('input', function() {
     }
 });
 
+// Ao mudar de zona, apenas destaca a zona no mapa do país já carregado (NÃO recarrega SVG)
 document.getElementById('zone').addEventListener('change', function() {
-    const zonaId = this.value;
+    const zonaId = this.value.trim();
     zonaSelecionada = zonaId;
-    if (paisSelecionado) {
-        carregarMapa(`svg/${paisSelecionado}.svg`, zonaId);
-    }
+    destacarNoMapa(zonaId);
 });
 
 // Limpar zona: volta ao mapa do país sem destaque
