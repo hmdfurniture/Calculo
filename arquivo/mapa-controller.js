@@ -1,9 +1,15 @@
-// mapa-controller.js
+// --- Adiciona o array de países válidos no topo deste ficheiro ---
+const PAISES_LIST = [
+  "Afeganistao","Africa do Sul","Albania","Alemanha","Andorra","Angola","Anguila","Antarctica","Antigua e Barbuda","Arabia Saudita","Argelia","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijao","Bahamas","Bangladexe","Barbados","Barem","Belgica","Belize","Benin","Bermuda","Bielorrussia","Bolivia","Bosnia e Herzegovina","Botswana","Brasil","Brunei Darussalam","Bulgaria","Burquina Fasso","Burundi","Butao","Cabo Verde","Camaroes","Camboja","Canada","Catar","Cazaquistao","Republica Centro-Africana","Chade","Chequia","Chile","China","Chipre","Colombia","Comores","Congo","Coreia do Sul","Coreia do Norte","Costa do Marfim","Costa Rica","Croacia","Cuba","Curacau","Dinamarca","Dominica","Egipto","El Salvador","Emiratos Arabes Unidos","Equador","Eritreia","Eslovaquia","Eslovenia","Espanha","Essuatini","Estados Unidos","Estonia","Etiopia","Filipinas","Finlandia","França","Gabao","Gambia","Gana","Georgia","Georgia do Sul e Ilhas Sandwich","Gernsey","Gibraltar","Granada","Grecia","Gronelandia","Guadalupe","Guam","Guatemala","Guiana","Guiana Francesa","Guine","Guine Equatorial","Guine-Bissau","Haiti","Honduras","Hong Kong","Hungria","Iemen","Ilha de Man","Ilhas Aland","Ilhas Bouvet","Ilhas Caimao","Ilhas Christmas","Ilhas Cocos (Keeling)","Ilhas Cook","Ilhas Falkland (Malvinas)","Ilhas Faroe","Fiji","Ilhas Heard e Ilhas Mcdonald","Ilhas Marianas do Norte","Ilhas Marshall","Ilhas Menores Distantes dos Estados Unidos","Ilhas Norfolk","Ilhas Salomao","Ilhas Virgens (Britanicas)","Ilhas Virgens (Estados Unidos)","India","Indonesia","Irao","Iraque","Irlanda","Islandia","Israel","Italia","Jamaica","Japao","Jersey","Jibuti","Jordania","Quenia","Kiribati","Kuwait","Laos","Lesoto","Letonia","Libano","Liberia","Libia","Liechtenstein","Lituania","Luxemburgo","Macau","Macedonia do Norte","Madagascar","Malasia","Malawi","Maldivas","Mali","Malta","Marrocos","Martinica","Mauricia","Mauritania","Mayotte","Mexico","Mianmar","Micronesia","Mocambique","Moldavia","Monaco","Mongolia","Monserrate","Montenegro","Namibia","Nauru","Nepal","Nicaragua","Niger","Nigeria","Niue","Noruega","Nova Caledonia","Nova Zelandia","Oma","Paises Baixos","Paises Baixos Caribenhos","Palau","Panama","Papuasia-Nova Guine","Paquistao","Paraguai","Peru","Pitcairn","Polinesia Francesa","Polonia","Porto Rico","Portugal","Quirguizistao","Reino Unido","Republica Dominicana","Reuniao","Romenia","Ruanda","Russia","Samoa","Samoa Americana","Santa Helena","Santa Lucia","Santa Se (Cidade Estado do Vaticano)","Sao Bartolomeu","Sao Cristovao e Nevis","Sao Marino","Sao Martinho","Sao Martinho (Coletividade de Sao Martinho)","Sao Pedro e Miquelon","Sao Tome e Principe","Sao Vicente e Granadinas","Sara Ocidental","Senegal","Sri Lanca","Serra Leoa","Servia","Seychelles","Singapura","Siria","Somalia","Sudao","Sudao do Sul","Suecia","Suiça","Suriname","Svalbard e a Ilha de Jan Mayen","Tailandia","Taiwan","Tajiquistao","Tanzania, Republica Unida da","Territorio Britanico do Oceano Indico","Territorio Palestiniano Ocupado","Territorios Franceses do Sul","Timor Leste","Togo","Tokelau","Tonga","Trindade e Tobago","Tunisia","Turcos e Caicos","Turquemenistao","Turquia","Tuvalu","Ucrania","Uganda","Uruguai","Usbequistao","Vanuatu","Venezuela","Vietname","Wallis e Futuna","Zambia","Zimbabwe"
+];
 
 // Função genérica para carregar qualquer SVG no div #map
 function carregarMapa(svgPath, selectedId = null, callback = null) {
     fetch(svgPath)
-      .then(r => r.text())
+      .then(r => {
+          if (!r.ok) throw new Error("SVG não encontrado");
+          return r.text();
+      })
       .then(svg => {
           const mapDiv = document.getElementById('map');
           mapDiv.innerHTML = svg;
@@ -14,20 +20,21 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
 
           // Destaca a região se um ID for especificado
           if (selectedId) {
-              // Espera o SVG ser injetado, e só então aplica a classe
-              // Não precisa de timeout pois é síncrono após innerHTML
               const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
               if (reg) reg.classList.add('selected');
               else console.warn('País não encontrado no SVG:', selectedId);
           }
 
           if (typeof callback === 'function') callback();
-
-          // O mapa NÃO é interativo ao clique!
       })
       .catch(() => {
-          const mapDiv = document.getElementById('map');
-          mapDiv.innerHTML = "<b>Erro ao carregar o mapa.</b>";
+          // Se falhar a carregar um país, volta ao mapa inicial da Europa
+          if (svgPath !== 'svg/europamain.svg') {
+              carregarMapa('svg/europamain.svg');
+          } else {
+              const mapDiv = document.getElementById('map');
+              mapDiv.innerHTML = "<b>Erro ao carregar o mapa.</b>";
+          }
       });
 }
 
@@ -37,7 +44,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
-// (Esta função não é usada no fluxo normal, mas pode ser útil se quiseres destacar sem recarregar SVG)
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
@@ -52,18 +58,18 @@ let paisSelecionado = null;
 let zonaSelecionada = null;
 let timeoutPais = null;
 
-// Quando o utilizador escolhe um país
+// --- ALTERADO: Evento para garantir país válido ---
 document.getElementById('country').addEventListener('change', function() {
-    const paisId = this.value;
+    const paisId = this.value.trim();
+    // Só permite países válidos (exatamente iguais aos do array)
+    if (!PAISES_LIST.includes(paisId)) {
+        carregarMapa('svg/europamain.svg');
+        paisSelecionado = null;
+        return;
+    }
     zonaSelecionada = null;
-
-    // Debug: mostra o valor selecionado
-    // console.log('Selecionado:', paisId);
-
-    // Destaca o país no mapa Europa
     carregarMapa('svg/europamain.svg', paisId);
 
-    // Após 2 segundos, carrega o mapa do país
     clearTimeout(timeoutPais);
     if (paisId) {
         timeoutPais = setTimeout(() => {
@@ -75,7 +81,16 @@ document.getElementById('country').addEventListener('change', function() {
     }
 });
 
-// Quando o utilizador escolhe uma zona
+document.getElementById('country').addEventListener('input', function() {
+    // Sempre que se escreve/apaga no campo país
+    const paisId = this.value.trim();
+    if (!paisId) {
+        carregarMapa('svg/europamain.svg');
+        paisSelecionado = null;
+        zonaSelecionada = null;
+    }
+});
+
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value;
     zonaSelecionada = zonaId;
@@ -98,8 +113,6 @@ function limparPais() {
     paisSelecionado = null;
     zonaSelecionada = null;
 }
-
-// Remove o bloco de CSS injetado via JS para evitar conflitos
 
 // Torna os paths não interativos ao rato (mantém apenas pointer-events: none no container)
 document.addEventListener('DOMContentLoaded', () => {
