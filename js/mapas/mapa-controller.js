@@ -22,7 +22,7 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           if (selectedId) {
               const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
               if (reg) reg.classList.add('selected');
-              else console.warn('Região não encontrada no SVG:', selectedId);
+              else console.warn('País não encontrado no SVG:', selectedId);
           }
 
           if (typeof callback === 'function') callback();
@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
     carregarMapa('svg/europamain.svg');
 });
 
-// Função para destacar uma região no mapa carregado (sem recarregar SVG)
+// Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
@@ -58,7 +58,7 @@ let paisSelecionado = null;
 let zonaSelecionada = null;
 let timeoutPais = null;
 
-// Evento para garantir país válido
+// --- Evento para garantir país válido (mantém delay de 2 segundos) ---
 document.getElementById('country').addEventListener('change', function() {
     const paisId = this.value.trim();
     // Só permite países válidos (exatamente iguais aos do array)
@@ -68,8 +68,17 @@ document.getElementById('country').addEventListener('change', function() {
         return;
     }
     zonaSelecionada = null;
-    carregarMapa(`svg/${paisId}.svg`);
-    paisSelecionado = paisId;
+    carregarMapa('svg/europamain.svg', paisId);
+
+    clearTimeout(timeoutPais);
+    if (paisId) {
+        timeoutPais = setTimeout(() => {
+            carregarMapa(`svg/${paisId}.svg`);
+            paisSelecionado = paisId;
+        }, 2000);
+    } else {
+        paisSelecionado = null;
+    }
 });
 
 document.getElementById('country').addEventListener('input', function() {
@@ -82,7 +91,7 @@ document.getElementById('country').addEventListener('input', function() {
     }
 });
 
-// NOVO: Ao mudar de zona, só destaca a zona no mapa do país já carregado
+// Ao mudar de zona, apenas destaca a zona no mapa do país já carregado (NÃO recarrega SVG)
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value.trim();
     zonaSelecionada = zonaId;
