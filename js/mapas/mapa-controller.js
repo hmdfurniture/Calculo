@@ -81,6 +81,16 @@ document.getElementById('country').addEventListener('change', function() {
     }
 });
 
+document.getElementById('country').addEventListener('input', function() {
+    // Sempre que se escreve/apaga no campo país
+    const paisId = this.value.trim();
+    if (!paisId) {
+        carregarMapa('svg/europamain.svg');
+        paisSelecionado = null;
+        zonaSelecionada = null;
+    }
+});
+
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value;
     zonaSelecionada = zonaId;
