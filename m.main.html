@@ -377,52 +377,42 @@
             gap: 10px;
             margin-top: 10px;
         }
-
-        /* -------- Mapa Europa - ESTILO FINAL -------- */
-
-        #map svg {
-            width: 100%;
-            height: 100%;
+        /* Numeric keyboard dropdown style */
+        .numeric-keyboard-dropdown {
+            display: none;
+            position: absolute;
+            min-width: 180px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px 0 rgba(0,0,0,0.13);
+            z-index: 9999;
+            padding: 8px;
+            top: 100%;
+            left: 0;
+        }
+        .numeric-keyboard-dropdown.show {
             display: block;
-            margin: 0 auto;
         }
-
-        /* Fundo e países por defeito: a mesma cor (cinza claro) */
-        .bg.geo,
-        .geo.region {
-            fill: #C9D1DA;
-            stroke: #333;
-            stroke-width: 0.7;
-            transition: fill 0.2s;
+        .numeric-keyboard-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
         }
-
-        /* País/Região selecionado: cinza mais escuro */
-        .geo.region.selected {
-            fill: #96A9BF;
+        .numeric-keyboard-dropdown button {
+            width: 50px;
+            height: 40px;
+            margin: 2px;
+            font-size: 18px;
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-
-        /* Fronteiras e outlines a preto */
-        .geo.borders,
-        .geo.region-outline {
-            stroke: #333;
-            fill: none;
-            stroke-width: 0.7;
-        }
-
-        .footer-content {
-            width: 98vw;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
-        footer {
-            margin-top: auto;
-            width: 100%;
-            text-align: right;
-            font-size: 11px;
-            color: #888;
-            background: transparent;
-            min-width: 0;
-            border-top: 1px solid #eee;
+        .numeric-keyboard-dropdown button:hover {
+            background: #e1e8ed;
         }
     </style>
 </head>
@@ -471,13 +461,11 @@
                 <div class="form-group">
                     <label for="country">Select Country:</label>
                     <div class="dropdown">
-                        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                        <div class="dropdown-content" id="country-list"></div>
+                        <select id="country" onchange="onCountryChange()" style="width:100%"></select>
                     </div>
                     <label for="zone">Select Zone:</label>
                     <div class="dropdown">
-                        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                        <div class="dropdown-content" id="zone-list"></div>
+                        <select id="zone" disabled style="width:100%"></select>
                     </div>
                 </div>
                 <div class="header-row">
@@ -497,16 +485,16 @@
                             </select>
                         </div>
                         <div>
-                            <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                            <input type="text" class="width numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
                         </div>
                         <div>
-                            <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                            <input type="text" class="length numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
                         </div>
                         <div>
-                            <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                            <input type="text" class="height numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
                         </div>
                         <div>
-                            <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                            <input type="text" class="quantity numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
                         </div>
                         <div>
                             <button class="remove-button" onclick="removeLine(this)">Remove</button>
@@ -527,6 +515,24 @@
             <div class="mensagens-container" id="mensagens"></div>
         </div>
     </div>
+    <!-- Numeric Keyboard Dropdown -->
+    <div id="numeric-keyboard" class="numeric-keyboard-dropdown">
+      <div class="numeric-keyboard-buttons">
+        <button type="button" onclick="keyNum(1)">1</button>
+        <button type="button" onclick="keyNum(2)">2</button>
+        <button type="button" onclick="keyNum(3)">3</button>
+        <button type="button" onclick="keyNum(4)">4</button>
+        <button type="button" onclick="keyNum(5)">5</button>
+        <button type="button" onclick="keyNum(6)">6</button>
+        <button type="button" onclick="keyNum(7)">7</button>
+        <button type="button" onclick="keyNum(8)">8</button>
+        <button type="button" onclick="keyNum(9)">9</button>
+        <button type="button" onclick="keyBack()">⌫</button>
+        <button type="button" onclick="keyNum(0)" style="width:106px">0</button>
+        <button type="button" onclick="keyClear()">Clear</button>
+        <button type="button" onclick="keyOk()">OK</button>
+      </div>
+    </div>
     <footer>
         <div class="footer-content">
             Copyright © hmdfurniture
@@ -540,32 +546,113 @@
     <script src="js/main.js"></script>
     <script src="js/mapas/mapa-controller.js"></script>
     <script>
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = () => reject(new Error('Erro ao carregar: ' + src));
-            document.body.appendChild(s);
-        });
+    // País e Zona como selects
+    function onCountryChange() {
+        // Função para ativar e popular zona consoante país selecionado
+        let countrySelect = document.getElementById('country');
+        let zoneSelect = document.getElementById('zone');
+        let country = countrySelect.value;
+        // Exemplo simples: zona enabled se país selecionado
+        if (country) {
+            zoneSelect.disabled = false;
+            // Você pode popular as zonas conforme o país (ajuste conforme seus dados)
+            zoneSelect.innerHTML = '<option value="">Selecione...</option><option value="1">Zona 1</option><option value="2">Zona 2</option>';
+        } else {
+            zoneSelect.disabled = true;
+            zoneSelect.innerHTML = '';
+        }
     }
-    fetch('./Tables/tables-list.json')
-        .then(res => res.json())
-        .then(tableFiles => {
-            const promises = tableFiles.map(f => {
-                const base = f.replace('.json', '');
-                return loadScript(`js/calculos/${base}.js`);
-            });
-            return Promise.all(promises);
-        })
-        .then(() => {
-            if (typeof loadSupplierData === "function") loadSupplierData();
-        })
-        .catch(err => {
-            document.getElementById('error-message').innerText = "Erro ao carregar scripts de cálculo: " + err;
-        });
+    // Exemplo de populate inicial de países
+    function populateCountryDropdown() {
+        let countries = ['Portugal', 'Espanha', 'França', 'Alemanha']; // Substitua pelos seus dados reais
+        let countrySelect = document.getElementById('country');
+        countrySelect.innerHTML = '<option value="">Selecione...</option>' + countries.map(c => `<option value="${c}">${c}</option>`).join('');
+        document.getElementById('zone').innerHTML = '';
+        document.getElementById('zone').disabled = true;
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        populateCountryDropdown();
+    });
     </script>
     <script>
+    // Numeric Keyboard Dropdown
+    let currentInput = null;
+    function openNumericKeyboard(inputEl) {
+        currentInput = inputEl;
+        // Fecha outros teclados se abertos
+        document.querySelectorAll('.numeric-keyboard-dropdown').forEach(k=>k.classList.remove('show'));
+        // Posiciona o teclado logo abaixo do input
+        let rect = inputEl.getBoundingClientRect();
+        let keyboard = document.getElementById('numeric-keyboard');
+        // Ajustar scroll
+        let scrollY = window.scrollY || document.documentElement.scrollTop;
+        let scrollX = window.scrollX || document.documentElement.scrollLeft;
+        keyboard.style.top = (rect.bottom + scrollY + 2) + "px";
+        keyboard.style.left = (rect.left + scrollX) + "px";
+        keyboard.classList.add('show');
+    }
+    function keyNum(n) {
+        if (!currentInput) return;
+        if (currentInput.value.length < 3) {
+            currentInput.value = (currentInput.value + n).replace(/^0+/, '') || '0';
+        }
+    }
+    function keyBack() {
+        if (!currentInput) return;
+        currentInput.value = currentInput.value.slice(0, -1) || '0';
+        if(currentInput.value === "") currentInput.value = "0";
+    }
+    function keyClear() {
+        if (!currentInput) return;
+        currentInput.value = "0";
+    }
+    function keyOk() {
+        document.getElementById('numeric-keyboard').classList.remove('show');
+        // Opcional: avançar para próximo input
+        currentInput.blur();
+        currentInput = null;
+    }
+    // Fecha teclado se clicar fora
+    document.addEventListener('mousedown', (e) => {
+        let keyboard = document.getElementById('numeric-keyboard');
+        if (keyboard.classList.contains('show')) {
+            if (!keyboard.contains(e.target) && (!currentInput || e.target !== currentInput)) {
+                keyboard.classList.remove('show');
+                currentInput = null;
+            }
+        }
+    });
+    // Reaplica teclado em linhas novas
+    function addLine() {
+        let container = document.getElementById('dimension-container');
+        let line = document.createElement('div');
+        line.className = "form-group dimension-line";
+        line.innerHTML = `
+            <div>
+                <select class="type" oninput="removeHighlight(this)">
+                    <option value="box">Box</option>
+                    <option value="pallet">Pallet</option>
+                </select>
+            </div>
+            <div>
+                <input type="text" class="width numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
+            </div>
+            <div>
+                <input type="text" class="length numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
+            </div>
+            <div>
+                <input type="text" class="height numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
+            </div>
+            <div>
+                <input type="text" class="quantity numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0">
+            </div>
+            <div>
+                <button class="remove-button" onclick="removeLine(this)">Remove</button>
+            </div>
+        `;
+        container.appendChild(line);
+    }
+    // Modificar resetForm para restaurar selects e inputs
     function resetForm() {
         const container = document.getElementById('dimension-container');
         container.innerHTML = '';
@@ -577,19 +664,17 @@
                         <option value="pallet">Pallet</option>
                     </select>
                 </div>
-                <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-                <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-                <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
-                <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+                <div><input type="text" class="width numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0"></div>
+                <div><input type="text" class="length numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0"></div>
+                <div><input type="text" class="height numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0"></div>
+                <div><input type="text" class="quantity numeric-measure" readonly onclick="openNumericKeyboard(this)" maxlength="3" placeholder="0"></div>
                 <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
             </div>`;
-        document.getElementById('country').value = '';
-        document.getElementById('zone').value = '';
-        document.getElementById('zone').disabled = true;
+        // País e zona
+        populateCountryDropdown();
         document.getElementById('result').innerHTML = '';
         document.getElementById('error-message').innerHTML = '';
         document.getElementById('mensagens').innerHTML = '';
-        populateCountryDropdown();
     }
     </script>
     <script>
