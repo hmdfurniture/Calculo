@@ -2,48 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Main Page - Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            min-height: 100vh;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            font-size: 16px; /* Para evitar zoom em inputs no mobile */
-            background: #fff;
-            overflow-x: hidden;
+        body, input, select, button, textarea,
+        .dropdown-menu, .dropdown-menu a, .dropdown-menu button,
+        .mensagens-container, .result {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+            font-size: 12px !important;
         }
         body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .header-content, .main-content, .footer-content {
+            width: 98vw;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
         header {
-            width: 100vw;
             background: #fff;
+            z-index: 100;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
+            box-sizing: border-box;
             border-bottom: 1px solid #eee;
+        }
+        .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 8px;
-            min-height: 54px;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 100;
+            min-height: 60px;
         }
         .logo-header {
-            height: 32px;
-            margin: 6px 0;
-            max-width: 40vw;
+            height: 38px;
+            margin: 8px 0;
+            display: block;
+            max-width: 90vw;
         }
         .header-actions {
             display: flex;
+            gap: 16px;
             align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
+            position: relative;
         }
         .icon-btn {
             background: none;
@@ -51,16 +58,23 @@
             cursor: pointer;
             padding: 6px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background 0.2s;
         }
+        .icon-btn:focus,
+        .icon-btn:hover {
+            background: #eee;
+        }
         .icon-svg {
             width: 26px;
             height: 26px;
+            display: block;
             fill: #111;
         }
         .dropdown-menu {
@@ -71,7 +85,7 @@
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
-            min-width: 180px;
+            min-width: 200px;
             box-shadow: 0 4px 16px 0 rgba(0,0,0,0.13);
             z-index: 9999;
         }
@@ -79,23 +93,25 @@
             display: block;
         }
         .dropdown-menu ul {
+            list-style: none;
             margin: 0;
             padding: 0;
-            list-style: none;
         }
         .dropdown-menu li {
             border-bottom: 1px solid #f0f0f0;
         }
-        .dropdown-menu li:last-child { border-bottom: none; }
+        .dropdown-menu li:last-child {
+            border-bottom: none;
+        }
         .dropdown-menu a,
         .dropdown-menu button {
             width: 100%;
             text-align: left;
-            padding: 12px 16px;
+            padding: 12px 18px;
             background: none;
             border: none;
             color: #222;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
             outline: none;
             text-decoration: none;
@@ -106,313 +122,475 @@
         .dropdown-menu button:hover {
             background: #f5f5f5;
         }
-        /* --- Conteúdo principal --- */
-        main {
-            flex: 1 0 auto;
-            width: 100vw;
+        .avatar-icon {
+            border: none !important;
+            background: none !important;
+            width: 26px !important;
+            height: 26px !important;
+            padding: 0 !important;
             display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            box-sizing: border-box;
-            padding: 0;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none !important;
+        }
+        .avatar-icon svg {
+            width: 26px !important;
+            height: 26px !important;
+            fill: #222 !important;
+            background: none !important;
+            border-radius: 0 !important;
+        }
+        .avatar-dropdown, .hamburger-dropdown {
+            min-width: 200px;
+        }
+        .logout-button {
+            display: none;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            align-items: flex-start;
+            flex: 1 0 auto;
         }
         .form-container {
-            width: 100vw;
-            background: #fff;
-            padding: 8px 4vw 0 4vw;
-            box-sizing: border-box;
-        }
-        .form-inner {
-            width: 100%;
+            flex: 0 1 60%;
+            max-width: 60%;
             display: flex;
             flex-direction: column;
+            min-width: 340px;
+        }
+        .form-inner {
+            width: 80%;
+            margin-left: 0;
+            margin-right: auto;
+            background: #fff;
+            display: block;
+        }
+        .map-container {
+            flex: 0 1 40%;
+            max-width: 40%;
+            min-width: 320px;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .map {
+            width: 85%;
+            aspect-ratio: 1 / 1;
+            max-width: 85%;
+            background-color: white;
+            margin: 0 auto;
+            display: block;
+        }
+        .mensagens-container {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 440px;
+        }
+        .mensagem-explicativa-bloco {
+            display: flex;
+            align-items: flex-start;
+            background: #eef6ff;
+            border: 1px solid #acd3fa;
+            border-radius: 12px;
+            padding: 14px 16px 8px 12px;
+            min-height: 70px;
+            width: 100%;
+            box-sizing: border-box;
+            gap: 16px;
+        }
+        .mensagem-explicativa-logo {
+            width: 80px;
+            height: 44px;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            margin-right: 12px;
+            display: block;
+        }
+        .mensagem-explicativa-lista {
+            margin: 0;
+            padding-left: 20px;
+            color: #174b7a;
+            font-size: 15px;
         }
         .form-group {
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
-        .form-group label {
-            font-size: 15px;
-            min-width: 85px;
+        .header-row, .dimension-line {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .dimension-line {
+            background-color: #f9f9f9;
+            padding: 2px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        .dimension-line:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .dimension-line > div, .header-row > div {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+        }
+        input[type="text"], select, button.remove-button {
+            width: 70px;
+            height: 25px;
+            padding: 4px 6px;
+            box-sizing: border-box;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        input[type="number"] {
+            width: 70px;
+            height: 25px;
+            padding: 4px 6px;
+            box-sizing: border-box;
+            -moz-appearance: textfield;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        button {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .remove-button {
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 4px 6px;
+            height: 25px;
+        }
+        .remove-button:hover {
+            background-color: #FF4500;
         }
         .dropdown {
             position: relative;
             display: inline-block;
-            width: 100%;
-            max-width: 180px;
-        }
-        .dropdown input {
-            width: 100%;
-            font-size: 16px;
-            padding: 6px;
-            box-sizing: border-box;
         }
         .dropdown-content {
             display: none;
             position: absolute;
             background-color: #f9f9f9;
-            min-width: 100%;
-            max-height: 220px;
+            min-width: 160px;
+            max-height: 200px;
             overflow-y: auto;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-            z-index: 10;
-            left: 0;
-        }
-        .dropdown-content.show {
-            display: block;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
         }
         .dropdown-content a {
-            color: #111;
-            padding: 10px 16px;
+            color: black;
+            padding: 12px 16px;
             text-decoration: none;
             display: block;
         }
         .dropdown-content a:hover {
             background-color: #f1f1f1;
         }
-        /* Linhas de dimensões */
-        .header-row, .dimension-line {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .header-row {
-            font-weight: 600;
-            font-size: 15px;
-            padding: 2px 0;
-            justify-content: space-between;
-        }
-        .dimension-line {
-            margin-bottom: 4px;
-        }
-        .dimension-line > div, .header-row > div {
-            flex: 1 1 0;
-            display: flex;
-            align-items: center;
-        }
-        select, input[type="number"], input[type="text"] {
+        .dropdown input {
             width: 100%;
-            padding: 6px;
-            font-size: 16px;
             box-sizing: border-box;
-        }
-        input[type="number"]:not([readonly])::-webkit-outer-spin-button,
-        input[type="number"]:not([readonly])::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .remove-button {
-            background: #FF6347;
-            border: none;
-            color: #fff;
-            padding: 6px 10px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .remove-button:hover { background: #FF4500; }
-        .row-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 10px;
-            margin-bottom: 8px;
-            width: 100%;
-        }
-        .row-actions button {
-            flex: 1 1 0;
-            font-size: 16px;
-            padding: 10px 0;
-            border-radius: 6px;
-        }
-        .calculate-btn { background: #007BFF; color: #fff; }
-        .calculate-btn:hover { background: #0056b3; }
-        .result {
-            margin-top: 18px;
-            margin-bottom: 10px;
-            width: 100%;
+            padding: 4px;
+            height: 25px;
         }
         .error-message {
             color: red;
-            font-size: 15px;
-            margin: 12px 0;
+            font-size: 14px;
+            margin-top: 10px;
         }
-        /* RESULTADOS E MAPA */
-        .result-map-container {
-            width: 100vw;
-            display: none;
-            flex-direction: column;
-            align-items: stretch;
+        .highlight {
+            border-color: red;
         }
-        .result-row {
+        #dimension-container {
+            margin-top: 20px;
+        }
+        #result {
             display: flex;
-            flex-direction: row;
-            gap: 8px;
-            width: 100%;
-            justify-content: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         .resultado-bloco {
+            width: 220px;
+            min-height: 320px;
             background: #fafafa;
             border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 12px 8px 8px 8px;
+            border-radius: 12px;
+            padding: 16px 12px 8px 12px;
             box-sizing: border-box;
-            width: 48vw;
-            min-width: 150px;
-            max-width: 220px;
-            min-height: 200px;
-            margin-bottom: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .logo-tabela {
-            width: 90px;
-            height: 40px;
+            width: 120px;
+            height: 60px;
             object-fit: contain;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             background: #fff;
-            border-radius: 5px;
+            border-radius: 6px;
             border: 1px solid #eee;
+            display: block;
         }
-        .mapa-bloco {
-            flex: 1 1 0;
-            min-width: 150px;
-            max-width: 220px;
-            min-height: 200px;
-            margin-left: 8px;
-            background: #fff;
-            border-radius: 10px;
-            border: 1px solid #ddd;
+        .row-actions {
             display: flex;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        #map {
-            width: 95%;
-            height: 95%;
-        }
-        /* Mensagens */
-        .mensagens-container {
-            margin-top: 10px;
-            width: 100vw;
-            padding: 0 4vw;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .mensagem-explicativa-bloco {
-            background: #eef6ff;
-            border: 1px solid #acd3fa;
-            border-radius: 8px;
-            padding: 10px 14px 6px 10px;
-            min-height: 50px;
             width: 100%;
-            box-sizing: border-box;
-            gap: 12px;
+            max-width: 100%;
+        }
+        .row-actions #add-line {
+            margin-right: 10px;
+        }
+        .row-actions .calculate-btn {
+            margin-left: auto;
+        }
+        .button-container {
             display: flex;
-            align-items: flex-start;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
         }
-        .mensagem-explicativa-lista {
-            margin: 0;
-            padding-left: 18px;
-            color: #174b7a;
-            font-size: 15px;
+
+        /* -------- Mapa Europa - ESTILO FINAL -------- */
+
+        #map svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 auto;
         }
-        /* Footer */
+
+        /* Fundo e países por defeito: a mesma cor (cinza claro) */
+        .bg.geo,
+        .geo.region {
+            fill: #C9D1DA;
+            stroke: #333;
+            stroke-width: 0.7;
+            transition: fill 0.2s;
+        }
+
+        /* País/Região selecionado: cinza mais escuro */
+        .geo.region.selected {
+            fill: #96A9BF;
+        }
+
+        /* Fronteiras e outlines a preto */
+        .geo.borders,
+        .geo.region-outline {
+            stroke: #333;
+            fill: none;
+            stroke-width: 0.7;
+        }
+
+        .footer-content {
+            width: 98vw;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
         footer {
-            width: 100vw;
-            padding: 8px 4vw;
-            background: #fff;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #888;
+            margin-top: auto;
+            width: 100%;
             text-align: right;
+            font-size: 11px;
+            color: #888;
+            background: transparent;
+            min-width: 0;
+            border-top: 1px solid #eee;
         }
-        /* ----------- Modo Paisagem: layout desktop ajustado ----------- */
-        @media (orientation: landscape) and (max-width: 900px) {
-            main {
-                flex-direction: row;
-                align-items: flex-start;
-                padding: 0 2vw;
-            }
-            .form-container, .result-map-container, .mensagens-container {
-                width: 50vw;
-            }
-            .form-container {
-                min-width: 320px;
-                max-width: 50vw;
-            }
-            .result-map-container {
-                display: flex;
-                max-width: 50vw;
-                align-items: stretch;
-            }
-            .mensagens-container { max-width: 50vw; }
-            .result-row { justify-content: flex-start; }
-        }
+/* ======= MOBILE RETRATO (PORTRAIT) ======= */
+@media (max-width: 900px) and (orientation: portrait) {
+    html, body {
+        width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+    header, .header-content, .footer-content, footer {
+        width: 100vw !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    .main-content {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        width: 100vw !important;
+        margin: 0 !important;
+    }
+    .form-container,
+    .form-inner,
+    .map-container,
+    .mensagens-container,
+    #result {
+        width: 100vw !important;
+        min-width: 0 !important;
+        max-width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .form-inner {
+        width: 98vw !important;
+        margin: 0 auto !important;
+    }
+    .map-container {
+        order: 3;
+        padding: 0 !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        margin: 0 auto !important;
+        width: 100vw !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    .mensagens-container {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        padding: 0 2vw !important;
+    }
+    .result {
+        margin-top: 10px !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+    }
+    /* Resultados + mapa em até 2 por linha */
+    #result {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        align-items: stretch !important;
+        width: 100vw !important;
+    }
+    .resultado-bloco, .map {
+        width: 44vw !important;
+        min-width: 120px !important;
+        max-width: 210px !important;
+        margin-bottom: 8px !important;
+        box-sizing: border-box !important;
+    }
+    .map {
+        min-height: 160px !important;
+        aspect-ratio: 1/1 !important;
+        background: #fff !important;
+        border-radius: 10px !important;
+        border: 1px solid #ddd !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+    }
+    /* Inputs: evitar zoom */
+    input, select, button, textarea {
+        font-size: 16px !important;
+    }
+}
+/* ======= MOBILE PAISAGEM (LANDSCAPE) = DESKTOP ======= */
+@media (max-width: 900px) and (orientation: landscape) {
+    html, body, .main-content, .header-content, .footer-content, footer {
+        width: 100vw !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+    input, select, button, textarea {
+        font-size: 16px !important;
+    }
+    /* Mantém a estrutura e cores do desktop */
+}
     </style>
+    <script>
+    if (window.innerWidth < 900) {
+        window.location.replace('m.main.html');
+    }
+    </script>
 </head>
 <body>
     <header>
-        <img src="images/logo.png" alt="Logo" class="logo-header">
-        <div class="header-actions">
-            <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <rect y="4" width="24" height="3"/>
-                    <rect y="10.5" width="24" height="3"/>
-                    <rect y="17" width="24" height="3"/>
-                </svg>
-            </button>
-            <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
-                <ul>
-                    <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
-                    <li><button onclick="printResult()">Imprimir</button></li>
-                    <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
-                </ul>
-            </div>
-            <button class="icon-btn" id="avatarBtn" aria-label="Conta">
-                <span class="avatar-icon">
+        <div class="header-content">
+            <img src="images/logo.png" alt="Logo" class="logo-header" />
+            <div class="header-actions">
+                <!-- Hamburger -->
+                <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
                     <svg class="icon-svg" viewBox="0 0 24 24">
-                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#222"/>
+                        <rect y="4" width="24" height="3"/>
+                        <rect y="10.5" width="24" height="3"/>
+                        <rect y="17" width="24" height="3"/>
                     </svg>
-                </span>
-            </button>
-            <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
-                <ul>
-                    <li><a href="admin.html" target="_blank">Admin</a></li>
-                    <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
-                    <li><button onclick="logout()">Logout</button></li>
-                </ul>
+                </button>
+                <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
+                    <ul>
+                        <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
+                        <li><button onclick="printResult()">Imprimir</button></li>
+                        <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
+                    </ul>
+                </div>
+                <!-- Avatar (sem círculo) -->
+                <button class="icon-btn" id="avatarBtn" aria-label="Conta">
+                    <span class="avatar-icon">
+                        <svg class="icon-svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#222"/>
+                        </svg>
+                    </span>
+                </button>
+                <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
+                    <ul>
+                        <li><a href="admin.html" target="_blank">Admin</a></li>
+                        <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
+                        <li><button onclick="logout()">Logout</button></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
-    <main>
+    <div class="main-content">
         <div class="form-container">
             <div class="form-inner">
+                <!-- (Todo o conteúdo do formulário como já tens) -->
                 <div class="form-group">
-                    <label for="country">País:</label>
+                    <label for="country">Select Country:</label>
                     <div class="dropdown">
-                        <input type="text" id="country" placeholder="Pesquisar país..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+                        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
                         <div class="dropdown-content" id="country-list"></div>
                     </div>
-                    <label for="zone">Zona:</label>
+                    <label for="zone">Select Zone:</label>
                     <div class="dropdown">
-                        <input type="text" id="zone" placeholder="Nº zona..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
                         <div class="dropdown-content" id="zone-list"></div>
                     </div>
                 </div>
                 <div class="header-row">
-                    <div>Tipo</div>
-                    <div>Largura</div>
-                    <div>Compr.</div>
-                    <div>Altura</div>
-                    <div>Qtd</div>
-                    <div></div>
+                    <div>Type:</div>
+                    <div>Width (cm):</div>
+                    <div>Length (cm):</div>
+                    <div>Height (cm):</div>
+                    <div>Quantity:</div>
+                    <div>Action:</div>
                 </div>
                 <div id="dimension-container">
                     <div class="form-group dimension-line">
@@ -435,27 +613,28 @@
                             <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
                         </div>
                         <div>
-                            <button class="remove-button" onclick="removeLine(this)">Remover</button>
+                            <button class="remove-button" onclick="removeLine(this)">Remove</button>
                         </div>
                     </div>
                 </div>
                 <div class="row-actions">
-                    <button id="add-line" onclick="addLine()">+ Linha</button>
+                    <button id="add-line" onclick="addLine()">+ Add More Lines</button>
                     <button onclick="resetForm()">Reset</button>
-                    <button class="calculate-btn" onclick="finalCalculate()">Calcular</button>
+                    <button class="calculate-btn" onclick="finalCalculate()">Calculate</button>
                 </div>
+                <div class="result" id="result"></div>
                 <div class="error-message" id="error-message"></div>
             </div>
         </div>
-        <!-- RESULTADOS E MAPA -->
-        <div class="result-map-container" id="result-map-container" style="display:none;">
-            <!-- O JS irá montar o resultado + mapa aqui conforme regras mobile/desktop -->
+        <div class="map-container">
+            <div id="map" class="map"></div>
+            <div class="mensagens-container" id="mensagens"></div>
         </div>
-        <!-- Mensagens explicativas -->
-        <div class="mensagens-container" id="mensagens"></div>
-    </main>
+    </div>
     <footer>
-        Copyright © hmdfurniture
+        <div class="footer-content">
+            Copyright © hmdfurniture
+        </div>
     </footer>
     <script src="js/calculo_geral.js"></script>
     <script src="js/dataLoader.js"></script>
@@ -465,7 +644,6 @@
     <script src="js/main.js"></script>
     <script src="js/mapas/mapa-controller.js"></script>
     <script>
-    // Carregar scripts de cálculos adicionais (como no desktop)
     function loadScript(src) {
         return new Promise((resolve, reject) => {
             const s = document.createElement('script');
@@ -490,53 +668,35 @@
         .catch(err => {
             document.getElementById('error-message').innerText = "Erro ao carregar scripts de cálculo: " + err;
         });
-
-    // Exemplo de montagem dinâmica dos resultados + mapa para mobile:
-    function showResultsAndMap(resultsHtmlArr, mapHtml) {
-        const container = document.getElementById('result-map-container');
+    </script>
+    <script>
+    function resetForm() {
+        const container = document.getElementById('dimension-container');
         container.innerHTML = '';
-        if (!resultsHtmlArr.length && !mapHtml) {
-            container.style.display = "none";
-            return;
-        }
-        container.style.display = "";
-        // Até 2 por linha: máximo 2 blocos resultado + mapa, excedentes por baixo
-        let row = document.createElement('div');
-        row.className = 'result-row';
-        let count = 0;
-        for (let i = 0; i < resultsHtmlArr.length; ++i) {
-            if (count === 2) {
-                container.appendChild(row);
-                row = document.createElement('div');
-                row.className = 'result-row';
-                count = 0;
-            }
-            let div = document.createElement('div');
-            div.innerHTML = resultsHtmlArr[i];
-            div = div.firstElementChild;
-            row.appendChild(div);
-            count++;
-            if (i === 1 && mapHtml) { // mapa ao lado dos dois primeiros resultados
-                let mapDiv = document.createElement('div');
-                mapDiv.className = 'mapa-bloco';
-                mapDiv.innerHTML = mapHtml;
-                row.appendChild(mapDiv);
-                count++;
-            }
-        }
-        if (count > 0) container.appendChild(row);
-        // Se não tiver resultados, só mostra o mapa centralizado
-        if (!resultsHtmlArr.length && mapHtml) {
-            let row = document.createElement('div');
-            row.className = 'result-row';
-            let mapDiv = document.createElement('div');
-            mapDiv.className = 'mapa-bloco';
-            mapDiv.innerHTML = mapHtml;
-            row.appendChild(mapDiv);
-            container.appendChild(row);
-        }
+        container.innerHTML = `
+            <div class="form-group dimension-line">
+                <div>
+                    <select class="type" oninput="removeHighlight(this)">
+                        <option value="box">Box</option>
+                        <option value="pallet">Pallet</option>
+                    </select>
+                </div>
+                <div><input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+                <div><input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+                <div><input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+                <div><input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)"></div>
+                <div><button class="remove-button" onclick="removeLine(this)">Remove</button></div>
+            </div>`;
+        document.getElementById('country').value = '';
+        document.getElementById('zone').value = '';
+        document.getElementById('zone').disabled = true;
+        document.getElementById('result').innerHTML = '';
+        document.getElementById('error-message').innerHTML = '';
+        document.getElementById('mensagens').innerHTML = '';
+        populateCountryDropdown();
     }
-    // Dropdowns
+    </script>
+    <script>
     function closeAllDropdowns() {
         document.getElementById('hamburgerMenu').classList.remove('show');
         document.getElementById('avatarMenu').classList.remove('show');
