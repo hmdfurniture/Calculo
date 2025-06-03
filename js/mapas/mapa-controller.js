@@ -19,11 +19,9 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           mapDiv.style.background = "white";
 
           // Destaca a região se um ID for especificado (apenas para o mapa da Europa)
-          if (selectedId) {
-              const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
-              if (reg) reg.classList.add('selected');
-              else console.warn('País não encontrado no SVG:', selectedId);
-          }
+if (selectedId) {
+    destacarNoMapa(selectedId);
+}
 
           if (typeof callback === 'function') callback();
       })
