@@ -18,7 +18,7 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           mapDiv.style.justifyContent = "center";
           mapDiv.style.background = "white";
 
-          // Destaca a região se um ID for especificado
+          // Destaca a região se um ID for especificado (apenas para o mapa da Europa)
           if (selectedId) {
               const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
               if (reg) reg.classList.add('selected');
@@ -44,13 +44,24 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // Função para destacar uma região no mapa carregado (deve ser chamada após carregar o SVG)
+// --- Alteração: agora destaca zonas por data-zona (para mapas de países) ---
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
+    // Remove qualquer destaque anterior
+    // Remover destaque de países (Europa)
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
+    // Remover destaque de zonas (país)
+    mapDiv.querySelectorAll('[data-zona].selected').forEach(el => el.classList.remove('selected'));
+
     if (selectedId) {
-        // Para zonas (id no <g>), seleciona o path dentro do grupo
-        let reg = mapDiv.querySelector(`#${CSS.escape(selectedId)} .geo.region`);
-        // Se não encontrar, tenta o caso do país (id no path)
+        // 1. Primeiro tenta destacar zona por data-zona (para mapas de países)
+        let reg = mapDiv.querySelector(`[data-zona="${selectedId}"]`);
+        if (reg) {
+            reg.classList.add('selected');
+            return;
+        }
+        // 2. Se não for zona, tenta país como antes (para o mapa da Europa)
+        reg = mapDiv.querySelector(`#${CSS.escape(selectedId)} .geo.region`);
         if (!reg) reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
         if (reg) reg.classList.add('selected');
     }
