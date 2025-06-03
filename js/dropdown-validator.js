@@ -11,21 +11,19 @@ function normalizarTexto(str) {
         .trim();
 }
 
-// Mostra mensagem de erro global no #error-message
-function mostrarErroGlobal(msg) {
-    const erroDiv = document.getElementById("error-message");
-    if (erroDiv) {
-        erroDiv.innerText = msg;
-        erroDiv.style.display = "block";
+// Mostra mensagem de erro global no #result
+function mostrarErroNoResult(msg) {
+    const resultDiv = document.getElementById("result");
+    if (resultDiv) {
+        resultDiv.innerHTML = `<p class="error-message">${msg}</p>`;
     }
 }
 
-// Esconde mensagem de erro global
-function esconderErroGlobal() {
-    const erroDiv = document.getElementById("error-message");
-    if (erroDiv) {
-        erroDiv.innerText = "";
-        erroDiv.style.display = "none";
+// Esconde mensagem de erro em #result (só limpa se for erro, não limpa resultados válidos)
+function esconderErroNoResult() {
+    const resultDiv = document.getElementById("result");
+    if (resultDiv && resultDiv.querySelector('.error-message')) {
+        resultDiv.innerHTML = "";
     }
 }
 
@@ -42,21 +40,21 @@ function validarDropdown(inputId, listId, erroMsg) {
         let encontrada = opcoes.find(opt => normalizarTexto(opt.textContent) === valorInput);
 
         if (this.value.trim() === "") {
-            esconderErroGlobal();
+            esconderErroNoResult();
             return;
         }
 
         if (encontrada) {
             this.value = encontrada.textContent; // Assume grafia correta do dropdown
-            esconderErroGlobal();
+            esconderErroNoResult();
         } else {
-            mostrarErroGlobal(erroMsg);
+            mostrarErroNoResult(erroMsg);
             this.value = '';
         }
     });
 
     input.addEventListener('input', function() {
-        esconderErroGlobal();
+        esconderErroNoResult();
     });
 }
 
