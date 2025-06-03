@@ -1,17 +1,16 @@
 // --- dropdown-validator.js ---
-// Valida country e zone: só aceita opções do dropdown, ignora acentos/maiúsculas/ç, e mostra mensagem clara no #error-message
+// Valida country e zone: só aceita opções do dropdown, ignora acentos/maiúsculas/ç, e mostra mensagem clara no #result
 
 function normalizarTexto(str) {
     return str
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // remove acentos
-        .replace(/ç/g, 'c') // trata ç como c
-        .replace(/[^a-z0-9\s]/gi, '') // remove outros caracteres especiais (opcional)
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9\s]/gi, '')
         .trim();
 }
 
-// Mostra mensagem de erro global no #result
 function mostrarErroNoResult(msg) {
     const resultDiv = document.getElementById("result");
     if (resultDiv) {
@@ -19,7 +18,6 @@ function mostrarErroNoResult(msg) {
     }
 }
 
-// Esconde mensagem de erro em #result (só limpa se for erro, não limpa resultados válidos)
 function esconderErroNoResult() {
     const resultDiv = document.getElementById("result");
     if (resultDiv && resultDiv.querySelector('.error-message')) {
@@ -27,7 +25,7 @@ function esconderErroNoResult() {
     }
 }
 
-// Validação genérica para dropdown+input (country ou zone)
+// Validação para dropdown+input (country ou zone)
 function validarDropdown(inputId, listId, erroMsg) {
     const input = document.getElementById(inputId);
     const list = document.getElementById(listId);
@@ -64,7 +62,6 @@ validarDropdown(
     'country-list',
     'Nenhum país disponível com esse nome. Selecione um país válido da lista.'
 );
-
 // Zonas
 validarDropdown(
     'zone',
