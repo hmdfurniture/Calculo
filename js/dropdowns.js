@@ -1,23 +1,3 @@
-// Função utilitária para validação case-insensitive
-function matchDropdownValue(inputValue, dropdownArray) {
-    const normalizedInput = inputValue.trim().toLowerCase();
-    return dropdownArray.find(opt => opt.toLowerCase() === normalizedInput) || null;
-}
-
-// Mensagens de erro centralizadas no #result (mesmo sítio que os outros erros do main.js)
-function showError(msg) {
-    const resultDiv = document.getElementById('result');
-    if (resultDiv) resultDiv.innerHTML = `<p>${msg}</p>`;
-    // Limpa mensagens/contexto associadas ao cálculo
-    const mensagensDiv = document.getElementById('mensagens');
-    if (mensagensDiv) mensagensDiv.innerHTML = '';
-}
-function hideError() {
-    const resultDiv = document.getElementById('result');
-    if (resultDiv) resultDiv.innerHTML = '';
-}
-
-// ---- PAISES ----
 function populateCountryDropdown() {
     const countryList = document.getElementById("country-list");
     countryList.innerHTML = "";
@@ -71,29 +51,6 @@ function filterCountries() {
         });
 }
 
-// Validação ao perder o foco ou carregar ENTER (país)
-document.getElementById('country').addEventListener('blur', function() {
-    const uniqueCountries = [...new Set(supplierData.map((item) => item.country))];
-    const input = this.value;
-    const matched = matchDropdownValue(input, uniqueCountries);
-    if (!matched) {
-        showError('Nenhum destino/Zona disponível.');
-        this.value = '';
-        document.getElementById("zone").value = "";
-        document.getElementById("zone").disabled = true;
-        document.getElementById("zone-list").innerHTML = "";
-        // Limpa outros blocos de resultados/contexto já feito no showError
-    } else {
-        this.value = matched;
-        hideError();
-        this.dispatchEvent(new Event('change', {bubbles: true}));
-        document.getElementById("zone").disabled = false;
-    }
-});
-document.getElementById('country').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') this.blur();
-});
-
 function selectCountry(country) {
     const countryInput = document.getElementById("country");
     countryInput.value = country;
@@ -112,7 +69,6 @@ function selectCountry(country) {
     filterCountries();
 }
 
-// ---- ZONAS ----
 function populateZoneDropdown(country) {
     const zoneList = document.getElementById("zone-list");
     zoneList.innerHTML = "";
@@ -163,7 +119,7 @@ function filterZones() {
     }
 
     uniqueZones
-        .filter((zone) => zone.toLowerCase().startsWith(input))
+        .filter((zone) => zone.startsWith(input))
         .forEach((zone) => {
             const a = document.createElement("a");
             a.href = "#";
@@ -175,30 +131,6 @@ function filterZones() {
             zoneList.appendChild(a);
         });
 }
-
-// Validação ao perder o foco ou carregar ENTER (zona)
-document.getElementById('zone').addEventListener('blur', function() {
-    const country = document.getElementById("country").value;
-    const zones = supplierData
-        .filter((item) => item.country === country)
-        .map((item) => item.code);
-    const uniqueZones = [...new Set(zones)];
-
-    const input = this.value;
-    const matched = matchDropdownValue(input, uniqueZones);
-    if (!matched) {
-        showError('Nenhum destino/Zona disponível.');
-        this.value = '';
-        destacarNoMapa(null);
-    } else {
-        this.value = matched;
-        hideError();
-        this.dispatchEvent(new Event('change', {bubbles: true}));
-    }
-});
-document.getElementById('zone').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') this.blur();
-});
 
 function selectZone(zone) {
     const zoneInput = document.getElementById("zone");
