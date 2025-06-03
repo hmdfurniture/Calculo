@@ -21,10 +21,12 @@ function populateCountryDropdown() {
         const a = document.createElement("a");
         a.href = "#";
         a.textContent = country;
-        a.onclick = () => {
+        // Usa mousedown para garantir seleção mesmo após erro/blur
+        a.addEventListener("mousedown", (e) => {
+            e.preventDefault();
             selectCountry(country);
             hideDropdown("country-list");
-        };
+        });
         countryList.appendChild(a);
     });
 }
@@ -41,10 +43,11 @@ function filterCountries() {
             const a = document.createElement("a");
             a.href = "#";
             a.textContent = country;
-            a.onclick = () => {
+            a.addEventListener("mousedown", (e) => {
+                e.preventDefault();
                 selectCountry(country);
                 hideDropdown("country-list");
-            };
+            });
             countryList.appendChild(a);
         });
         return;
@@ -56,10 +59,11 @@ function filterCountries() {
             const a = document.createElement("a");
             a.href = "#";
             a.textContent = country;
-            a.onclick = () => {
+            a.addEventListener("mousedown", (e) => {
+                e.preventDefault();
                 selectCountry(country);
                 hideDropdown("country-list");
-            };
+            });
             countryList.appendChild(a);
         });
 }
@@ -95,10 +99,11 @@ function populateZoneDropdown(country) {
         const a = document.createElement("a");
         a.href = "#";
         a.textContent = zone;
-        a.onclick = () => {
+        a.addEventListener("mousedown", (e) => {
+            e.preventDefault();
             selectZone(zone);
             hideDropdown("zone-list");
-        };
+        });
         zoneList.appendChild(a);
     });
 }
@@ -121,10 +126,11 @@ function filterZones() {
             const a = document.createElement("a");
             a.href = "#";
             a.textContent = zone;
-            a.onclick = () => {
+            a.addEventListener("mousedown", (e) => {
+                e.preventDefault();
                 selectZone(zone);
                 hideDropdown("zone-list");
-            };
+            });
             zoneList.appendChild(a);
         });
         return;
@@ -136,10 +142,11 @@ function filterZones() {
             const a = document.createElement("a");
             a.href = "#";
             a.textContent = zone;
-            a.onclick = () => {
+            a.addEventListener("mousedown", (e) => {
+                e.preventDefault();
                 selectZone(zone);
                 hideDropdown("zone-list");
-            };
+            });
             zoneList.appendChild(a);
         });
 }
