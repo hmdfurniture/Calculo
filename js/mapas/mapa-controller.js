@@ -27,11 +27,10 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           if (selectedId) {
               destacarNoMapa(selectedId);
           }
-
+          // Chama callback após o mapa estar pronto
           if (typeof callback === 'function') callback();
       })
       .catch(() => {
-          // Se falhar a carregar um país, volta ao mapa inicial da Europa
           if (svgPath !== 'svg/europamain.svg') {
               carregarMapa('svg/europamain.svg');
           } else {
@@ -57,7 +56,6 @@ function destacarNoMapa(selectedId) {
     mapDiv.querySelectorAll('[data-zona].selected').forEach(el => el.classList.remove('selected'));
 
     if (selectedId) {
-        // Normaliza para string sem espaços
         const normalizado = String(selectedId).trim();
         // Destaca zona (por data-zona)
         let reg = Array.from(mapDiv.querySelectorAll('[data-zona]')).find(el =>
@@ -82,13 +80,18 @@ document.getElementById('country').addEventListener('change', function() {
         paisSelecionado = null;
         return;
     }
-    zonaSelecionada = null;
+    zonaSelecionada = document.getElementById('zone').value.trim() || null;
     carregarMapa('svg/europamain.svg', paisId);
 
     clearTimeout(timeoutPais);
     if (paisId) {
         timeoutPais = setTimeout(() => {
-            carregarMapa(`svg/${paisId}.svg`);
+            carregarMapa(`svg/${paisId}.svg`, null, function() {
+                // SE HOUVER ZONA, DESTACA APÓS o mapa do país estar carregado!
+                if (zonaSelecionada) {
+                    destacarNoMapa(zonaSelecionada);
+                }
+            });
             paisSelecionado = paisId;
         }, 2000);
     } else {
@@ -108,28 +111,30 @@ document.getElementById('country').addEventListener('input', function() {
 // Evento para o campo de zona: destaca zona ou limpa se vazio
 document.getElementById('zone').addEventListener('input', function() {
     const zonaId = this.value.trim();
+    zonaSelecionada = zonaId || null; // <-- Mantém sempre sincronizado!
     if (!zonaId && paisSelecionado) {
-        carregarMapa(`svg/${paisSelecionado}.svg`);
-        zonaSelecionada = null;
-    } else if (zonaId) {
+        carregarMapa(`svg/${paisSelecionado}.svg`, null, function() {
+            // Nada a destacar
+        });
+    } else if (zonaId && paisSelecionado) {
+        // Se o mapa do país já estiver carregado, destaca imediatamente.
         destacarNoMapa(zonaId);
-        zonaSelecionada = zonaId;
     }
 });
 
 // (Opcional, mantém também o evento change para máxima compatibilidade)
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value.trim();
+    zonaSelecionada = zonaId || null;
     if (zonaId) {
         destacarNoMapa(zonaId);
-        zonaSelecionada = zonaId;
     }
 });
 
 // Função para limpar zona manualmente
 function limparZona() {
     if (paisSelecionado) {
-        carregarMapa(`svg/${paisSelecionado}.svg`);
+        carregarMapa(`svg/${paisSelecionado}.svg`, null, function() {});
         zonaSelecionada = null;
     }
 }
