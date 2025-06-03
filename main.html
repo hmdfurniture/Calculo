@@ -473,18 +473,21 @@
         <div class="form-container">
             <div class="form-inner">
                 <!-- (Todo o conteúdo do formulário como já tens) -->
-                <div class="form-group">
-                    <label for="country">Select Country:</label>
-                    <div class="dropdown">
-                        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                        <div class="dropdown-content" id="country-list"></div>
-                    </div>
-                    <label for="zone">Select Zone:</label>
-                    <div class="dropdown">
-                        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                        <div class="dropdown-content" id="zone-list"></div>
-                    </div>
-                </div>
+<!-- ... resto do HTML ... -->
+<div class="form-group">
+    <label for="country">Select Country:</label>
+    <div class="dropdown">
+        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+        <div class="dropdown-content" id="country-list"></div>
+    </div>
+    <label for="zone">Select Zone:</label>
+    <div class="dropdown">
+        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+        <div class="dropdown-content" id="zone-list"></div>
+    </div>
+</div>
+<div class="error-message" id="error-message"></div>
+<!-- ... resto do HTML ... -->
                 <div class="header-row">
                     <div>Type:</div>
                     <div>Width (cm):</div>
@@ -540,6 +543,7 @@
     <script src="js/calculo_geral.js"></script>
     <script src="js/dataLoader.js"></script>
     <script src="js/dropdowns.js"></script>
+    <script src="js/dropdown-validator.js"></script>
     <script src="js/validation.js"></script>
     <script src="js/calculator.js"></script>
     <script src="js/main.js"></script>
