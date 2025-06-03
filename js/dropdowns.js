@@ -1,3 +1,16 @@
+// --- dropdowns.js ---
+// Dropdowns de países e zonas com filtro tolerante (ignora acentos, maiúsculas, ç)
+
+function normalizarTexto(str) {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9\s]/gi, '')
+        .trim();
+}
+
 function populateCountryDropdown() {
     const countryList = document.getElementById("country-list");
     countryList.innerHTML = "";
@@ -17,7 +30,7 @@ function populateCountryDropdown() {
 }
 
 function filterCountries() {
-    const input = document.getElementById("country").value.toLowerCase();
+    const input = normalizarTexto(document.getElementById("country").value);
     const countryList = document.getElementById("country-list");
     const uniqueCountries = [...new Set(supplierData.map((item) => item.country))].sort();
 
@@ -38,7 +51,7 @@ function filterCountries() {
     }
 
     uniqueCountries
-        .filter((country) => country.toLowerCase().startsWith(input))
+        .filter((country) => normalizarTexto(country).startsWith(input))
         .forEach((country) => {
             const a = document.createElement("a");
             a.href = "#";
@@ -64,7 +77,6 @@ function selectCountry(country) {
     populateZoneDropdown(country);
 
     countryInput.dispatchEvent(new Event("input"));
-    // PATCH para disparar o evento de mapa:
     countryInput.dispatchEvent(new Event("change"));
     filterCountries();
 }
@@ -92,7 +104,7 @@ function populateZoneDropdown(country) {
 }
 
 function filterZones() {
-    const input = document.getElementById("zone").value.toLowerCase();
+    const input = normalizarTexto(document.getElementById("zone").value);
     const zoneList = document.getElementById("zone-list");
     const country = document.getElementById("country").value;
 
@@ -119,7 +131,7 @@ function filterZones() {
     }
 
     uniqueZones
-        .filter((zone) => zone.startsWith(input))
+        .filter((zone) => normalizarTexto(zone).startsWith(input))
         .forEach((zone) => {
             const a = document.createElement("a");
             a.href = "#";
