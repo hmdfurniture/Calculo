@@ -26,7 +26,8 @@ function esconderErroNoResult() {
 }
 
 // Validação para dropdown+input (country ou zone)
-function validarDropdown(inputId, listId, erroMsg) {
+// Recebe agora o filtro respetivo como 4º parâmetro!
+function validarDropdown(inputId, listId, erroMsg, filterFn) {
     const input = document.getElementById(inputId);
     const list = document.getElementById(listId);
 
@@ -39,6 +40,7 @@ function validarDropdown(inputId, listId, erroMsg) {
 
         if (this.value.trim() === "") {
             esconderErroNoResult();
+            filterFn(); // <- Mostra todas as opções se o campo ficou vazio
             return;
         }
 
@@ -48,6 +50,7 @@ function validarDropdown(inputId, listId, erroMsg) {
         } else {
             mostrarErroNoResult(erroMsg);
             this.value = '';
+            filterFn(); // <- Força reset visual do dropdown para mostrar tudo
         }
     });
 
@@ -60,11 +63,13 @@ function validarDropdown(inputId, listId, erroMsg) {
 validarDropdown(
     'country',
     'country-list',
-    'Nenhum país disponível com esse nome. Selecione um país válido da lista.'
+    'Nenhum país disponível com esse nome. Selecione um país válido da lista.',
+    filterCountries // <- Passa a função de filtro do país
 );
 // Zonas
 validarDropdown(
     'zone',
     'zone-list',
-    'Nenhuma zona disponível com esse valor. Selecione uma zona válida da lista.'
+    'Nenhuma zona disponível com esse valor. Selecione uma zona válida da lista.',
+    filterZones // <- Passa a função de filtro da zona
 );
