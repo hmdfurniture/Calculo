@@ -48,7 +48,10 @@ function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
     if (selectedId) {
-        const reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
+        // Para zonas (id no <g>), seleciona o path dentro do grupo
+        let reg = mapDiv.querySelector(`#${CSS.escape(selectedId)} .geo.region`);
+        // Se não encontrar, tenta o caso do país (id no path)
+        if (!reg) reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
         if (reg) reg.classList.add('selected');
     }
 }
