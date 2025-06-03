@@ -40,17 +40,25 @@ function validarDropdown(inputId, listId, erroMsg, filterFn) {
 
         if (this.value.trim() === "") {
             esconderErroNoResult();
-            filterFn(); // <- Mostra todas as opções se o campo ficou vazio
+            filterFn(); // Mostra todas as opções se o campo ficou vazio
             return;
         }
 
         if (encontrada) {
             this.value = encontrada.textContent; // Assume grafia correta do dropdown
             esconderErroNoResult();
+            // Chama o mesmo fluxo de seleção do dropdown para garantir consistência
+            if (inputId === 'country') {
+                selectCountry(encontrada.textContent);
+            }
+            if (inputId === 'zone') {
+                selectZone(encontrada.textContent);
+            }
         } else {
             mostrarErroNoResult(erroMsg);
             this.value = '';
-            filterFn(); // <- Força reset visual do dropdown para mostrar tudo
+            filterFn(); // Força reset visual do dropdown para mostrar tudo
+            // Opcional: limpar mapas e estado dependente aqui, se necessário
         }
     });
 
