@@ -1,17 +1,16 @@
 // --- dropdown-validator.js ---
-// Valida country e zone: só aceita opções do dropdown, ignora acentos/maiúsculas/ç, e mostra mensagem clara no #error-message
+// Valida country e zone: só aceita opções do dropdown, ignora acentos/maiúsculas/ç, e mostra mensagem clara no #result
 
 function normalizarTexto(str) {
     return str
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // remove acentos
-        .replace(/ç/g, 'c') // trata ç como c
-        .replace(/[^a-z0-9\s]/gi, '') // remove outros caracteres especiais (opcional)
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ç/g, 'c')
+        .replace(/[^a-z0-9\s]/gi, '')
         .trim();
 }
 
-// Mostra mensagem de erro global no #result
 function mostrarErroNoResult(msg) {
     const resultDiv = document.getElementById("result");
     if (resultDiv) {
@@ -19,7 +18,6 @@ function mostrarErroNoResult(msg) {
     }
 }
 
-// Esconde mensagem de erro em #result (só limpa se for erro, não limpa resultados válidos)
 function esconderErroNoResult() {
     const resultDiv = document.getElementById("result");
     if (resultDiv && resultDiv.querySelector('.error-message')) {
@@ -27,8 +25,9 @@ function esconderErroNoResult() {
     }
 }
 
-// Validação genérica para dropdown+input (country ou zone)
-function validarDropdown(inputId, listId, erroMsg) {
+// Validação para dropdown+input (country ou zone)
+// Recebe agora o filtro respetivo como 4º parâmetro!
+function validarDropdown(inputId, listId, erroMsg, filterFn) {
     const input = document.getElementById(inputId);
     const list = document.getElementById(listId);
 
@@ -41,15 +40,21 @@ function validarDropdown(inputId, listId, erroMsg) {
 
         if (this.value.trim() === "") {
             esconderErroNoResult();
+            filterFn(); // <- Mostra todas as opções se o campo ficou vazio
             return;
         }
 
         if (encontrada) {
             this.value = encontrada.textContent; // Assume grafia correta do dropdown
             esconderErroNoResult();
+            // Dispara 'change' para garantir que lógica dependente (ex: mapas) é ativada
+            input.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
             mostrarErroNoResult(erroMsg);
             this.value = '';
+            filterFn(); // <- Força reset visual do dropdown para mostrar tudo
+            // Opcional: disparar evento para limpar mapa, se necessário
+            input.dispatchEvent(new Event('change', { bubbles: true }));
         }
     });
 
@@ -62,12 +67,13 @@ function validarDropdown(inputId, listId, erroMsg) {
 validarDropdown(
     'country',
     'country-list',
-    'Nenhum país disponível com esse nome. Selecione um país válido da lista.'
+    'Nenhum país disponível com esse nome. Selecione um país válido da lista.',
+    filterCountries // <- Passa a função de filtro do país
 );
-
 // Zonas
 validarDropdown(
     'zone',
     'zone-list',
-    'Nenhuma zona disponível com esse valor. Selecione uma zona válida da lista.'
+    'Nenhuma zona disponível com esse valor. Selecione uma zona válida da lista.',
+    filterZones // <- Passa a função de filtro da zona
 );
