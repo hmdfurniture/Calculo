@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main Page</title>
     <style>
-        /* GITHUB FONT STACK E TAMANHO */
         body, input, select, button, textarea,
         .dropdown-menu, .dropdown-menu a, .dropdown-menu button,
         .mensagens-container, .result {
@@ -14,23 +13,32 @@
         }
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
-            position: relative;
-            flex-wrap: wrap;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .header-content, .main-content, .footer-content {
+            width: 98vw;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
         header {
-            width: 100vw;
-            min-width: 100%;
-            margin-left: calc(-1 * ((100vw - 100%) / 2));
+            background: #fff;
+            z-index: 100;
+            width: 100%;
+            min-width: 0;
+            margin: 0;
             box-sizing: border-box;
+            border-bottom: 1px solid #eee;
+        }
+        .header-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px 0 10px;
-            margin-bottom: 18px;
-            background: #fff;
-            z-index: 100;
+            min-height: 60px;
         }
         .logo-header {
             height: 38px;
@@ -38,7 +46,6 @@
             display: block;
             max-width: 90vw;
         }
-        /* ==== NOVO: Estilos dos botões modernos e dropdowns ==== */
         .header-actions {
             display: flex;
             gap: 16px;
@@ -107,51 +114,75 @@
             font-size: 15px;
             cursor: pointer;
             outline: none;
+            text-decoration: none;
+            font-family: inherit;
+            display: block;
         }
         .dropdown-menu a:hover,
         .dropdown-menu button:hover {
             background: #f5f5f5;
         }
-        /* Avatar */
         .avatar-icon {
-            border-radius: 50%;
-            border: 2px solid #222;
-            width: 30px;
-            height: 30px;
-            background: #fff;
-            overflow: hidden;
+            border: none !important;
+            background: none !important;
+            width: 26px !important;
+            height: 26px !important;
+            padding: 0 !important;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: none !important;
         }
-        .avatar-dropdown { right: 0; }
-        .hamburger-dropdown { right: 58px; }
-        /* ==== FIM dos estilos dos botões modernos ==== */
-
-        /* ... mantém o restante do seu CSS ... */
+        .avatar-icon svg {
+            width: 26px !important;
+            height: 26px !important;
+            fill: #222 !important;
+            background: none !important;
+            border-radius: 0 !important;
+        }
+        .avatar-dropdown, .hamburger-dropdown {
+            min-width: 200px;
+        }
         .logout-button {
-            display: none; /* ESCONDE O BOTÃO ORIGINAL */
+            display: none;
+        }
+        .main-content {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            align-items: flex-start;
+            flex: 1 0 auto;
         }
         .form-container {
-            flex: 1 1 60%;
+            flex: 0 1 60%;
+            max-width: 60%;
             display: flex;
             flex-direction: column;
+            min-width: 340px;
         }
         .form-inner {
-            max-width: 760px;
-            margin: 0;
+            width: 80%;
+            margin-left: 0;
+            margin-right: auto;
             background: #fff;
+            display: block;
         }
         .map-container {
-            flex: 1 1 40%;
+            flex: 0 1 40%;
+            max-width: 40%;
+            min-width: 320px;
             padding-left: 20px;
             display: flex;
             flex-direction: column;
+            align-items: center;
         }
         .map {
-            height: 500px;
-            width: 100%;
+            width: 85%;
+            aspect-ratio: 1 / 1;
+            max-width: 85%;
             background-color: white;
+            margin: 0 auto;
+            display: block;
         }
         .mensagens-container {
             margin-top: 18px;
@@ -159,6 +190,7 @@
             flex-direction: column;
             gap: 12px;
             width: 100%;
+            max-width: 440px;
         }
         .mensagem-explicativa-bloco {
             display: flex;
@@ -219,6 +251,8 @@
             height: 25px;
             padding: 4px 6px;
             box-sizing: border-box;
+            font-size: 12px;
+            font-family: inherit;
         }
         input[type="number"] {
             width: 70px;
@@ -226,6 +260,8 @@
             padding: 4px 6px;
             box-sizing: border-box;
             -moz-appearance: textfield;
+            font-size: 12px;
+            font-family: inherit;
         }
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
@@ -323,52 +359,17 @@
             border: 1px solid #eee;
             display: block;
         }
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-            header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-            .form-container, .map-container {
-                flex: 1 1 100%;
-                padding-left: 0;
-            }
-            .map {
-                height: 300px;
-            }
-            .mensagens-container {
-                margin-top: 12px;
-            }
-            .form-inner {
-                max-width: none;
-            }
+        .row-actions {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 100%;
         }
-        @media (max-width: 480px) {
-            .logout-button {
-                width: 100%;
-                position: static;
-                margin-bottom: 10px;
-            }
-            input[type="text"], select, button.remove-button {
-                width: 100%;
-            }
-            input[type="number"] {
-                width: 100%;
-            }
-            button {
-                width: 100%;
-            }
-            .mensagem-explicativa-bloco {
-                flex-direction: column;
-                gap: 4px;
-                align-items: flex-start;
-            }
-            .mensagem-explicativa-logo {
-                margin-bottom: 8px;
-            }
+        .row-actions #add-line {
+            margin-right: 10px;
+        }
+        .row-actions .calculate-btn {
+            margin-left: auto;
         }
         .button-container {
             display: flex;
@@ -376,131 +377,177 @@
             gap: 10px;
             margin-top: 10px;
         }
-        footer {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 100vw;
-            min-width: 100%;
-            background: transparent;
-            padding: 10px 20px;
-            text-align: right;
-            z-index: 100;
+
+        /* -------- Mapa Europa - ESTILO FINAL -------- */
+
+        #map svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Fundo e países por defeito: a mesma cor (cinza claro) */
+        .bg.geo,
+        .geo.region {
+            fill: #e9eef5;
+            stroke: #333;
+            stroke-width: 0.7;
+            transition: fill 0.2s;
+        }
+
+        /* País/Região selecionado: cinza mais escuro */
+        .geo.region.selected {
+            fill: #96A9BF;
+        }
+
+        /* Fronteiras e outlines a preto */
+        .geo.borders,
+        .geo.region-outline {
+            stroke: #333;
+            fill: none;
+            stroke-width: 0.5;
+        }
+
+        .footer-content {
+            width: 98vw;
+            margin: 0 auto;
             box-sizing: border-box;
         }
-        footer a {
-            text-decoration: none;
-            color: #007BFF;
-            font-weight: bold;
-        }
-        footer a:hover {
-            color: #0056b3;
+        footer {
+            margin-top: auto;
+            width: 100%;
+            text-align: right;
+            font-size: 11px;
+            color: #888;
+            background: transparent;
+            min-width: 0;
+            border-top: 1px solid #eee;
         }
     </style>
+    <script>
+    if (window.innerWidth < 900) {
+        window.location.replace('m.main.html');
+    }
+    </script>
 </head>
 <body>
     <header>
-        <img src="images/logo.png" alt="Logo" class="logo-header" />
-        <div class="header-actions">
-            <!-- Hamburger -->
-            <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
-                <svg class="icon-svg" viewBox="0 0 24 24">
-                    <rect y="4" width="24" height="3"/>
-                    <rect y="10.5" width="24" height="3"/>
-                    <rect y="17" width="24" height="3"/>
-                </svg>
-            </button>
-            <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
-                <ul>
-                    <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
-                    <li><button onclick="printResult()">Imprimir</button></li>
-                    <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
-                </ul>
-            </div>
-            <!-- Avatar -->
-            <button class="icon-btn" id="avatarBtn" aria-label="Conta">
-                <span class="avatar-icon">
-<svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-  <circle cx="12" cy="8" r="4" fill="#222"/>
-  <ellipse cx="12" cy="17" rx="7" ry="4.5" fill="#222"/>
-</svg
-                </span>
-            </button>
-            <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
-                <ul>
-                    <li><a href="admin.html" target="_blank">Admin</a></li>
-                    <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
-                    <li><button onclick="logout()">Logout</button></li>
-                </ul>
+        <div class="header-content">
+            <img src="images/logo.png" alt="Logo" class="logo-header" />
+            <div class="header-actions">
+                <!-- Hamburger -->
+                <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
+                    <svg class="icon-svg" viewBox="0 0 24 24">
+                        <rect y="4" width="24" height="3"/>
+                        <rect y="10.5" width="24" height="3"/>
+                        <rect y="17" width="24" height="3"/>
+                    </svg>
+                </button>
+                <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
+                    <ul>
+                        <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
+                        <li><button onclick="printResult()">Imprimir</button></li>
+                        <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
+                    </ul>
+                </div>
+                <!-- Avatar (sem círculo) -->
+                <button class="icon-btn" id="avatarBtn" aria-label="Conta">
+                    <span class="avatar-icon">
+                        <svg class="icon-svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#222"/>
+                        </svg>
+                    </span>
+                </button>
+                <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
+                    <ul>
+                        <li><a href="admin.html" target="_blank">Admin</a></li>
+                        <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
+                        <li><button onclick="logout()">Logout</button></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
-    <div class="form-container">
-        <div class="form-inner">
-            <div class="form-group">
-                <label for="country">Select Country:</label>
-                <div class="dropdown">
-                    <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
-                    <div class="dropdown-content" id="country-list"></div>
+    <div class="main-content">
+        <div class="form-container">
+            <div class="form-inner">
+                <!-- (Todo o conteúdo do formulário como já tens) -->
+<!-- ... resto do HTML ... -->
+<div class="form-group">
+    <label for="country">Select Country:</label>
+    <div class="dropdown">
+        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+        <div class="dropdown-content" id="country-list"></div>
+    </div>
+    <label for="zone">Select Zone:</label>
+    <div class="dropdown">
+        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+        <div class="dropdown-content" id="zone-list"></div>
+    </div>
+</div>
+
+<!-- ... resto do HTML ... -->
+                <div class="header-row">
+                    <div>Type:</div>
+                    <div>Width (cm):</div>
+                    <div>Length (cm):</div>
+                    <div>Height (cm):</div>
+                    <div>Quantity:</div>
+                    <div>Action:</div>
                 </div>
-                <label for="zone">Select Zone:</label>
-                <div class="dropdown">
-                    <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
-                    <div class="dropdown-content" id="zone-list"></div>
-                </div>
-            </div>
-            <div class="header-row">
-                <div>Type:</div>
-                <div>Width (cm):</div>
-                <div>Length (cm):</div>
-                <div>Height (cm):</div>
-                <div>Quantity:</div>
-                <div>Action:</div>
-            </div>
-            <div id="dimension-container">
-                <div class="form-group dimension-line">
-                    <div>
-                        <select class="type" oninput="removeHighlight(this)">
-                            <option value="box">Box</option>
-                            <option value="pallet">Pallet</option>
-                        </select>
-                    </div>
-                    <div>
-                        <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
-                    </div>
-                    <div>
-                        <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                <div id="dimension-container">
+                    <div class="form-group dimension-line">
+                        <div>
+                            <select class="type" oninput="removeHighlight(this)">
+                                <option value="box">Box</option>
+                                <option value="pallet">Pallet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                        </div>
                     </div>
                 </div>
+                <div class="row-actions">
+                    <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+                    <button onclick="resetForm()">Reset</button>
+                    <button class="calculate-btn" onclick="finalCalculate()">Calculate</button>
+                </div>
+                <div class="result" id="result"></div>
+                <div class="error-message" id="error-message"></div>
             </div>
-            <button id="add-line" onclick="addLine()">+ Add More Lines</button>
-            <div class="button-container">
-                <button onclick="finalCalculate()">Calculate</button>
-            </div>
-            <button onclick="resetForm()">Reset</button>
-            <div class="result" id="result"></div>
-            <div class="error-message" id="error-message"></div>
+        </div>
+        <div class="map-container">
+            <div id="map" class="map"></div>
+            <div class="mensagens-container" id="mensagens"></div>
         </div>
     </div>
-    <div class="map-container">
-        <div id="map" class="map"></div>
-        <div class="mensagens-container" id="mensagens"></div>
-    </div>
+    <footer>
+        <div class="footer-content">
+            Copyright © hmdfurniture
+        </div>
+    </footer>
     <script src="js/calculo_geral.js"></script>
     <script src="js/dataLoader.js"></script>
     <script src="js/dropdowns.js"></script>
+    <script src="js/dropdown-validator.js"></script>
     <script src="js/validation.js"></script>
     <script src="js/calculator.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/mapas/mapa-controller.js"></script>
     <script>
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -554,7 +601,6 @@
         populateCountryDropdown();
     }
     </script>
-    <!-- NOVO: Script para dropdown dos botões modernos -->
     <script>
     function closeAllDropdowns() {
         document.getElementById('hamburgerMenu').classList.remove('show');
@@ -579,10 +625,5 @@
     function sendByEmail() { alert('Função de enviar por e-mail ainda não implementada.'); }
     function logout() { alert('Logout! (implementar redirecionamento)'); }
     </script>
-    <footer>
-        <a href="https://hmdfurniture.github.io/Calculo/admin.html" target="_blank">admin</a>
-        &nbsp;|&nbsp;
-        <a href="https://hmdfurniture.github.io/Calculo/adminc.html" target="_blank">adminc</a>
-    </footer>
 </body>
 </html>
