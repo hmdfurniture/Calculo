@@ -113,11 +113,8 @@ document.getElementById('zone').addEventListener('input', function() {
     const zonaId = this.value.trim();
     zonaSelecionada = zonaId || null; // <-- Mantém sempre sincronizado!
     if (!zonaId && paisSelecionado) {
-        carregarMapa(`svg/${paisSelecionado}.svg`, null, function() {
-            // Nada a destacar
-        });
+        carregarMapa(`svg/${paisSelecionado}.svg`, null, function() {});
     } else if (zonaId && paisSelecionado) {
-        // Se o mapa do país já estiver carregado, destaca imediatamente.
         destacarNoMapa(zonaId);
     }
 });
