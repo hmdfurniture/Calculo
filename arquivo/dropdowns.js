@@ -64,6 +64,8 @@ function selectCountry(country) {
     populateZoneDropdown(country);
 
     countryInput.dispatchEvent(new Event("input"));
+    // PATCH para disparar o evento de mapa:
+    countryInput.dispatchEvent(new Event("change"));
     filterCountries();
 }
 
