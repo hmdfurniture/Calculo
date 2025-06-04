@@ -190,7 +190,7 @@
             flex-direction: column;
             gap: 12px;
             width: 100%;
-            max-width: 440px;
+            max-width: 100%;
         }
         .mensagem-explicativa-bloco {
             display: flex;
@@ -599,6 +599,7 @@
         document.getElementById('error-message').innerHTML = '';
         document.getElementById('mensagens').innerHTML = '';
         populateCountryDropdown();
+        carregarMapa('svg/europamain.svg');
     }
     </script>
     <script>
