@@ -424,6 +424,41 @@
             min-width: 0;
             border-top: 1px solid #eee;
         }
+        /* --- Adicional para os 3 pontos --- */
+        .more-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            margin-right: 2px;
+        }
+        .more-btn:focus,
+        .more-btn:hover {
+            background: #eee;
+        }
+        .more-svg {
+            width: 26px;
+            height: 26px;
+            display: block;
+            fill: #111;
+        }
+        .more-dropdown {
+            min-width: 200px;
+            left: 0;
+            right: auto;
+        }
+        .hidden {
+            display: none !important;
+        }
     </style>
     <script>
     if (window.innerWidth < 900) {
@@ -436,6 +471,20 @@
         <div class="header-content">
             <img src="images/logo.png" alt="Logo" class="logo-header" />
             <div class="header-actions">
+                <!-- Botão dos 3 Pontos - NOVO -->
+                <button class="more-btn hidden" id="moreBtn" aria-label="Mais opções">
+                    <svg class="more-svg" viewBox="0 0 24 24">
+                        <circle cx="5" cy="12" r="2"/>
+                        <circle cx="12" cy="12" r="2"/>
+                        <circle cx="19" cy="12" r="2"/>
+                    </svg>
+                </button>
+                <div class="dropdown-menu more-dropdown" id="moreMenu">
+                    <ul>
+                        <li><button onclick="alert('Função Comparar ainda não implementada')">Comparar</button></li>
+                        <li><button onclick="alert('Função Pedir Orçamento ainda não implementada')">Pedir Orçamento</button></li>
+                    </ul>
+                </div>
                 <!-- Hamburger -->
                 <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
                     <svg class="icon-svg" viewBox="0 0 24 24">
@@ -473,7 +522,6 @@
         <div class="form-container">
             <div class="form-inner">
                 <!-- (Todo o conteúdo do formulário como já tens) -->
-<!-- ... resto do HTML ... -->
 <div class="form-group">
     <label for="country">Select Country:</label>
     <div class="dropdown">
@@ -486,8 +534,6 @@
         <div class="dropdown-content" id="zone-list"></div>
     </div>
 </div>
-
-<!-- ... resto do HTML ... -->
                 <div class="header-row">
                     <div>Type:</div>
                     <div>Width (cm):</div>
@@ -548,6 +594,8 @@
     <script src="js/calculator.js"></script>
     <script src="js/main.js"></script>
     <script src="js/mapas/mapa-controller.js"></script>
+    <!-- NOVO: script do menu dos 3 pontos -->
+    <script src="js/hidden-menu.js"></script>
     <script>
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -600,24 +648,29 @@
         document.getElementById('mensagens').innerHTML = '';
         populateCountryDropdown();
         carregarMapa('svg/europamain.svg');
+        // Esconde também o menu dos 3 pontos no reset
+        if (typeof hideMoreBtn === "function") hideMoreBtn();
     }
     </script>
     <script>
     function closeAllDropdowns() {
         document.getElementById('hamburgerMenu').classList.remove('show');
         document.getElementById('avatarMenu').classList.remove('show');
+        document.getElementById('moreMenu').classList.remove('show'); // fecha menu dos 3 pontos
     }
     document.getElementById('hamburgerBtn').onclick = function(e) {
         e.stopPropagation();
         const menu = document.getElementById('hamburgerMenu');
         menu.classList.toggle('show');
         document.getElementById('avatarMenu').classList.remove('show');
+        document.getElementById('moreMenu').classList.remove('show');
     };
     document.getElementById('avatarBtn').onclick = function(e) {
         e.stopPropagation();
         const menu = document.getElementById('avatarMenu');
         menu.classList.toggle('show');
         document.getElementById('hamburgerMenu').classList.remove('show');
+        document.getElementById('moreMenu').classList.remove('show');
     };
     document.addEventListener('click', closeAllDropdowns);
 
