@@ -69,6 +69,10 @@ document.getElementById("zone").addEventListener("input", () => {
     }
 });
 
+// NOVO: Limpa resultados e mensagens sempre que se MUDA de país ou zona
+document.getElementById("country").addEventListener("change", clearResultsAndMessages);
+document.getElementById("zone").addEventListener("change", clearResultsAndMessages);
+
 document.getElementById("country").addEventListener("focus", () => {
     showDropdown("country-list");
 });
