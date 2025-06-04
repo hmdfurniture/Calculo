@@ -18,7 +18,7 @@ jobs:
           node-version: '20'
 
       - name: Gerar tables-list.json
-        run: node generate-tables-list.js
+        run: node js/admin/generate-tables-list.js
 
       - name: Commit e push se houver alterações
         run: |
