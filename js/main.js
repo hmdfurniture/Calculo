@@ -125,6 +125,13 @@ function calculateResults() {
     });
     resultDiv.innerHTML = html;
 
+// Mostra o botão dos 3 pontos se houver resultados
+if(resultados.length > 0) {
+    showMoreBtn();
+} else {
+    hideMoreBtn();
+}
+
 // 6. Mostrar mensagens explicativas/contextuais
 const mensagensDiv = document.getElementById("mensagens");
 let htmlMensagens = "";
