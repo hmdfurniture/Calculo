@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page Teste</title>
+    <link rel="stylesheet" href="teste.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="images/logo.png" alt="Logo" class="logo-header" />
+            <div class="header-actions">
+                <!-- Botão dos 3 Pontos -->
+                <button class="more-btn hidden" id="moreBtn" aria-label="Mais opções">
+                    <svg class="more-svg" viewBox="0 0 24 24">
+                        <circle cx="5" cy="12" r="2"/>
+                        <circle cx="12" cy="12" r="2"/>
+                        <circle cx="19" cy="12" r="2"/>
+                    </svg>
+                </button>
+                <div class="dropdown-menu more-dropdown" id="moreMenu">
+                    <ul>
+                        <li><button onclick="alert('Função Comparar ainda não implementada')">Comparar</button></li>
+                        <li><button onclick="alert('Função Pedir Orçamento ainda não implementada')">Pedir Orçamento</button></li>
+                    </ul>
+                </div>
+                <!-- Hamburger -->
+                <button class="icon-btn" id="hamburgerBtn" aria-label="Menu">
+                    <svg class="icon-svg" viewBox="0 0 24 24">
+                        <rect y="4" width="24" height="3"/>
+                        <rect y="10.5" width="24" height="3"/>
+                        <rect y="17" width="24" height="3"/>
+                    </svg>
+                </button>
+                <div class="dropdown-menu hamburger-dropdown" id="hamburgerMenu">
+                    <ul>
+                        <li><button onclick="copyToExcel()">Copiar para Excel</button></li>
+                        <li><button onclick="printResult()">Imprimir</button></li>
+                        <li><button onclick="sendByEmail()">Enviar por e-mail</button></li>
+                    </ul>
+                </div>
+                <!-- Avatar -->
+                <button class="icon-btn" id="avatarBtn" aria-label="Conta">
+                    <span class="avatar-icon">
+                        <svg class="icon-svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" fill="#222"/>
+                        </svg>
+                    </span>
+                </button>
+                <div class="dropdown-menu avatar-dropdown" id="avatarMenu">
+                    <ul>
+                        <li><a href="admin.html" target="_blank">Admin</a></li>
+                        <li><a href="adminc.html" target="_blank">Adminc Avançada</a></li>
+                        <li><button onclick="logout()">Logout</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="main-content">
+        <div class="form-container">
+            <div class="form-inner">
+                <!-- O TEU FORMULÁRIO COMPLETO COMO NO ORIGINAL -->
+                <div class="form-group">
+                    <label for="country">Select Country:</label>
+                    <div class="dropdown">
+                        <input type="text" id="country" placeholder="Type to search..." onkeyup="filterCountries()" onfocus="showDropdown('country-list')">
+                        <div class="dropdown-content" id="country-list"></div>
+                    </div>
+                    <label for="zone">Select Zone:</label>
+                    <div class="dropdown">
+                        <input type="text" id="zone" placeholder="Type zone number..." onkeyup="filterZones()" onfocus="showDropdown('zone-list')" disabled>
+                        <div class="dropdown-content" id="zone-list"></div>
+                    </div>
+                </div>
+                <div class="header-row">
+                    <div>Type:</div>
+                    <div>Width (cm):</div>
+                    <div>Length (cm):</div>
+                    <div>Height (cm):</div>
+                    <div>Quantity:</div>
+                    <div>Action:</div>
+                </div>
+                <div id="dimension-container">
+                    <div class="form-group dimension-line">
+                        <div>
+                            <select class="type" oninput="removeHighlight(this)">
+                                <option value="box">Box</option>
+                                <option value="pallet">Pallet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="number" class="width" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="length" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="height" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <input type="number" class="quantity" min="0" max="999" maxlength="3" oninput="validateInput(this)">
+                        </div>
+                        <div>
+                            <button class="remove-button" onclick="removeLine(this)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row-actions">
+                    <button id="add-line" onclick="addLine()">+ Add More Lines</button>
+                    <button onclick="resetForm()">Reset</button>
+                    <button class="calculate-btn" onclick="finalCalculate()">Calculate</button>
+                </div>
+                <div class="result" id="result"></div>
+                <div class="error-message" id="error-message"></div>
+            </div>
+        </div>
+        <div class="map-container">
+            <div id="map" class="map"></div>
+            <div class="mensagens-container" id="mensagens"></div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-content">
+            Copyright © hmdfurniture
+        </div>
+    </footer>
+    <!-- Scripts externos antigos -->
+    <script src="js/calculo_geral.js"></script>
+    <script src="js/dataLoader.js"></script>
+    <script src="js/dropdowns.js"></script>
+    <script src="js/dropdown-validator.js"></script>
+    <script src="js/validation.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mapas/mapa-controller.js"></script>
+    <script src="js/hidden-menu.js"></script>
+    <!-- Novo: tudo inline aqui vai para teste.js -->
+    <script src="teste.js"></script>
+</body>
+</html>
