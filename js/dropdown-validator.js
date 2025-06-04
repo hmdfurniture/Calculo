@@ -1,4 +1,3 @@
-// --- dropdown-validator.js ---
 // Valida country e zone: só aceita opções do dropdown, ignora acentos/maiúsculas/ç, e mostra mensagem clara no #result
 
 function normalizarTexto(str) {
@@ -41,13 +40,23 @@ function validarDropdown(inputId, listId, erroMsg, filterFn) {
         if (this.value.trim() === "") {
             esconderErroNoResult();
             filterFn(); // Mostra todas as opções se o campo ficou vazio
+            // --- SINCRONIZAÇÃO MAPA ---
+            if (inputId === 'country') {
+                document.getElementById('zone').value = '';
+                document.getElementById('zone').disabled = true;
+                carregarMapa('svg/europamain.svg');
+            }
+            if (inputId === 'zone') {
+                if (paisSelecionado) {
+                    carregarMapa(`svg/${paisSelecionado}.svg`);
+                }
+            }
             return;
         }
 
         if (encontrada) {
             this.value = encontrada.textContent; // Assume grafia correta do dropdown
             esconderErroNoResult();
-            // Chama o mesmo fluxo de seleção do dropdown para garantir consistência
             if (inputId === 'country') {
                 selectCountry(encontrada.textContent);
             }
@@ -58,12 +67,23 @@ function validarDropdown(inputId, listId, erroMsg, filterFn) {
             mostrarErroNoResult(erroMsg);
             this.value = '';
             filterFn(); // Força reset visual do dropdown para mostrar tudo
-            // Opcional: limpar mapas e estado dependente aqui, se necessário
+            // --- SINCRONIZAÇÃO MAPA ---
+            if (inputId === 'country') {
+                document.getElementById('zone').value = '';
+                document.getElementById('zone').disabled = true;
+                carregarMapa('svg/europamain.svg');
+            }
+            if (inputId === 'zone') {
+                if (paisSelecionado) {
+                    carregarMapa(`svg/${paisSelecionado}.svg`);
+                }
+            }
         }
     });
 
     input.addEventListener('input', function() {
         esconderErroNoResult();
+        // Se limpa zona manualmente, já é tratado em mapa-controller.js
     });
 }
 
@@ -72,12 +92,12 @@ validarDropdown(
     'country',
     'country-list',
     'Nenhum país disponível com esse nome. Selecione um país válido da lista.',
-    filterCountries // <- Passa a função de filtro do país
+    filterCountries
 );
 // Zonas
 validarDropdown(
     'zone',
     'zone-list',
     'Nenhuma zona disponível com esse valor. Selecione uma zona válida da lista.',
-    filterZones // <- Passa a função de filtro da zona
+    filterZones
 );
