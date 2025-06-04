@@ -34,6 +34,17 @@ function addLine() {
 function removeLine(button) {
     const line = button.parentElement.parentElement;
     line.remove();
+    // Se todas as linhas forem removidas, limpa resultados e mensagens
+    if (document.querySelectorAll(".dimension-line").length === 0) {
+        clearResultsAndMessages();
+    }
+}
+
+// Função utilitária para limpar resultados e mensagens
+function clearResultsAndMessages() {
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("mensagens").innerHTML = "";
+    hideMoreBtn();
 }
 
 // Listeners para inputs de country/zone
@@ -46,9 +57,15 @@ document.getElementById("country").addEventListener("input", () => {
         zoneInput.value = "";
         zoneInput.disabled = true;
         zoneList.innerHTML = "";
-        document.getElementById("result").innerHTML = "";  // Limpa os resultados
-        document.getElementById("mensagens").innerHTML = ""; // Limpa mensagens também
-        hideMoreBtn();
+        clearResultsAndMessages();
+    }
+});
+
+document.getElementById("zone").addEventListener("input", () => {
+    // Quando o input da zona é limpo, limpa resultados e mensagens
+    const zoneInput = document.getElementById("zone");
+    if (zoneInput.value.trim() === "") {
+        clearResultsAndMessages();
     }
 });
 
@@ -102,6 +119,7 @@ function calculateResults() {
     if (resultados.length === 0) {
         resultDiv.innerHTML = "<p>Nenhuma tabela/cálculo disponível para este destino.</p>";
         document.getElementById("mensagens").innerHTML = "";
+        hideMoreBtn();
         return;
     }
     let html = "";
@@ -126,27 +144,50 @@ function calculateResults() {
     });
     resultDiv.innerHTML = html;
 
-// Mostra o botão dos 3 pontos se houver resultados
-if(resultados.length > 0) {
-    showMoreBtn();
-} else {
-    hideMoreBtn();
+    // Mostra o botão dos 3 pontos se houver resultados
+    if(resultados.length > 0) {
+        showMoreBtn();
+    } else {
+        hideMoreBtn();
+    }
+
+    // 6. Mostrar mensagens explicativas/contextuais
+    const mensagensDiv = document.getElementById("mensagens");
+    let htmlMensagens = "";
+    resultados.forEach(r => {
+        if (r.resultado.mensagens && r.resultado.mensagens.length > 0) {
+            htmlMensagens += `
+                <div class="mensagem-explicativa-bloco">
+                    <img src="images/${r.tabela}.png" class="mensagem-explicativa-logo" alt="${r.tabela}">
+                    <ul class="mensagem-explicativa-lista">
+                        ${r.resultado.mensagens.map(m => `<li>${m}</li>`).join("")}
+                    </ul>
+                </div>
+            `;
+        }
+    });
+    mensagensDiv.innerHTML = htmlMensagens;
 }
 
-// 6. Mostrar mensagens explicativas/contextuais
-const mensagensDiv = document.getElementById("mensagens");
-let htmlMensagens = "";
-resultados.forEach(r => {
-    if (r.resultado.mensagens && r.resultado.mensagens.length > 0) {
-        htmlMensagens += `
-            <div class="mensagem-explicativa-bloco">
-                <img src="images/${r.tabela}.png" class="mensagem-explicativa-logo" alt="${r.tabela}">
-                <ul class="mensagem-explicativa-lista">
-                    ${r.resultado.mensagens.map(m => `<li>${m}</li>`).join("")}
-                </ul>
-            </div>
-        `;
-    }
-});
-mensagensDiv.innerHTML = htmlMensagens;
+// Funções para mostrar/esconder o botão dos três pontos
+function showMoreBtn() {
+    document.getElementById('moreBtn').classList.remove('hidden');
 }
+function hideMoreBtn() {
+    document.getElementById('moreBtn').classList.add('hidden');
+    document.getElementById('moreMenu').classList.remove('show');
+}
+
+// Mostra/oculta o dropdown
+document.getElementById('moreBtn').onclick = function(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('moreMenu');
+    menu.classList.toggle('show');
+    document.getElementById('hamburgerMenu').classList.remove('show');
+    document.getElementById('avatarMenu').classList.remove('show');
+};
+
+// Fecha dropdowns ao clicar fora
+document.addEventListener('click', function() {
+    document.getElementById('moreMenu').classList.remove('show');
+});
