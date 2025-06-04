@@ -27,7 +27,6 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
           if (selectedId) {
               destacarNoMapa(selectedId);
           }
-          // Chama callback após o mapa estar pronto
           if (typeof callback === 'function') callback();
       })
       .catch(() => {
@@ -43,21 +42,17 @@ function carregarMapa(svgPath, selectedId = null, callback = null) {
 // Carrega o mapa da Europa ao abrir a página
 window.addEventListener('DOMContentLoaded', () => {
     carregarMapa('svg/europamain.svg');
-    // Torna os paths não interativos ao rato
     const mapDiv = document.getElementById('map');
     mapDiv.style.pointerEvents = 'none';
 });
 
-// Função para destacar uma região no mapa carregado (país ou zona)
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
-    // Remove qualquer destaque anterior
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
     mapDiv.querySelectorAll('[data-zona].selected').forEach(el => el.classList.remove('selected'));
 
     if (selectedId) {
         const normalizado = String(selectedId).trim();
-        // Destaca zona (por data-zona)
         let reg = Array.from(mapDiv.querySelectorAll('[data-zona]')).find(el =>
             String(el.getAttribute('data-zona')).trim() === normalizado
         );
@@ -65,7 +60,6 @@ function destacarNoMapa(selectedId) {
             reg.classList.add('selected');
             return;
         }
-        // Se não for zona, tenta país (mapa Europa)
         reg = mapDiv.querySelector(`#${CSS.escape(selectedId)} .geo.region`);
         if (!reg) reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
         if (reg) reg.classList.add('selected');
@@ -78,6 +72,9 @@ document.getElementById('country').addEventListener('change', function() {
     if (!PAISES_LIST.includes(paisId)) {
         carregarMapa('svg/europamain.svg');
         paisSelecionado = null;
+        zonaSelecionada = null;
+        document.getElementById('zone').value = '';
+        document.getElementById('zone').disabled = true;
         return;
     }
     zonaSelecionada = document.getElementById('zone').value.trim() || null;
@@ -87,7 +84,6 @@ document.getElementById('country').addEventListener('change', function() {
     if (paisId) {
         timeoutPais = setTimeout(() => {
             carregarMapa(`svg/${paisId}.svg`, null, function() {
-                // SE HOUVER ZONA, DESTACA APÓS o mapa do país estar carregado!
                 if (zonaSelecionada) {
                     destacarNoMapa(zonaSelecionada);
                 }
@@ -105,13 +101,14 @@ document.getElementById('country').addEventListener('input', function() {
         carregarMapa('svg/europamain.svg');
         paisSelecionado = null;
         zonaSelecionada = null;
+        document.getElementById('zone').value = '';
+        document.getElementById('zone').disabled = true;
     }
 });
 
-// Evento para o campo de zona: destaca zona ou limpa se vazio
 document.getElementById('zone').addEventListener('input', function() {
     const zonaId = this.value.trim();
-    zonaSelecionada = zonaId || null; // <-- Mantém sempre sincronizado!
+    zonaSelecionada = zonaId || null;
     if (!zonaId && paisSelecionado) {
         carregarMapa(`svg/${paisSelecionado}.svg`, null, function() {});
     } else if (zonaId && paisSelecionado) {
@@ -119,7 +116,6 @@ document.getElementById('zone').addEventListener('input', function() {
     }
 });
 
-// (Opcional, mantém também o evento change para máxima compatibilidade)
 document.getElementById('zone').addEventListener('change', function() {
     const zonaId = this.value.trim();
     zonaSelecionada = zonaId || null;
