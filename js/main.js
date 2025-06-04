@@ -48,6 +48,7 @@ document.getElementById("country").addEventListener("input", () => {
         zoneList.innerHTML = "";
         document.getElementById("result").innerHTML = "";  // Limpa os resultados
         document.getElementById("mensagens").innerHTML = ""; // Limpa mensagens também
+        hideMoreBtn();
     }
 });
 
