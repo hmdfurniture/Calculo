@@ -7,6 +7,32 @@ function validateInput(input) {
 }
 
 function finalCalculate() {
+    // --- INTEGRAÇÃO: Valida país e zona antes de tudo ---
+    const countryInput = document.getElementById('country').value;
+    const zoneInput = document.getElementById('zone').value;
+
+    // Função para verificar se o valor existe no dropdown (usa a tua lógica de normalização, se necessário)
+    function existeNoDropdown(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        if (!input || !list) return false;
+        const valorInput = input.value.trim().toLowerCase();
+        const opcoes = Array.from(list.querySelectorAll('a'));
+        return opcoes.some(opt => opt.textContent.trim().toLowerCase() === valorInput);
+    }
+
+    const countryValid = existeNoDropdown('country', 'country-list');
+    const zoneValid = existeNoDropdown('zone', 'zone-list');
+
+    // --- Chama o fluxo de orçamento se inválido ---
+    if (countryValid && zoneValid) {
+        if (typeof tentarCalcularOrcamento === "function") tentarCalcularOrcamento(true);
+    } else {
+        if (typeof tentarCalcularOrcamento === "function") tentarCalcularOrcamento(false);
+        return; // interrompe o cálculo se não for válido
+    }
+
+    // --- O resto da função mantem-se como já tens ---
     const lines = document.querySelectorAll(".dimension-line");
     let allValid = true;
 
@@ -52,6 +78,15 @@ function finalCalculate() {
             removeHighlight(type);
         }
     });
+
+    const errorMessage = document.getElementById("error-message");
+    if (!allValid) {
+        errorMessage.textContent = "Please fill in all the required fields.";
+    } else {
+        errorMessage.textContent = "";
+        calculateResults(); // Chama a função dinâmica
+    }
+}
 
     const errorMessage = document.getElementById("error-message");
     if (!allValid) {
