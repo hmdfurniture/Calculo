@@ -7,7 +7,14 @@ function pedirOrcamento() {
 }
 
 function imprimirResultados() {
-    window.print();
+    // Adiciona a classe ao body para ativar o CSS de impressão específico
+    document.body.classList.add('print-calculo');
+    // Aguarda um pouco para o CSS aplicar (garante em certos browsers)
+    setTimeout(function() {
+        window.print();
+        // Remove a classe após imprimir (garante que não afeta navegação normal)
+        document.body.classList.remove('print-calculo');
+    }, 100);
 }
 
 function enviarPorEmail() {
