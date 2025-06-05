@@ -1,0 +1,14 @@
+@media print {
+  /* Exemplo inicial: só mostra o bloco dos resultados */
+  body {
+    background: #fff !important;
+  }
+  .conteudo-principal, .resultados-impressao {
+    display: block !important;
+  }
+  /* Esconde tudo o resto */
+  body *:not(.conteudo-principal):not(.conteudo-principal *) {
+    display: none !important;
+  }
+  /* ... aqui colocas o layout detalhado conforme o que definiste ... */
+}
