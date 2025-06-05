@@ -1,19 +1,18 @@
 function compararResultados() {
     alert('Função Comparar ainda não implementada');
-    // Implementação futura aqui...
 }
 
 function pedirOrcamento() {
     alert('Função Pedir Orçamento ainda não implementada');
-    // Implementação futura aqui...
 }
 
 function imprimirResultados() {
-    alert('Função Imprimir ainda não implementada');
-    // Implementação futura aqui...
+    window.print();
 }
 
 function enviarPorEmail() {
-    alert('Função Enviar por e-mail ainda não implementada');
-    // Implementação futura aqui...
+    const resultadosHtml = document.getElementById("result").innerText;
+    const subject = encodeURIComponent("Resultados do Cálculo");
+    const body = encodeURIComponent("Aqui estão os resultados:\n\n" + resultadosHtml);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
