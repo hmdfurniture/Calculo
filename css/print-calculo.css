@@ -98,19 +98,19 @@
   /* Mensagem ao lado do resultado, centrada verticalmente */
   body.print-calculo .print-mensagem {
     background: #e8f2ff;
-    border: 1px solid #7bb4f6;
-    border-radius: 10px;
+    border: none;
+    border-radius: 0;
     padding: 18px 18px;
-    margin-left: 0px;
     font-size: 1em;
     color: #165199;
     min-width: 210px;
-    max-width: 250px;
-    display: flex;
+    max-width: 320px;
+    display: flex !important;
     align-items: center;
+    justify-content: center;
     text-align: center;
     flex: 1 1 200px;
-    /* altura igual ao bloco do resultado */
+    min-height: 120px;
   }
   
   /* Alinhar as mensagens à altura dos resultados */
