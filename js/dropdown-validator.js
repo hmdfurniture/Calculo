@@ -40,10 +40,6 @@ function validarDropdown(inputId, listId, erroMsg, filterFn) {
         if (this.value.trim() === "") {
             esconderErroNoResult();
             filterFn(); // Mostra todas as opções se o campo ficou vazio
-
-    // --- FLUXO ORÇAMENTO ---
-    if (typeof paisOuZonaInvalido === 'function') paisOuZonaInvalido();
-
             // --- SINCRONIZAÇÃO MAPA ---
             if (inputId === 'country') {
                 document.getElementById('zone').value = '';
