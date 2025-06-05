@@ -88,15 +88,6 @@ function finalCalculate() {
     }
 }
 
-    const errorMessage = document.getElementById("error-message");
-    if (!allValid) {
-        errorMessage.textContent = "Please fill in all the required fields.";
-    } else {
-        errorMessage.textContent = "";
-        calculateResults(); // Chama a função dinâmica
-    }
-}
-
 function highlightField(field) {
     field.classList.add("highlight");
 }
