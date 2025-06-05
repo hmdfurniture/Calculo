@@ -24,13 +24,6 @@ function finalCalculate() {
     const countryValid = existeNoDropdown('country', 'country-list');
     const zoneValid = existeNoDropdown('zone', 'zone-list');
 
-    // --- Chama o fluxo de orçamento se inválido ---
-    if (countryValid && zoneValid) {
-        if (typeof tentarCalcularOrcamento === "function") tentarCalcularOrcamento(true);
-    } else {
-        if (typeof tentarCalcularOrcamento === "function") tentarCalcularOrcamento(false);
-        return; // interrompe o cálculo se não for válido
-    }
 
     // --- O resto da função mantem-se como já tens ---
     const lines = document.querySelectorAll(".dimension-line");
