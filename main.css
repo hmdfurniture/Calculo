@@ -383,21 +383,21 @@ button:hover {
 /* Fundo e países por defeito: a mesma cor (cinza claro) */
 .bg.geo,
 .geo.region {
-    fill: #e9eef5;
-    stroke: #333;
-    stroke-width: 0.7;
+    fill: #04404f;
+    stroke: #ecf0f1;
+    stroke-width: 0.2;
     transition: fill 0.2s;
 }
 
 /* País/Região selecionado: cinza mais escuro */
 .geo.region.selected {
-    fill: #96A9BF;
+    fill: #3498db;
 }
 
 /* Fronteiras e outlines a preto */
 .geo.borders,
 .geo.region-outline {
-    stroke: #333;
+    stroke: #ecf0f1;
     fill: none;
     stroke-width: 0.5;
 }
