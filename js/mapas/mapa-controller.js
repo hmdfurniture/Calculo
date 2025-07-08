@@ -49,23 +49,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function destacarNoMapa(selectedId) {
     const mapDiv = document.getElementById('map');
-    // Remove qualquer destaque anterior
     mapDiv.querySelectorAll('.geo.region').forEach(el => el.classList.remove('selected'));
     mapDiv.querySelectorAll('[data-zona].selected').forEach(el => el.classList.remove('selected'));
 
     if (selectedId) {
         const normalizado = String(selectedId).trim();
-        // Destaca TODAS as zonas (por data-zona)
         let found = false;
+
         Array.from(mapDiv.querySelectorAll('[data-zona]')).forEach(el => {
-            if (String(el.getAttribute('data-zona')).trim() === normalizado) {
+            const zonas = el.getAttribute('data-zona')
+                            .split(/[ ,]+/) // separa por espaço ou vírgula
+                            .map(z => z.trim());
+
+            if (zonas.includes(normalizado)) {
                 el.classList.add('selected');
                 found = true;
             }
         });
+
         if (found) return;
 
-        // Se não for zona, tenta país (mapa Europa)
+        // Se não encontrou por data-zona, tenta destacar região pelo ID (Europa, etc.)
         let reg = mapDiv.querySelector(`#${CSS.escape(selectedId)} .geo.region`);
         if (!reg) reg = mapDiv.querySelector(`#${CSS.escape(selectedId)}.geo.region, .geo.region#${CSS.escape(selectedId)}`);
         if (reg) reg.classList.add('selected');
