@@ -1,4 +1,4 @@
-name: Gerar Estrutura Totoloto
+name: Gerar Estrutura
 
 on:
   workflow_dispatch:  # permite correr manualmente
