@@ -1,0 +1,85 @@
+/
+├── .github
+│   └── workflows
+│       ├── gerar_estrutura.yml
+│       ├── sync-countries.yml
+│       └── update-tables-list.yml
+├── Tables
+│   ├── tables-list.json
+│   ├── teste.json
+│   ├── xbslog_international.json
+│   └── xbslog_nacional.json
+├── admin.html
+├── adminc.html
+├── arquivo
+│   ├── admin.html
+│   ├── adminc.html
+│   ├── calculator.js
+│   ├── calculo_geral.js
+│   ├── dataLoader.js
+│   ├── dropdown-validator.js
+│   ├── dropdowns.js
+│   ├── estrutura.txt
+│   ├── generate-tables-list.js
+│   ├── gerar_estrutura.py
+│   ├── hidden-menu.js
+│   ├── main.html
+│   ├── main.js
+│   ├── mapa-controller.js
+│   ├── paises.js
+│   ├── sync-paises.js
+│   ├── teste.js
+│   ├── validation.js
+│   ├── xbslog_international.js
+│   └── xbslog_nacional.js
+├── css
+│   └── print-calculo.css
+├── images
+│   ├── logo.png
+│   ├── mapa
+│   │   └── europa_main.png
+│   ├── teste.png
+│   ├── xbslog_international.png
+│   └── xbslog_nacional.png
+├── index.html
+├── js
+│   ├── admin
+│   │   └── generate-tables-list.js
+│   ├── calculator.js
+│   ├── calculo_geral.js
+│   ├── calculos
+│   │   ├── teste.js
+│   │   ├── xbslog_international.js
+│   │   └── xbslog_nacional.js
+│   ├── dataLoader.js
+│   ├── dropdown-validator.js
+│   ├── dropdowns.js
+│   ├── hidden-menu.js
+│   ├── main.js
+│   ├── main2.js
+│   ├── mapas
+│   │   └── mapa-controller.js
+│   ├── paises.js
+│   ├── sync-paises.js
+│   └── validation.js
+├── json
+│   └── countries.json
+├── m.main.html
+├── main.css
+├── main.html
+└── svg
+    ├── Albania.svg
+    ├── Alemanha.svg
+    ├── Austria.svg
+    ├── Belgica.svg
+    ├── Chequia.svg
+    ├── Dinamarca.svg
+    ├── Espanha.svg
+    ├── França.svg
+    ├── Italia.svg
+    ├── Paises Baixos.svg
+    ├── Portugal.svg
+    ├── Reino Unido.svg
+    ├── Suecia.svg
+    ├── Suiça.svg
+    └── europamain.svg
